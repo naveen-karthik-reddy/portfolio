@@ -10,5 +10,9 @@ export default defineConfig({
       },
     }),
   ],
+  // Update this to match your GitHub repository name
+  // If repo is named 'portfolio', use '/portfolio'
+  // If repo is named 'naveen-portfolio', use '/naveen-portfolio'
+  // If deploying to username.github.io (root), use '/'
   base: '/portfolio',
 })
