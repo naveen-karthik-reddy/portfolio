@@ -84,6 +84,7 @@ export default function App() {
   const toggleOpen = (key) => setOpen({ ...open, [key]: !open[key] });
 
   // Scroll to section
+  // Dummy commit.
   const scrollToSection = (id) => {
     const element = document.getElementById(id);
     if (element) {
