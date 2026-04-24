@@ -1,16 +1,17 @@
 export const experienceData = [
   {
     company: "Tijori Finance",
-    role: "Software Development Engineer (Frontend)",
+    role: "SDE (Frontend Developer)",
     duration: "Dec 2024 – Present",
-    location: "Bengaluru, India",
+    location: "Bangalore, India",
     description: [
-      "Built and optimized data-driven UIs across TijoriStack.ai, TijoriFinance.com, Atlas, and Zerodha Stocks using JavaScript, TypeScript, jQuery, React, and MUI.",
-      "Implemented role-based UI logic, dynamic charts, and Google Analytics tracking for secure, real-time visualization.",
-      "Improved frontend performance and SEO by optimizing React Hooks and Core Web Vitals.",
-      "Collaborated across teams to ensure responsive UI, CI/CD integrations, and cross-browser stability.",
-      "Key Achievement: Led SEO & Performance Optimization across production environments.",
+      "Built and optimized data-driven UIs across Tijori Stack.ai and Zerodha Stocks using JavaScript, TypeScript, jQuery, React, and MUI.",
+      "Implemented role-based UI logic, dynamic charts, Google Analytics tracking, and interactive filters for secure, responsive, real-time data visualization.",
+      "Improved frontend performance, load times, and SEO using optimized React Hooks, reusable MUI components, and automated testing for stable deployments.",
+      "Collaborated with backend and design teams to ensure cross-browser compatibility, responsive UI, and maintainable frontend architecture with CI/CD integration.",
+      "Key Achievement: Led Core Web Vitals and performance improvements on production. Improved PageSpeed scores significantly.",
     ],
+    techStack: "JavaScript, TypeScript, jQuery, Material UI, React, Django Templates, HighCharts",
   },
   {
     company: "Zoho Corporation",
@@ -18,10 +19,12 @@ export const experienceData = [
     duration: "Jan 2023 – Dec 2024",
     location: "Chennai, India",
     description: [
-      "Developed scalable frontend architectures for multiple scraping tools using React, Redux, and Tailwind CSS.",
-      "Implemented virtualized rendering, lazy-loaded routes, and modular component-driven UI systems.",
-      "Enhanced frontend stability with schema-based dynamic UIs and custom hooks.",
+      "Engineered scalable frontend architecture for multiple in-house scraping tools using React, Tailwind CSS, and Redux for predictable state management.",
+      "Implemented modular component-driven design, lazy-loaded routes, virtualized rendering optimizing performance and reducing bundle size.",
+      "Designed schema-based dynamic UIs with configurable layouts, improving extensibility and maintainability across internal applications.",
+      "Enhanced frontend performance and UI stability using custom hooks, render optimization, and cross-browser testing.",
     ],
+    techStack: "JavaScript, Tailwind CSS, React JS, Redux",
   },
   {
     company: "ZeroBill",
@@ -29,9 +32,10 @@ export const experienceData = [
     duration: "Sep 2022 – Dec 2022",
     location: "Visakhapatnam, India",
     description: [
-      "Built a Next.js-based merchant management system for transaction tracking and settlements.",
-      "Created PowerBI dashboards for real-time analytics.",
-      "Developed NLP-based automated item extraction algorithm, improving efficiency by 97%.",
+      "Developed Next.js-based merchant management website to track transactions and settlements.",
+      "Created interactive analytic dashboards using PowerBI for real-time insights.",
+      "Developed algorithm using NLP techniques for automated item extraction from receipts, reducing manual data entry by 97%.",
     ],
+    techStack: "JavaScript, TypeScript, React, Node, Next, GCP (Docker, Kubernetes)",
   },
 ];
