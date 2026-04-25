@@ -13,8 +13,5 @@ export const portfolioData = {
     takeUforward: "https://takeuforward.org/",
     namasteDev: "https://namastedev.com/",
   },
-  projects: {
-    tijoriStack: "https://www.tijoristack.ai/",
-    zerodhaStocks: "https://zerodha.com/markets/stocks/",
-  },
 };
+
