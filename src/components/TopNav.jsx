@@ -49,7 +49,7 @@ export default function TopNav({
         <Typography
           variant="h6"
           onClick={() => scrollToSection("header")}
-          sx={{ fontWeight: 800, cursor: "pointer" }}
+          sx={{ fontWeight: 800, cursor: "pointer", color: "text.primary" }}
         >
           {portfolioData.name}
         </Typography>
