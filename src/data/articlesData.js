@@ -1,13 +1,22 @@
 export const articlesData = [
- {
-  id: "figma-llm-problem",
-  title: "The Real Problem with Figma + LLMs",
-  excerpt:
-    "Why AI-generated UI code from Figma designs is often inaccurate, and how to fix it through better design structure.",
-  date: "2026-04-25",
-  readTime: "12 min read",
-  tags: ["Design", "AI", "Engineering"],
-},
+  {
+    id: "claude-figma-mcp-integration",
+    title: "Figma MCP Integration Guide",
+    excerpt:
+      "Learn how to connect Figma MCP with Claude, extract design context, and generate production-ready UI code efficiently.",
+    date: "2026-04-25",
+    readTime: "8 min read",
+    tags: ["Figma", "Claude", "AI", "LLM"]
+  },
+  {
+    id: "figma-llm-problem",
+    title: "The Real Problem with Figma + LLMs",
+    excerpt:
+      "Why AI-generated UI code from Figma designs is often inaccurate, and how to fix it through better design structure.",
+    date: "2026-04-25",
+    readTime: "12 min read",
+    tags: ["Design", "AI", "Engineering"],
+  },
 ];
 
 // Generate a slug from a string (title)

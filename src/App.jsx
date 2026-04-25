@@ -71,7 +71,7 @@ export default function App() {
       viewport={{ once: true, margin: "-50px" }}
       variants={fadeInUp}
     >
-      <Box sx={{ mb: 10 }}>
+      <Box sx={{ mb: { xs: 6, sm: 10 } }}>
         <Box
           sx={{
             display: "flex",
@@ -127,10 +127,10 @@ export default function App() {
   );
 
   return (
-    <Container maxWidth="xl" sx={{ py: 8, px: { xs: 3, sm: 4, md: 6 } }}>
+    <Container maxWidth="xl" sx={{ py: { xs: 5, sm: 8 }, px: { xs: 2, sm: 3, md: 6 } }}>
       {/* HEADER */}
       <motion.div initial="hidden" animate="visible" variants={fadeInUp}>
-        <Box textAlign="center" sx={{ mb: 12 }}>
+        <Box textAlign="center" sx={{ mb: { xs: 7, sm: 12 } }}>
           <motion.div
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -140,8 +140,8 @@ export default function App() {
               src={profileImage}
               alt={portfolioData.name}
               sx={{
-                width: 160,
-                height: 160,
+                width: { xs: 110, sm: 160 },
+                height: { xs: 110, sm: 160 },
                 mx: "auto",
                 mb: 4,
                 border: "3px solid",

@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { ThemeProvider, createTheme } from "@mui/material/styles";
+import { ThemeProvider, createTheme, responsiveFontSizes } from "@mui/material/styles";
 import { Box } from "@mui/material";
 
 import TopNav from "./components/TopNav";
@@ -140,28 +140,30 @@ export default function Layout() {
   /* ✅ Memoized theme (important) */
   const theme = useMemo(
     () =>
-      createTheme({
-        palette: {
-          mode: darkMode ? "dark" : "light",
-          primary: { main: themeConfig.primary },
-          secondary: { main: themeConfig.secondary },
-          background: {
-            default: themeConfig.background,
-            paper: themeConfig.paper,
+      responsiveFontSizes(
+        createTheme({
+          palette: {
+            mode: darkMode ? "dark" : "light",
+            primary: { main: themeConfig.primary },
+            secondary: { main: themeConfig.secondary },
+            background: {
+              default: themeConfig.background,
+              paper: themeConfig.paper,
+            },
+            text: {
+              primary: themeConfig.text,
+              secondary: themeConfig.textSecondary,
+            },
           },
-          text: {
-            primary: themeConfig.text,
-            secondary: themeConfig.textSecondary,
+          typography: {
+            fontFamily: "'Inter', 'Segoe UI', sans-serif",
+            h1: { fontWeight: 900, fontSize: "3.5rem" },
+            h2: { fontWeight: 800, fontSize: "2.5rem" },
+            h3: { fontWeight: 800, fontSize: "2rem" },
           },
-        },
-        typography: {
-          fontFamily: "'Inter', 'Segoe UI', sans-serif",
-          h1: { fontWeight: 900, fontSize: "3.5rem" },
-          h2: { fontWeight: 800, fontSize: "2.5rem" },
-          h3: { fontWeight: 800, fontSize: "2rem" },
-        },
-        shape: { borderRadius: 12 },
-      }),
+          shape: { borderRadius: 12 },
+        })
+      ),
     [currentTheme, darkMode]
   );
 

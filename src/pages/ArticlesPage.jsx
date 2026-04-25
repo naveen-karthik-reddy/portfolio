@@ -31,6 +31,12 @@ const markdownFiles = import.meta.glob("../articles/*.md", {
   eager: true,
 });
 
+/* Load all article images so Vite hashes them for production */
+const assetImages = import.meta.glob("../assets/*.{png,jpg,jpeg,gif,svg,webp}", {
+  eager: true,
+  import: "default",
+});
+
 /* ==================== ANIMATIONS ==================== */
 
 const fadeInUp = {
@@ -213,7 +219,7 @@ export default function ArticlesPage() {
   const article = slug ? getArticleBySlug(slug) : null;
 
   return (
-    <Container maxWidth="md" sx={{ py: 8 }}>
+    <Container maxWidth="md" sx={{ py: { xs: 5, sm: 8 }, px: { xs: 2, sm: 3 } }}>
       {article ? <ArticleView article={article} /> : <ArticlesList />}
     </Container>
   );
@@ -537,6 +543,27 @@ function ArticleView({ article }) {
         <Box component="em" sx={{ fontStyle: "italic", color: "text.secondary" }}>
           {children}
         </Box>
+      );
+    },
+
+    img({ src, alt }) {
+      /* Resolve filename-only refs (e.g. "foo.png") against the assets glob map */
+      const resolved = assetImages[`../assets/${src}`] ?? src;
+      return (
+        <Box
+          component="img"
+          src={resolved}
+          alt={alt ?? ""}
+          sx={{
+            display: "block",
+            width: "100%",
+            height: "auto",
+            borderRadius: 2,
+            my: 3,
+            border: "1px solid",
+            borderColor: "divider",
+          }}
+        />
       );
     },
   };

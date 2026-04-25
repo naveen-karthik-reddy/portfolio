@@ -55,7 +55,7 @@ export default function TopNav({
         </Typography>
 
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-          {/* Nav Links */}
+          {/* Desktop nav links (all sections + articles) */}
           <Box sx={{ display: { xs: "none", md: "flex" }, gap: 1 }}>
             {["summary", "experience", "projects", "skills", "education", "achievements"].map(
               (id) => (
@@ -96,16 +96,45 @@ export default function TopNav({
             </Typography>
           </Box>
 
-          {/* Icons */}
-          <IconButton href={portfolioData.links.linkedin} target="_blank">
+          {/* Mobile: Articles link only */}
+          <Typography
+            component={Link}
+            to="/articles"
+            sx={{
+              display: { xs: "flex", md: "none" },
+              textDecoration: "none",
+              color: isArticlesActive ? "primary.main" : "text.secondary",
+              fontSize: "0.85rem",
+              fontWeight: 600,
+              letterSpacing: "0.05em",
+              transition: "color 0.2s",
+              "&:hover": { color: "primary.main" },
+            }}
+          >
+            ARTICLES
+          </Typography>
+
+          {/* Social icons — desktop only */}
+          <IconButton
+            href={portfolioData.links.linkedin}
+            target="_blank"
+            sx={{ display: { xs: "none", md: "flex" } }}
+          >
             <LinkedIn />
           </IconButton>
 
-          <IconButton href={portfolioData.links.github} target="_blank">
+          <IconButton
+            href={portfolioData.links.github}
+            target="_blank"
+            sx={{ display: { xs: "none", md: "flex" } }}
+          >
             <GitHub />
           </IconButton>
 
-          <IconButton href={`mailto:${portfolioData.email}`}>
+          <IconButton
+            href={`mailto:${portfolioData.email}`}
+            sx={{ display: { xs: "none", md: "flex" } }}
+          >
             <MailOutline />
           </IconButton>
 
