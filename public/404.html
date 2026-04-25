@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Naveen Karthik | Frontend Developer</title>
+    <script>
+      // GitHub Pages SPA redirect.
+      // Encodes the requested path as a query param and redirects to root,
+      // where index.html decodes it and restores the URL before React mounts.
+      var l = window.location;
+      l.replace(
+        l.protocol + '//' + l.host +
+        '/?p=' + encodeURIComponent(l.pathname + l.search) + l.hash
+      );
+    </script>
+  </head>
+  <body></body>
+</html>

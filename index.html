@@ -13,6 +13,13 @@
     <meta property="og:description" content="Frontend-focused Full Stack Developer with ~3 years of experience." />
     <meta property="twitter:card" content="summary" />
     <meta name="theme-color" content="#6366f1" />
+    <script>
+      // Restore path encoded by 404.html before React Router initializes.
+      (function () {
+        var p = new URLSearchParams(window.location.search).get('p');
+        if (p) window.history.replaceState(null, '', decodeURIComponent(p));
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
