@@ -1,6 +1,6 @@
 export const portfolioData = {
   name: "Naveen Karthik",
-  title: "Frontend-Focused Full Stack Developer",
+  title: "Software Development Engineer - Frontend",
   email: "karthiknaveen22022002@gmail.com",
   phone: "+91 8790674100",
   location: "Bangalore, India",
