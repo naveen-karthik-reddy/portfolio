@@ -33,6 +33,7 @@ export default function TopNav({
   const isArticlesActive =
     location.pathname.startsWith("/articles") ||
     location.pathname.startsWith("/article");
+  const isProjectsActive = location.pathname.startsWith("/projects");
 
   return (
     <AppBar
@@ -94,9 +95,26 @@ export default function TopNav({
             >
               ARTICLES
             </Typography>
+
+            <Typography
+              component={Link}
+              to="/projects"
+              sx={{
+                textDecoration: "none",
+                color: isProjectsActive ? "primary.main" : "text.secondary",
+                fontSize: "0.85rem",
+                fontWeight: 600,
+                letterSpacing: "0.05em",
+                px: 1,
+                transition: "color 0.2s",
+                "&:hover": { color: "primary.main" },
+              }}
+            >
+              PROJECTS
+            </Typography>
           </Box>
 
-          {/* Mobile: Articles link only */}
+          {/* Mobile: Articles + Projects links */}
           <Typography
             component={Link}
             to="/articles"
@@ -112,6 +130,23 @@ export default function TopNav({
             }}
           >
             ARTICLES
+          </Typography>
+
+          <Typography
+            component={Link}
+            to="/projects"
+            sx={{
+              display: { xs: "flex", md: "none" },
+              textDecoration: "none",
+              color: isProjectsActive ? "primary.main" : "text.secondary",
+              fontSize: "0.85rem",
+              fontWeight: 600,
+              letterSpacing: "0.05em",
+              transition: "color 0.2s",
+              "&:hover": { color: "primary.main" },
+            }}
+          >
+            PROJECTS
           </Typography>
 
           {/* Social icons — desktop only */}

@@ -1,11 +1,13 @@
 export const projectData = [
   {
-    name: "Clubs Manager",
-    date: "Dec 2022",
-    points: [
-      "Developed an all-in-one platform for club management with features like membership, event handling, and communication.",
-      "Built using Next.js and Prisma; integrated Firebase Firestore for image storage and PostgreSQL for structured data.",
-      "Implemented responsive UI using Tailwind CSS and deployed on a scalable architecture.",
-    ],
+    id: "holdings-analyzer",
+    name: "Holdings Analyzer",
+    date: "Apr 2026",
+    excerpt: "Upload your Zerodha holdings CSV and get an instant portfolio dashboard — allocation breakdown, top gainers & losers, and a full sortable holdings table.",
+    tags: ["React", "Recharts", "MUI", "CSV"],
+    points: [],
   },
 ];
+
+export const getProjectBySlug = (slug) =>
+  projectData.find((p) => p.id === slug);

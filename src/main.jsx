@@ -6,6 +6,7 @@ import "./index.css";
 import Layout from "./Layout";
 import App from "./App.jsx";
 import ArticlesPage from "./pages/ArticlesPage";
+import ProjectsPage from "./pages/ProjectsPage";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -16,6 +17,8 @@ createRoot(document.getElementById("root")).render(
           <Route path="/" element={<App />} />
           <Route path="/articles" element={<ArticlesPage />} />
           <Route path="/articles/:slug" element={<ArticlesPage />} />
+          <Route path="/projects" element={<ProjectsPage />} />
+          <Route path="/projects/:slug" element={<ProjectsPage />} />
         </Route>
 
         {/* Fallback */}
