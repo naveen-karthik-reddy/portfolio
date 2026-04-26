@@ -4,19 +4,91 @@ import {
   TableContainer, TableHead, TableRow, TableSortLabel,
   TextField, InputAdornment, Button, IconButton, Tooltip,
   Dialog, DialogTitle, DialogContent, DialogActions, Stack,
-  Divider,
+  Divider, Chip, Skeleton,
 } from "@mui/material";
 import {
-  Search, Add, FileDownload, Delete, Edit,
+  Search, Add, FileDownload, Delete,
 } from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
-import { derive, deriveAll, fmt, fmtCur } from "../utils";
+import { derive, deriveAll, fmt, fmtCur, solidPaperBg } from "../utils";
+
+/* ── Cap category helper ── */
+function capInfo(marketCap, isDark) {
+  if (marketCap == null) return null;
+  if (marketCap >= 6e9) return { label: "Large", sx: { bgcolor: isDark ? "rgba(59,130,246,0.18)" : "rgba(59,130,246,0.10)", color: "#3b82f6" } };
+  if (marketCap >= 1.8e9) return { label: "Mid", sx: { bgcolor: isDark ? "rgba(139,92,246,0.18)" : "rgba(139,92,246,0.10)", color: "#8b5cf6" } };
+  return { label: "Small", sx: { bgcolor: isDark ? "rgba(245,158,11,0.18)" : "rgba(245,158,11,0.10)", color: "#f59e0b" } };
+}
+
+/* ── Stock name cell with company name + cap badge ── */
+function StockNameCell({ instrument, dd, onCommit }) {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === "dark";
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState("");
+
+  const start = () => { setDraft(instrument); setEditing(true); };
+  const commit = () => {
+    setEditing(false);
+    const val = draft.trim();
+    if (val) onCommit(val);
+  };
+  const cancel = () => setEditing(false);
+
+  const companyName = dd?.loading ? null : (dd?.companyName ?? null);
+  const cap = dd?.loading ? null : capInfo(dd?.marketCap ?? null, isDark);
+
+  if (editing) {
+    return (
+      <TableCell align="left" sx={{ p: "4px 6px" }}>
+        <TextField
+          size="small"
+          value={draft}
+          onChange={e => setDraft(e.target.value.toUpperCase())}
+          onBlur={commit}
+          onKeyDown={e => { if (e.key === "Enter") commit(); if (e.key === "Escape") cancel(); }}
+          autoFocus
+          sx={{ width: 140 }}
+          inputProps={{ style: { textAlign: "left", padding: "4px 8px", fontSize: "0.8rem" } }}
+        />
+      </TableCell>
+    );
+  }
+
+  return (
+    <TableCell
+      align="left"
+      onClick={start}
+      sx={{ cursor: "text", "&:hover": { bgcolor: "action.hover" }, "&:hover .edit-dot": { opacity: 1 }, position: "relative" }}
+    >
+      <Typography sx={{ fontWeight: 700, fontSize: "0.8rem", lineHeight: 1.3 }}>{instrument}</Typography>
+      {dd?.loading ? (
+        <Skeleton width={90} height={12} sx={{ mt: 0.3 }} />
+      ) : (
+        <>
+          {companyName && (
+            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: "0.7rem", lineHeight: 1.3, mt: 0.2 }}>
+              {companyName}
+            </Typography>
+          )}
+          {cap && (
+            <Chip label={cap.label} size="small" sx={{ height: 16, fontSize: "0.62rem", fontWeight: 700, mt: 0.3, ...cap.sx }} />
+          )}
+        </>
+      )}
+      <Box
+        className="edit-dot"
+        component="span"
+        sx={{ position: "absolute", top: 4, right: 4, width: 4, height: 4, borderRadius: "50%", bgcolor: "primary.main", opacity: 0, transition: "opacity 0.15s" }}
+      />
+    </TableCell>
+  );
+}
 
 /* ── Inline-editable table cell ── */
 function EditableCell({ display, raw, onCommit, numeric = true, align = "right", bold = false, colored }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState("");
-  const theme = useTheme();
 
   const start = () => { setDraft(String(raw ?? display)); setEditing(true); };
   const commit = () => {
@@ -105,8 +177,7 @@ const COLS = [
   { id: "dayChg", label: "Day %", numeric: true },
 ];
 
-export default function Holdings({ holdings, setHoldings }) {
-  const theme = useTheme();
+export default function Holdings({ holdings, setHoldings, dividendData }) {
   const [search, setSearch] = useState("");
   const [order, setOrder] = useState("desc");
   const [orderBy, setOrderBy] = useState("curVal");
@@ -172,7 +243,6 @@ export default function Holdings({ holdings, setHoldings }) {
     URL.revokeObjectURL(url);
   };
 
-  // Summary totals
   const totalInvested = derived.reduce((s, h) => s + h.invested, 0);
   const totalCurVal = derived.reduce((s, h) => s + h.curVal, 0);
   const totalPL = totalCurVal - totalInvested;
@@ -216,7 +286,7 @@ export default function Holdings({ holdings, setHoldings }) {
       </Box>
 
       {/* Table */}
-      <Paper sx={{ border: "1px solid", borderColor: "divider", borderRadius: 2 }}>
+      <Paper sx={{ border: "1px solid", borderColor: "divider", borderRadius: 2, overflow: "hidden" }}>
         <TableContainer sx={{ maxHeight: 480 }}>
           <Table size="small" stickyHeader>
             <TableHead>
@@ -225,7 +295,7 @@ export default function Holdings({ holdings, setHoldings }) {
                   <TableCell
                     key={col.id}
                     align={col.align ?? "right"}
-                    sx={{ fontWeight: 700, fontSize: "0.75rem", letterSpacing: "0.06em", bgcolor: "background.paper", whiteSpace: "nowrap" }}
+                    sx={{ fontWeight: 700, fontSize: "0.73rem", letterSpacing: "0.07em", bgcolor: t => solidPaperBg(t), color: "text.secondary", whiteSpace: "nowrap", borderBottom: "2px solid", borderBottomColor: "divider" }}
                   >
                     <TableSortLabel
                       active={orderBy === col.id}
@@ -236,14 +306,17 @@ export default function Holdings({ holdings, setHoldings }) {
                     </TableSortLabel>
                   </TableCell>
                 ))}
-                <TableCell sx={{ bgcolor: "background.paper", width: 40 }} />
+                <TableCell sx={{ bgcolor: t => solidPaperBg(t), width: 40, borderBottom: "2px solid", borderBottomColor: "divider" }} />
               </TableRow>
             </TableHead>
             <TableBody>
               {filtered.map(row => (
                 <TableRow key={row._id} hover>
-                  <EditableCell display={row.instrument} raw={row.instrument} numeric={false} align="left" bold
-                    onCommit={v => update(row._id, "instrument", v)} />
+                  <StockNameCell
+                    instrument={row.instrument}
+                    dd={dividendData?.[row.instrument]}
+                    onCommit={v => update(row._id, "instrument", v)}
+                  />
                   <EditableCell display={fmt(row.qty)} raw={row.qty}
                     onCommit={v => update(row._id, "qty", v)} />
                   <EditableCell display={`₹${fmt(row.avgCost)}`} raw={row.avgCost}

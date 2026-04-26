@@ -247,7 +247,7 @@ export default function Overview({ holdings }) {
                   tickLine={false}
                   tickFormatter={v => `₹${(v / 1000).toFixed(0)}k`}
                 />
-                <ReTip formatter={v => [fmtCur(v), "P&L"]} contentStyle={tipStyle} />
+                <ReTip formatter={v => [fmtCur(v), "P&L"]} contentStyle={tipStyle} cursor={false} />
                 <Bar dataKey="pl" radius={[4, 4, 0, 0]}>
                   {barData.map((e, i) => (
                     <Cell key={i} fill={e.pl >= 0 ? theme.palette.success.main : theme.palette.error.main} />

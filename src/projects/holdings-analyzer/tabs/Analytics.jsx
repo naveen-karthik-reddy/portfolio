@@ -8,7 +8,7 @@ import {
   PieChart, Pie, Cell, Tooltip as ReTip, Legend,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer,
 } from "recharts";
-import { deriveAll, isETF, fmt, fmtCur } from "../utils";
+import { deriveAll, isETF, fmt, fmtCur, solidPaperBg } from "../utils";
 
 export default function Analytics({ holdings }) {
   const theme = useTheme();
@@ -59,12 +59,23 @@ export default function Analytics({ holdings }) {
     return buckets;
   }, [derived]);
 
+  const paperSx = {
+    p: 2.5,
+    border: "1px solid",
+    borderColor: "divider",
+    borderRadius: 2,
+    height: "100%",
+    display: "flex",
+    flexDirection: "column",
+  };
+
   return (
     <Box>
-      <Grid container spacing={2} sx={{ mb: 3 }}>
+      {/* Equal-height row */}
+      <Grid container spacing={2} sx={{ mb: 3, alignItems: "stretch" }}>
         {/* ETF vs Equity */}
         <Grid size={{ xs: 12, md: 5 }}>
-          <Paper sx={{ p: 2.5, border: "1px solid", borderColor: "divider", borderRadius: 2 }}>
+          <Paper sx={paperSx}>
             <Typography variant="subtitle2" fontWeight={700} mb={2} color="text.secondary" letterSpacing="0.08em">
               ETF vs EQUITY SPLIT
             </Typography>
@@ -85,7 +96,7 @@ export default function Analytics({ holdings }) {
                 <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 12 }} />
               </PieChart>
             </ResponsiveContainer>
-            <Box sx={{ display: "flex", justifyContent: "space-around", mt: 1 }}>
+            <Box sx={{ display: "flex", justifyContent: "space-around", mt: 1.5 }}>
               {splitData.map((d, i) => (
                 <Box key={i} sx={{ textAlign: "center" }}>
                   <Typography variant="h6" fontWeight={800} sx={{ color: SPLIT_COLORS[i] }}>
@@ -100,39 +111,39 @@ export default function Analytics({ holdings }) {
 
         {/* P&L Distribution */}
         <Grid size={{ xs: 12, md: 7 }}>
-          <Paper sx={{ p: 2.5, border: "1px solid", borderColor: "divider", borderRadius: 2 }}>
+          <Paper sx={paperSx}>
             <Typography variant="subtitle2" fontWeight={700} mb={2} color="text.secondary" letterSpacing="0.08em">
               P&L DISTRIBUTION
             </Typography>
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={plBuckets} margin={{ top: 0, right: 8, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
-                <XAxis dataKey="label" tick={{ fill: tickColor, fontSize: 11 }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fill: tickColor, fontSize: 11 }} axisLine={false} tickLine={false} allowDecimals={false}
-                  label={{ value: "Stocks", angle: -90, position: "insideLeft", fill: tickColor, fontSize: 11 }} />
-                <ReTip formatter={v => [`${v} stock${v !== 1 ? "s" : ""}`, ""]} contentStyle={tipStyle} />
-                <Bar dataKey="count" radius={[4, 4, 0, 0]}>
-                  {plBuckets.map((b, i) => (
-                    <Cell
-                      key={i}
-                      fill={
-                        i === 0 ? "#10b981"
-                          : i === 1 ? "#6ee7b7"
-                          : i === 2 ? "#a7f3d0"
-                          : i === 3 ? "#fca5a5"
-                          : "#ef4444"
-                      }
-                    />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+                  <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
+                  <XAxis dataKey="label" tick={{ fill: tickColor, fontSize: 11 }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fill: tickColor, fontSize: 11 }} axisLine={false} tickLine={false} allowDecimals={false}
+                    label={{ value: "Stocks", angle: -90, position: "insideLeft", fill: tickColor, fontSize: 11 }} />
+                  <ReTip formatter={v => [`${v} stock${v !== 1 ? "s" : ""}`, ""]} contentStyle={tipStyle} cursor={false} />
+                  <Bar dataKey="count" radius={[4, 4, 0, 0]}>
+                    {plBuckets.map((b, i) => (
+                      <Cell
+                        key={i}
+                        fill={
+                          i === 0 ? "#10b981"
+                            : i === 1 ? "#6ee7b7"
+                            : i === 2 ? "#a7f3d0"
+                            : i === 3 ? "#fca5a5"
+                            : "#ef4444"
+                        }
+                      />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
           </Paper>
         </Grid>
       </Grid>
 
       {/* Concentration table */}
-      <Paper sx={{ border: "1px solid", borderColor: "divider", borderRadius: 2, mb: 3 }}>
+      <Paper sx={{ border: "1px solid", borderColor: "divider", borderRadius: 2, mb: 3, overflow: "hidden" }}>
         <Box sx={{ p: 2.5 }}>
           <Typography variant="subtitle2" fontWeight={700} color="text.secondary" letterSpacing="0.08em">
             CONCENTRATION RISK — TOP 10 HOLDINGS
@@ -144,7 +155,7 @@ export default function Analytics({ holdings }) {
               <TableRow>
                 {["#", "Stock", "Current Value", "% of Portfolio", "P&L", "Net %"].map(h => (
                   <TableCell key={h} align={h === "Stock" || h === "#" ? "left" : "right"}
-                    sx={{ fontWeight: 700, fontSize: "0.75rem", letterSpacing: "0.06em", bgcolor: "background.paper" }}>
+                    sx={{ fontWeight: 700, fontSize: "0.73rem", letterSpacing: "0.07em", bgcolor: t => solidPaperBg(t), color: "text.secondary", whiteSpace: "nowrap", borderBottom: "2px solid", borderBottomColor: "divider" }}>
                     {h}
                   </TableCell>
                 ))}
@@ -187,7 +198,6 @@ export default function Analytics({ holdings }) {
           </Table>
         </TableContainer>
       </Paper>
-
     </Box>
   );
 }

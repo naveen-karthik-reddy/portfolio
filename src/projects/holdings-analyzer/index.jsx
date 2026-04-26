@@ -1,6 +1,9 @@
-import { useState, useCallback, useEffect } from "react";
-import { Box, Typography, Chip, Divider } from "@mui/material";
-import { CloudUpload, GridOn, Savings, Calculate, Insights } from "@mui/icons-material";
+import { useState, useCallback, useEffect, useMemo } from "react";
+import { Box, Typography, Chip, Divider, Tabs, Tab } from "@mui/material";
+import {
+  CloudUpload, GridOn, Savings, Calculate, Insights,
+  BarChart as BarChartIcon, Shield, TrendingUp,
+} from "@mui/icons-material";
 import { useTheme, alpha } from "@mui/material/styles";
 import { motion } from "framer-motion";
 
@@ -11,12 +14,18 @@ import Holdings from "./tabs/Holdings";
 import Dividends from "./tabs/Dividends";
 import Calculators from "./tabs/Calculators";
 import Analytics from "./tabs/Analytics";
+import Fundamentals from "./tabs/Fundamentals";
+import Risk from "./tabs/Risk";
+import Analyst from "./tabs/Analyst";
 
 const UPLOAD_FEATURES = [
   "Portfolio Overview",
   "Dividend Yields",
   "SIP & CAGR Calculators",
   "Concentration Risk",
+  "Fundamentals",
+  "Risk Dashboard",
+  "Analyst Insights",
 ];
 
 /* ── Upload screen ── */
@@ -134,7 +143,7 @@ function UploadScreen({ onFile }) {
       </motion.div>
 
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.32 }}>
-        <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", justifyContent: "center", maxWidth: 480, mx: "auto" }}>
+        <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", justifyContent: "center", maxWidth: 520, mx: "auto" }}>
           {UPLOAD_FEATURES.map(f => (
             <Chip
               key={f}
@@ -150,11 +159,27 @@ function UploadScreen({ onFile }) {
   );
 }
 
-/* ── Supabase dividend_yields query ── */
+/* ── Supabase dividend_yields query — fetches all columns ── */
+const EMPTY_ROW = {
+  yieldPct: null, fiveYearAvgYield: null,
+  payoutRatio: null, exDividendDate: null,
+  companyName: null, series: null, marketCap: null,
+  trailingPe: null, forwardPe: null, priceToBook: null,
+  priceToSales: null, evToEbitda: null, pegRatio: null,
+  trailingEps: null, forwardEps: null,
+  beta: null, fiftyTwoWeekHigh: null, fiftyTwoWeekLow: null,
+  returnOnEquity: null, returnOnAssets: null,
+  profitMargins: null, operatingMargins: null,
+  debtToEquity: null, currentRatio: null,
+  revenueGrowth: null, earningsQuarterlyGrowth: null,
+  targetMeanPrice: null, recommendationMean: null,
+  fetchedAt: null, nullCount: null,
+};
+
 async function fetchDividends(instruments, setDividendData) {
   setDividendData(
     Object.fromEntries(
-      instruments.map(inst => [inst, { yieldPct: null, fiveYearAvgYield: null, loading: true, error: false }])
+      instruments.map(inst => [inst, { ...EMPTY_ROW, loading: true, error: false }])
     )
   );
 
@@ -163,7 +188,14 @@ async function fetchDividends(instruments, setDividendData) {
 
     const { data, error } = await supabase
       .from("dividend_yields")
-      .select("symbol, dividend_yield, five_year_avg_dividend_yield")
+      .select(`symbol, company_name, series, dividend_yield, five_year_avg_dividend_yield,
+        payout_ratio, ex_dividend_date, market_cap,
+        trailing_pe, forward_pe, price_to_book, price_to_sales, ev_to_ebitda, peg_ratio,
+        trailing_eps, forward_eps, beta,
+        fifty_two_week_high, fifty_two_week_low,
+        return_on_equity, return_on_assets, profit_margins, operating_margins,
+        debt_to_equity, current_ratio, revenue_growth, earnings_quarterly_growth,
+        target_mean_price, recommendation_mean, fetched_at, null_count`)
       .in("symbol", nsSymbols);
 
     if (error) throw error;
@@ -177,6 +209,34 @@ async function fetchDividends(instruments, setDividendData) {
           return [inst, {
             yieldPct: row?.dividend_yield != null ? row.dividend_yield * 100 : null,
             fiveYearAvgYield: row?.five_year_avg_dividend_yield ?? null,
+            payoutRatio: row?.payout_ratio ?? null,
+            exDividendDate: row?.ex_dividend_date ?? null,
+            companyName: row?.company_name ?? null,
+            series: row?.series ?? null,
+            marketCap: row?.market_cap ?? null,
+            trailingPe: row?.trailing_pe ?? null,
+            forwardPe: row?.forward_pe ?? null,
+            priceToBook: row?.price_to_book ?? null,
+            priceToSales: row?.price_to_sales ?? null,
+            evToEbitda: row?.ev_to_ebitda ?? null,
+            pegRatio: row?.peg_ratio ?? null,
+            trailingEps: row?.trailing_eps ?? null,
+            forwardEps: row?.forward_eps ?? null,
+            beta: row?.beta ?? null,
+            fiftyTwoWeekHigh: row?.fifty_two_week_high ?? null,
+            fiftyTwoWeekLow: row?.fifty_two_week_low ?? null,
+            returnOnEquity: row?.return_on_equity ?? null,
+            returnOnAssets: row?.return_on_assets ?? null,
+            profitMargins: row?.profit_margins ?? null,
+            operatingMargins: row?.operating_margins ?? null,
+            debtToEquity: row?.debt_to_equity ?? null,
+            currentRatio: row?.current_ratio ?? null,
+            revenueGrowth: row?.revenue_growth ?? null,
+            earningsQuarterlyGrowth: row?.earnings_quarterly_growth ?? null,
+            targetMeanPrice: row?.target_mean_price ?? null,
+            recommendationMean: row?.recommendation_mean ?? null,
+            fetchedAt: row?.fetched_at ?? null,
+            nullCount: row?.null_count ?? null,
             loading: false,
             error: false,
           }];
@@ -186,7 +246,7 @@ async function fetchDividends(instruments, setDividendData) {
   } catch {
     setDividendData(
       Object.fromEntries(
-        instruments.map(inst => [inst, { yieldPct: null, fiveYearAvgYield: null, loading: false, error: true }])
+        instruments.map(inst => [inst, { ...EMPTY_ROW, loading: false, error: true }])
       )
     );
   }
@@ -194,10 +254,13 @@ async function fetchDividends(instruments, setDividendData) {
 
 /* ── Section divider with icon pill ── */
 const SECTION_META = {
-  Holdings:    { icon: <GridOn fontSize="small" />,    color: "#6366f1" },
-  Dividends:   { icon: <Savings fontSize="small" />,   color: "#10b981" },
-  Calculators: { icon: <Calculate fontSize="small" />, color: "#f59e0b" },
-  Analytics:   { icon: <Insights fontSize="small" />,  color: "#06b6d4" },
+  Holdings:     { icon: <GridOn fontSize="small" />,        color: "#6366f1" },
+  Dividends:    { icon: <Savings fontSize="small" />,        color: "#10b981" },
+  Calculators:  { icon: <Calculate fontSize="small" />,      color: "#f59e0b" },
+  Analytics:    { icon: <Insights fontSize="small" />,       color: "#06b6d4" },
+  Fundamentals: { icon: <BarChartIcon fontSize="small" />,   color: "#8b5cf6" },
+  Risk:         { icon: <Shield fontSize="small" />,         color: "#ef4444" },
+  Analyst:      { icon: <TrendingUp fontSize="small" />,     color: "#f59e0b" },
 };
 
 function SectionHeader({ title }) {
@@ -233,6 +296,18 @@ function SectionHeader({ title }) {
   );
 }
 
+/* ── Time-ago helper ── */
+function timeAgo(isoStr) {
+  if (!isoStr) return null;
+  const diff = Date.now() - new Date(isoStr).getTime();
+  const mins = Math.round(diff / 60000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  return `${Math.floor(hours / 24)}d ago`;
+}
+
 /* ══════════════════════════════════════════
    ROOT
 ══════════════════════════════════════════ */
@@ -244,6 +319,7 @@ export default function HoldingsAnalyzer() {
   const [holdings, setHoldings] = useState(null);
   const [dividendData, setDividendData] = useState({});
   const [dividendOverrides, setDividendOverrides] = useState({});
+  const [tab, setTab] = useState(0);
 
   const handleFile = useCallback((file) => {
     const reader = new FileReader();
@@ -253,6 +329,7 @@ export default function HoldingsAnalyzer() {
       setHoldings(rows.map((r, i) => ({ ...r, _id: i })));
       setDividendData({});
       setDividendOverrides({});
+      setTab(0);
     };
     reader.readAsText(file);
   }, []);
@@ -267,9 +344,30 @@ export default function HoldingsAnalyzer() {
     if (holdings && holdings.length) fetchDividends(holdings.map(h => h.instrument), setDividendData);
   }, [holdings]);
 
+  /* ── Data health summary ── */
+  const dataHealth = useMemo(() => {
+    const entries = Object.values(dividendData);
+    if (!entries.length || entries.every(e => e.loading)) return null;
+    const loaded = entries.filter(e => !e.loading);
+    const errorCount = loaded.filter(e => e.error).length;
+    const firstWithDate = loaded.find(e => e.fetchedAt != null);
+    return {
+      ago: timeAgo(firstWithDate?.fetchedAt ?? null),
+      errorCount,
+    };
+  }, [dividendData]);
+
   if (!holdings) return <UploadScreen onFile={handleFile} />;
 
   const sharedProps = { holdings, setHoldings, dividendData, dividendOverrides, setDividendOverrides };
+
+  const TAB_DEFS = [
+    { label: "Overview",      icon: <Insights sx={{ fontSize: 16 }} /> },
+    { label: "Holdings",      icon: <GridOn sx={{ fontSize: 16 }} /> },
+    { label: "Dividends",     icon: <Savings sx={{ fontSize: 16 }} /> },
+    { label: "Fundamentals",  icon: <BarChartIcon sx={{ fontSize: 16 }} /> },
+    { label: "Risk & Analyst",icon: <Shield sx={{ fontSize: 16 }} /> },
+  ];
 
   return (
     <Box>
@@ -281,12 +379,15 @@ export default function HoldingsAnalyzer() {
         borderRadius: 3,
         px: { xs: 2.5, sm: 3 },
         py: { xs: 2, sm: 2.5 },
-        mb: 4,
+        mb: 0,
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
         gap: 2,
         flexWrap: "wrap",
+        borderBottomLeftRadius: 0,
+        borderBottomRightRadius: 0,
+        borderBottom: "none",
       }}>
         <Box>
           <Typography
@@ -295,9 +396,25 @@ export default function HoldingsAnalyzer() {
           >
             Holdings Analyzer
           </Typography>
-          <Typography variant="caption" color="text.secondary" sx={{ mt: 0.3, display: "block" }}>
-            {holdings.length} stocks · powered by NSE data
-          </Typography>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 0.3, flexWrap: "wrap" }}>
+            <Typography variant="caption" color="text.secondary">
+              {holdings.length} stocks · powered by NSE data
+              {dataHealth?.ago && ` · updated ${dataHealth.ago}`}
+            </Typography>
+            {dataHealth?.errorCount > 0 && (
+              <Chip
+                label={`${dataHealth.errorCount} fetch error${dataHealth.errorCount > 1 ? "s" : ""}`}
+                size="small"
+                sx={{
+                  height: 18,
+                  fontSize: "0.63rem",
+                  fontWeight: 700,
+                  bgcolor: isDark ? "rgba(245,158,11,0.18)" : "rgba(245,158,11,0.10)",
+                  color: "warning.main",
+                }}
+              />
+            )}
+          </Box>
         </Box>
         <Chip
           label="Upload new CSV"
@@ -313,19 +430,76 @@ export default function HoldingsAnalyzer() {
         />
       </Box>
 
-      <Overview {...sharedProps} />
+      {/* Tab bar */}
+      <Box sx={{
+        border: "1px solid",
+        borderColor: isDark ? alpha(theme.palette.primary.main, 0.22) : alpha(theme.palette.primary.main, 0.14),
+        borderTop: "none",
+        borderRadius: 3,
+        borderTopLeftRadius: 0,
+        borderTopRightRadius: 0,
+        mb: 4,
+        bgcolor: isDark ? alpha("#fff", 0.02) : alpha("#000", 0.01),
+        overflow: "hidden",
+      }}>
+        <Tabs
+          value={tab}
+          onChange={(_, v) => setTab(v)}
+          variant="scrollable"
+          scrollButtons="auto"
+          sx={{
+            minHeight: 44,
+            "& .MuiTabs-indicator": {
+              height: 2,
+              borderRadius: 1,
+              bgcolor: "primary.main",
+            },
+            "& .MuiTab-root": {
+              minHeight: 44,
+              fontSize: "0.78rem",
+              fontWeight: 600,
+              textTransform: "none",
+              letterSpacing: "0.01em",
+              gap: 0.75,
+              color: "text.secondary",
+              "&.Mui-selected": { color: "primary.main" },
+            },
+          }}
+        >
+          {TAB_DEFS.map((t, i) => (
+            <Tab key={t.label} label={t.label} icon={t.icon} iconPosition="start" />
+          ))}
+        </Tabs>
+      </Box>
 
-      <SectionHeader title="Holdings" />
-      <Holdings {...sharedProps} />
+      {/* Tab panels */}
+      {tab === 0 && (
+        <Box>
+          <Overview {...sharedProps} />
+          <SectionHeader title="Analytics" />
+          <Analytics {...sharedProps} />
+        </Box>
+      )}
 
-      <SectionHeader title="Dividends" />
-      <Dividends {...sharedProps} onRetry={retryDividends} />
+      {tab === 1 && <Holdings {...sharedProps} />}
 
-      <SectionHeader title="Calculators" />
-      <Calculators />
+      {tab === 2 && (
+        <Box>
+          <Dividends {...sharedProps} onRetry={retryDividends} />
+          <SectionHeader title="Calculators" />
+          <Calculators />
+        </Box>
+      )}
 
-      <SectionHeader title="Analytics" />
-      <Analytics {...sharedProps} />
+      {tab === 3 && <Fundamentals {...sharedProps} />}
+
+      {tab === 4 && (
+        <Box>
+          <Risk {...sharedProps} />
+          <SectionHeader title="Analyst" />
+          <Analyst {...sharedProps} />
+        </Box>
+      )}
     </Box>
   );
 }

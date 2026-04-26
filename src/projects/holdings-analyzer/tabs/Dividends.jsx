@@ -9,7 +9,30 @@ import { useTheme } from "@mui/material/styles";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip as ReTip,
 } from "recharts";
-import { deriveAll, fmt, fmtCur, isETF } from "../utils";
+import { deriveAll, fmt, fmtCur, isETF, solidPaperBg } from "../utils";
+
+/* ── Helpers ── */
+function payoutChipInfo(ratio, isDark) {
+  if (ratio == null) return null;
+  const pct = ratio * 100;
+  if (pct < 60) return { label: `${pct.toFixed(0)}% · Safe`, bgcolor: isDark ? "rgba(16,185,129,0.18)" : "rgba(16,185,129,0.10)", color: "success.main" };
+  if (pct < 80) return { label: `${pct.toFixed(0)}% · Moderate`, bgcolor: isDark ? "rgba(245,158,11,0.18)" : "rgba(245,158,11,0.10)", color: "warning.main" };
+  return { label: `${pct.toFixed(0)}% · Risky`, bgcolor: isDark ? "rgba(239,68,68,0.18)" : "rgba(239,68,68,0.10)", color: "error.main" };
+}
+
+function fmtDate(str) {
+  if (!str) return "—";
+  const d = new Date(str);
+  if (isNaN(d.getTime())) return "—";
+  return d.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+}
+
+function isUpcoming(str) {
+  if (!str) return false;
+  const d = new Date(str);
+  const diff = d - Date.now();
+  return diff > 0 && diff < 30 * 24 * 60 * 60 * 1000;
+}
 
 /* ── Inline-editable yield % cell ── */
 function YieldCell({ value, loading, error, onCommit }) {
@@ -87,6 +110,8 @@ export default function Dividends({ holdings, dividendData, dividendOverrides, s
       error: dd?.error ?? false,
       effectiveYield,
       fiveYearAvgYield: dd?.fiveYearAvgYield ?? null,
+      payoutRatio: dd?.payoutRatio ?? null,
+      exDividendDate: dd?.exDividendDate ?? null,
       annualIncome,
       isEtf: isETF(h.instrument),
     };
@@ -155,7 +180,7 @@ export default function Dividends({ holdings, dividendData, dividendOverrides, s
                   <XAxis dataKey="name" tick={{ fill: tickColor, fontSize: 10 }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fill: tickColor, fontSize: 10 }} axisLine={false} tickLine={false}
                     tickFormatter={v => `₹${(v / 1000).toFixed(0)}k`} />
-                  <ReTip formatter={v => [fmtCur(v), "Annual Income"]} contentStyle={tipStyle} />
+                  <ReTip formatter={v => [fmtCur(v), "Annual Income"]} contentStyle={tipStyle} cursor={false} />
                   <Bar dataKey="income" radius={[4, 4, 0, 0]} fill={theme.palette.success.main} />
                 </BarChart>
               </ResponsiveContainer>
@@ -185,16 +210,16 @@ export default function Dividends({ holdings, dividendData, dividendOverrides, s
       )}
 
       {/* Dividend table */}
-      <Paper sx={{ border: "1px solid", borderColor: "divider", borderRadius: 2 }}>
+      <Paper sx={{ border: "1px solid", borderColor: "divider", borderRadius: 2, overflow: "hidden" }}>
         <TableContainer sx={{ maxHeight: 460 }}>
           <Table size="small" stickyHeader>
             <TableHead>
               <TableRow>
-                {["Stock", "Qty", "LTP", "Yield % (editable)", "5Y Avg Yield", "Annual Income", "Type"].map(h => (
+                {["Stock", "Qty", "LTP", "Yield % (editable)", "5Y Avg Yield", "Payout Ratio", "Ex-Div Date", "Annual Income", "Type"].map(h => (
                   <TableCell
                     key={h}
                     align={h === "Stock" || h === "Type" ? "left" : "right"}
-                    sx={{ fontWeight: 700, fontSize: "0.75rem", letterSpacing: "0.06em", bgcolor: "background.paper", whiteSpace: "nowrap" }}
+                    sx={{ fontWeight: 700, fontSize: "0.73rem", letterSpacing: "0.07em", bgcolor: t => solidPaperBg(t), color: "text.secondary", whiteSpace: "nowrap", borderBottom: "2px solid", borderBottomColor: "divider" }}
                   >
                     {h}
                   </TableCell>
@@ -202,56 +227,79 @@ export default function Dividends({ holdings, dividendData, dividendOverrides, s
               </TableRow>
             </TableHead>
             <TableBody>
-              {rows.map(row => (
-                <TableRow key={row.instrument} hover>
-                  <TableCell sx={{ fontWeight: 700, fontSize: "0.8rem" }}>{row.instrument}</TableCell>
-                  <TableCell align="right" sx={{ fontSize: "0.8rem" }}>{fmt(row.qty)}</TableCell>
-                  <TableCell align="right" sx={{ fontSize: "0.8rem" }}>₹{fmt(row.ltp)}</TableCell>
+              {rows.map(row => {
+                const payout = payoutChipInfo(row.payoutRatio, isDark);
+                return (
+                  <TableRow key={row.instrument} hover>
+                    <TableCell sx={{ fontWeight: 700, fontSize: "0.8rem" }}>{row.instrument}</TableCell>
+                    <TableCell align="right" sx={{ fontSize: "0.8rem" }}>{fmt(row.qty)}</TableCell>
+                    <TableCell align="right" sx={{ fontSize: "0.8rem" }}>₹{fmt(row.ltp)}</TableCell>
 
-                  <YieldCell
-                    value={row.effectiveYield}
-                    loading={row.loading}
-                    error={row.error}
-                    onCommit={v => setDividendOverrides(prev => {
-                      if (v === null) { const next = { ...prev }; delete next[row.instrument]; return next; }
-                      return { ...prev, [row.instrument]: v };
-                    })}
-                  />
-
-                  {/* 5Y Avg Yield */}
-                  {row.loading ? (
-                    <TableCell align="right"><Skeleton width={50} sx={{ ml: "auto" }} /></TableCell>
-                  ) : (
-                    <TableCell align="right" sx={{ fontSize: "0.8rem", color: "text.secondary" }}>
-                      {row.fiveYearAvgYield !== null ? `${parseFloat(row.fiveYearAvgYield).toFixed(2)}%` : "—"}
-                    </TableCell>
-                  )}
-
-                  {/* Annual Income */}
-                  {row.loading ? (
-                    <TableCell align="right"><Skeleton width={70} sx={{ ml: "auto" }} /></TableCell>
-                  ) : (
-                    <TableCell align="right" sx={{ fontSize: "0.8rem", fontWeight: 600, color: row.annualIncome > 0 ? "success.main" : "text.secondary" }}>
-                      {row.annualIncome > 0 ? fmtCur(row.annualIncome) : "—"}
-                    </TableCell>
-                  )}
-
-                  <TableCell>
-                    <Chip
-                      label={row.isEtf ? "Growth ETF" : "Equity"}
-                      size="small"
-                      sx={{
-                        fontSize: "0.7rem",
-                        fontWeight: 600,
-                        bgcolor: row.isEtf
-                          ? isDark ? "rgba(99,102,241,0.15)" : "rgba(99,102,241,0.08)"
-                          : isDark ? "rgba(16,185,129,0.15)" : "rgba(16,185,129,0.08)",
-                        color: row.isEtf ? "primary.main" : "success.main",
-                      }}
+                    <YieldCell
+                      value={row.effectiveYield}
+                      loading={row.loading}
+                      error={row.error}
+                      onCommit={v => setDividendOverrides(prev => {
+                        if (v === null) { const next = { ...prev }; delete next[row.instrument]; return next; }
+                        return { ...prev, [row.instrument]: v };
+                      })}
                     />
-                  </TableCell>
-                </TableRow>
-              ))}
+
+                    {/* 5Y Avg Yield */}
+                    {row.loading ? (
+                      <TableCell align="right"><Skeleton width={50} sx={{ ml: "auto" }} /></TableCell>
+                    ) : (
+                      <TableCell align="right" sx={{ fontSize: "0.8rem", color: "text.secondary" }}>
+                        {row.fiveYearAvgYield !== null ? `${parseFloat(row.fiveYearAvgYield).toFixed(2)}%` : "—"}
+                      </TableCell>
+                    )}
+
+                    {/* Payout Ratio */}
+                    {row.loading ? (
+                      <TableCell align="right"><Skeleton width={80} sx={{ ml: "auto" }} /></TableCell>
+                    ) : (
+                      <TableCell align="right" sx={{ fontSize: "0.8rem" }}>
+                        {payout ? (
+                          <Chip label={payout.label} size="small" sx={{ fontWeight: 700, fontSize: "0.68rem", bgcolor: payout.bgcolor, color: payout.color }} />
+                        ) : "—"}
+                      </TableCell>
+                    )}
+
+                    {/* Ex-Div Date */}
+                    {row.loading ? (
+                      <TableCell align="right"><Skeleton width={80} sx={{ ml: "auto" }} /></TableCell>
+                    ) : (
+                      <TableCell align="right" sx={{ fontSize: "0.8rem", color: isUpcoming(row.exDividendDate) ? "warning.main" : "text.secondary", fontWeight: isUpcoming(row.exDividendDate) ? 700 : 400 }}>
+                        {fmtDate(row.exDividendDate)}
+                      </TableCell>
+                    )}
+
+                    {/* Annual Income */}
+                    {row.loading ? (
+                      <TableCell align="right"><Skeleton width={70} sx={{ ml: "auto" }} /></TableCell>
+                    ) : (
+                      <TableCell align="right" sx={{ fontSize: "0.8rem", fontWeight: 600, color: row.annualIncome > 0 ? "success.main" : "text.secondary" }}>
+                        {row.annualIncome > 0 ? fmtCur(row.annualIncome) : "—"}
+                      </TableCell>
+                    )}
+
+                    <TableCell>
+                      <Chip
+                        label={row.isEtf ? "Growth ETF" : "Equity"}
+                        size="small"
+                        sx={{
+                          fontSize: "0.7rem",
+                          fontWeight: 600,
+                          bgcolor: row.isEtf
+                            ? isDark ? "rgba(99,102,241,0.15)" : "rgba(99,102,241,0.08)"
+                            : isDark ? "rgba(16,185,129,0.15)" : "rgba(16,185,129,0.08)",
+                          color: row.isEtf ? "primary.main" : "success.main",
+                        }}
+                      />
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </TableContainer>
