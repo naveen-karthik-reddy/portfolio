@@ -10,7 +10,7 @@ import ProjectsPage from "./pages/ProjectsPage";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <BrowserRouter basename="/portfolio">
+    <BrowserRouter>
       <Routes>
         {/* Shared Layout */}
         <Route element={<Layout />}>

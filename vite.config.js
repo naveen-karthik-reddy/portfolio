@@ -9,5 +9,5 @@ export default defineConfig({
   // Base path for assets
   // Use '/' for root domain deployment (e.g., naveenkarthik.com)
   // Use '/portfolio' for subdirectory deployment (e.g., github.com/username/portfolio)
-  base: '/portfolio',
+  base: '/',
 })
