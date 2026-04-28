@@ -58,7 +58,7 @@ export default function TopNav({
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
           {/* Desktop nav links (all sections + articles) */}
           <Box sx={{ display: { xs: "none", md: "flex" }, gap: 1 }}>
-            {["summary", "experience", "projects", "skills", "education", "achievements"].map(
+            {["summary", "experience", "skills", "education", "achievements"].map(
               (id) => (
                 <Typography
                   key={id}

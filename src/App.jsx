@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import {
   Typography,
   Container,
@@ -12,6 +13,7 @@ import {
   Card,
   CardContent,
   Avatar,
+  Button,
 } from "@mui/material";
 import {
   ExpandMore,
@@ -339,8 +341,12 @@ export default function App() {
           {projectData.map((proj, i) => (
             <motion.div key={i} variants={fadeInUp}>
               <Card
+                component={Link}
+                to={`/projects/${proj.id}`}
                 sx={{
                   mb: 3,
+                  display: "block",
+                  textDecoration: "none",
                   border: "1px solid",
                   borderColor: "divider",
                   borderRadius: 2,
@@ -409,6 +415,27 @@ export default function App() {
             </motion.div>
           ))}
         </motion.div>
+
+        <Box sx={{ textAlign: "center", mt: 2 }}>
+          <Button
+            component={Link}
+            to="/projects"
+            variant="outlined"
+            sx={{
+              borderColor: "primary.main",
+              color: "primary.main",
+              fontWeight: 700,
+              letterSpacing: "0.05em",
+              px: 4,
+              "&:hover": {
+                bgcolor: "primary.main",
+                color: "background.default",
+              },
+            }}
+          >
+            All Projects
+          </Button>
+        </Box>
       </Section>
 
       {/* SKILLS */}
