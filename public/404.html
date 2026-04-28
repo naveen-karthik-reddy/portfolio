@@ -4,13 +4,15 @@
     <meta charset="UTF-8" />
     <title>Naveen Karthik | Frontend Developer</title>
     <script>
-      // GitHub Pages SPA redirect.
-      // Encodes the requested path as a query param and redirects to root,
-      // where index.html decodes it and restores the URL before React mounts.
+      // GitHub Pages SPA redirect for subdirectory deployment.
+      // Strips the base path prefix, encodes the remaining path as a query
+      // param, and redirects to the app root so index.html can restore it.
       var l = window.location;
+      var base = '/portfolio';
+      var path = l.pathname.slice(base.length) || '/';
       l.replace(
-        l.protocol + '//' + l.host +
-        '/?p=' + encodeURIComponent(l.pathname + l.search) + l.hash
+        l.protocol + '//' + l.host + base +
+        '/?p=' + encodeURIComponent(path + l.search) + l.hash
       );
     </script>
   </head>
