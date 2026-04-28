@@ -509,21 +509,30 @@ function ArticleView({ article }) {
     },
 
     a({ href, children }) {
+      const isInternal = href && (href.startsWith("/") || href.startsWith("#"));
+      const linkSx = {
+        color: "primary.main",
+        textDecoration: "none",
+        borderBottom: "1px solid",
+        borderColor: "primary.main",
+        opacity: 0.9,
+        transition: "opacity 0.2s",
+        "&:hover": { opacity: 1 },
+      };
+      if (isInternal) {
+        return (
+          <Box component={Link} to={href} sx={linkSx}>
+            {children}
+          </Box>
+        );
+      }
       return (
         <Box
           component="a"
           href={href}
           target="_blank"
           rel="noopener noreferrer"
-          sx={{
-            color: "primary.main",
-            textDecoration: "none",
-            borderBottom: "1px solid",
-            borderColor: "primary.main",
-            opacity: 0.9,
-            transition: "opacity 0.2s",
-            "&:hover": { opacity: 1 },
-          }}
+          sx={linkSx}
         >
           {children}
         </Box>

@@ -1,5 +1,14 @@
 export const articlesData = [
   {
+    id: "web-performance-planner",
+    title: "Web Performance Planner — Building a Lighthouse Score Simulator",
+    excerpt:
+      "A guide to using the Web Performance Planner — model your Core Web Vitals before shipping, diagnose an underperforming page, and get a ranked list of what to fix first.",
+    date: "2026-04-28",
+    readTime: "10 min read",
+    tags: ["Performance", "React", "Web Vitals", "Engineering"],
+  },
+  {
     id: "claude-figma-mcp-integration",
     title: "Figma MCP Integration Guide",
     excerpt:
