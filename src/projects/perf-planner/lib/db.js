@@ -1,5 +1,5 @@
 const DB_NAME = "perf-planner";
-const DB_VERSION = 2;
+const DB_VERSION = 4;
 
 let _db = null;
 
@@ -17,6 +17,23 @@ export function openDB() {
       }
       if (oldVersion < 2) {
         db.createObjectStore("settings", { keyPath: "id" });
+      }
+      if (oldVersion < 3) {
+        if (db.objectStoreNames.contains("pages"))      db.deleteObjectStore("pages");
+        if (db.objectStoreNames.contains("variations")) db.deleteObjectStore("variations");
+        db.createObjectStore("pages", { keyPath: "id" });
+        const store = db.createObjectStore("variations", { keyPath: "id" });
+        store.createIndex("pageId", "pageId", { unique: false });
+      }
+      if (oldVersion < 4) {
+        // v4 replaces variation.inputs with variation.pageMeta + resource-shaped
+        // resources. Legacy v3 rows can't be auto-upgraded — wipe.
+        if (db.objectStoreNames.contains("pages"))      db.deleteObjectStore("pages");
+        if (db.objectStoreNames.contains("variations")) db.deleteObjectStore("variations");
+        db.createObjectStore("pages", { keyPath: "id" });
+        const store = db.createObjectStore("variations", { keyPath: "id" });
+        store.createIndex("pageId", "pageId", { unique: false });
+        // settings store survives.
       }
     };
     req.onsuccess = (e) => { _db = e.target.result; resolve(_db); };

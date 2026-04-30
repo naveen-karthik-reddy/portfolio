@@ -18,8 +18,9 @@ export default function ComparisonMode() {
       const variation = variations.find((v) => v.id === id);
       if (!variation) return null;
       const page = pages.find((p) => p.id === variation.pageId);
-      const metrics = computeMetrics(variation.inputs, PROFILES.mobile);
-      const scores  = computeScores(metrics);
+      const settings = page?.scoringCurves ? { scoringCurves: page.scoringCurves } : null;
+      const metrics = computeMetrics(variation.resources ?? [], variation.pageMeta ?? {}, PROFILES.mobile, page?.calibration);
+      const scores  = computeScores(metrics, settings);
       return { variation, page, metrics, scores };
     }).filter(Boolean);
   }, [comparisonVariationIds, variations, pages]);

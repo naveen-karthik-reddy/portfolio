@@ -7,9 +7,8 @@ export const DEFAULT_SETTINGS = {
     fcp: 0.10,
     lcp: 0.25,
     tbt: 0.30,
-    cls: 0.15,
+    cls: 0.25,
     si:  0.10,
-    tti: 0.10,
   },
   scoringCurves: {
     fcp: { median: 3000, p10: 1800 },
@@ -17,7 +16,6 @@ export const DEFAULT_SETTINGS = {
     tbt: { median: 600,  p10: 200  },
     cls: { median: 0.25, p10: 0.10 },
     si:  { median: 3900, p10: 3387 },
-    tti: { median: 7300, p10: 3785 },
   },
   connectionModel: {
     http1MaxConnections: 6,
@@ -31,15 +29,18 @@ export const DEFAULT_SETTINGS = {
 export const DEFAULT_RESOURCE = {
   id: "",
   name: "Untitled Resource",
-  type: "js",           // js | css | font | image | video | other
+  type: "js",            // js | css | font | image | video | other
   source: "same-origin", // same-origin | own-cdn | third-party-cdn
-  loading: "blocking",  // blocking | defer | async | preload | lazy | module
+  loading: "blocking",   // blocking | defer | async | preload | lazy | module
   sizeKB: 50,
   count: 1,
-  execTimeMs: 0,        // JS only
-  longTaskCount: 0,     // JS only
-  avgLongTaskMs: 0,     // JS only
-  imageFormat: "WebP",  // image only
+  execTimeMs: 0,         // JS only
+  longTaskCount: 0,      // JS only
+  avgLongTaskMs: 0,      // JS only
+  imageFormat: "WebP",   // image only
+  fetchpriority: false,  // image only
+  missingDimensions: false, // image only
+  fontDisplay: "swap",   // font only — swap | optional | block | auto
+  inline: false,         // css | js only
   isLcp: false,
-  compression: "auto",  // auto | gzip | brotli | none
 };

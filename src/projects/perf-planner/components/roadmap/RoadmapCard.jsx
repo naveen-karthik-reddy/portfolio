@@ -1,10 +1,10 @@
-import { Box, Typography, Chip, Button } from "@mui/material";
+import { Box, Typography, Chip, Button, IconButton, Tooltip } from "@mui/material";
 import { useTheme, alpha } from "@mui/material/styles";
-import { TrendingUp } from "@mui/icons-material";
+import { TrendingUp, LockOutlined } from "@mui/icons-material";
 
 const EFFORT_COLORS = { Easy: "#0cce6b", Medium: "#ffa400", Hard: "#ff4e42" };
 
-export default function RoadmapCard({ suggestion, onApply }) {
+export default function RoadmapCard({ suggestion, onApply, onLock }) {
   const theme  = useTheme();
   const isDark = theme.palette.mode === "dark";
   const effortColor = EFFORT_COLORS[suggestion.effort] ?? "#9ca3af";
@@ -68,19 +68,28 @@ export default function RoadmapCard({ suggestion, onApply }) {
         </Box>
       </Box>
 
-      {/* Apply button */}
-      <Button
-        size="small"
-        variant="outlined"
-        onClick={onApply}
-        sx={{
-          fontSize: "0.65rem", py: 0.25, px: 1, flexShrink: 0,
-          borderColor: "primary.main", color: "primary.main",
-          "&:hover": { bgcolor: alpha(theme.palette.primary.main, 0.08) },
-        }}
-      >
-        Apply
-      </Button>
+      {/* Lock + Apply */}
+      <Box sx={{ display: "flex", alignItems: "center", gap: 0.25, flexShrink: 0 }}>
+        {onLock && (
+          <Tooltip title="Hide this suggestion" arrow>
+            <IconButton size="small" onClick={onLock} sx={{ p: 0.25, color: "text.disabled" }}>
+              <LockOutlined sx={{ fontSize: 13 }} />
+            </IconButton>
+          </Tooltip>
+        )}
+        <Button
+          size="small"
+          variant="outlined"
+          onClick={onApply}
+          sx={{
+            fontSize: "0.65rem", py: 0.25, px: 1,
+            borderColor: "primary.main", color: "primary.main",
+            "&:hover": { bgcolor: alpha(theme.palette.primary.main, 0.08) },
+          }}
+        >
+          Apply
+        </Button>
+      </Box>
     </Box>
   );
 }

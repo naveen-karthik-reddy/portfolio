@@ -13,13 +13,8 @@ export function AppProvider({ children }) {
   useEffect(() => {
     async function init() {
       await openDB();
-      let pages = await getAllPages();
-      let variations = await getAllVariations();
-
-      // Ensure all variations have a resources array (migration for pre-v2 data)
-      variations = variations.map((v) =>
-        v.resources ? v : { ...v, resources: [] }
-      );
+      const pages = await getAllPages();
+      const variations = await getAllVariations();
 
       const activePageId = pages[0]?.id ?? null;
       const activeVariationId = activePageId
@@ -32,6 +27,14 @@ export function AppProvider({ children }) {
       let settings = await getSettings("global");
       if (!settings) {
         settings = { id: "global", ...DEFAULT_SETTINGS };
+        await saveSettings(settings);
+      } else if (settings.scoringWeights?.tti != null) {
+        // Migrate: remove TTI, reset weights + curves to current defaults
+        settings = {
+          ...settings,
+          scoringWeights: DEFAULT_SETTINGS.scoringWeights,
+          scoringCurves:  DEFAULT_SETTINGS.scoringCurves,
+        };
         await saveSettings(settings);
       }
 

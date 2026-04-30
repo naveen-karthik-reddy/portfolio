@@ -8,7 +8,6 @@ import { useTheme, alpha } from "@mui/material/styles";
 import { useApp } from "../../context/useApp.js";
 import { useContextMenu } from "../../hooks/useContextMenu.js";
 import { scoreColor } from "../../lib/calculator.js";
-import { BLANK_INPUTS } from "../../lib/defaults.js";
 import { saveVariation } from "../../lib/db.js";
 import TabContextMenu from "./TabContextMenu.jsx";
 
@@ -38,15 +37,19 @@ export default function VariationTabs({ variations, activeVariationId, tabScores
   const [renameTargetId, setRenameTargetId] = useState(null);
 
   function handleNewVariation() {
+    const baseline = state.variations.find(
+      (v) => v.pageId === state.activePageId && v.isBaseline
+    );
+    if (!baseline) return;
     const now = new Date().toISOString();
     const newVar = {
+      ...baseline,
       id: crypto.randomUUID(),
-      pageId: state.activePageId,
       name: `Variation ${variations.length + 1}`,
       isBaseline: false,
       locked: {},
-      inputs: { ...BLANK_INPUTS },
-      resources: [],
+      pageMeta: { ...(baseline.pageMeta ?? {}) },
+      resources: (baseline.resources ?? []).map((r) => ({ ...r, id: crypto.randomUUID() })),
       createdAt: now,
       updatedAt: now,
     };
@@ -168,7 +171,7 @@ export default function VariationTabs({ variations, activeVariationId, tabScores
         })}
 
         {/* Add variation button */}
-        <Tooltip title="Add variation (starts at 100)" arrow>
+        <Tooltip title="Add what-if variation (clones baseline)" arrow>
           <IconButton size="small" onClick={handleNewVariation} sx={{ mx: 0.5, flexShrink: 0 }}>
             <Add sx={{ fontSize: 16 }} />
           </IconButton>

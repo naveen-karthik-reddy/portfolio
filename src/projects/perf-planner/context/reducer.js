@@ -29,6 +29,33 @@ export function reducer(state, action) {
     case "PAGE_CREATED":
       return { ...state, pages: [...state.pages, payload] };
 
+    case "PAGE_CREATED_FROM_LIGHTHOUSE":
+      return {
+        ...state,
+        pages: [...state.pages, payload.page],
+        variations: [...state.variations, payload.baseline],
+        activePageId: payload.page.id,
+        activeVariationId: payload.baseline.id,
+      };
+
+    case "PAGE_RECALIBRATED": {
+      const updatedPages = state.pages.map((p) =>
+        p.id === payload.pageId
+          ? { ...p, scoringCurves: payload.scoringCurves, calibration: payload.calibration, updatedAt: payload.updatedAt }
+          : p
+      );
+      const updatedVariations = state.variations.map((v) => {
+        if (v.pageId !== payload.pageId || !v.isBaseline) return v;
+        return {
+          ...v,
+          pageMeta:  payload.baselinePageMeta  ?? v.pageMeta,
+          resources: payload.baselineResources ?? v.resources,
+          updatedAt: payload.updatedAt,
+        };
+      });
+      return { ...state, pages: updatedPages, variations: updatedVariations };
+    }
+
     case "PAGE_RENAMED":
       return {
         ...state,
@@ -95,14 +122,30 @@ export function reducer(state, action) {
     case "SET_ACTIVE_VARIATION":
       return { ...state, activeVariationId: payload.id };
 
-    // ── Inputs ───────────────────────────────────────────────────
+    // ── Page meta / resources ────────────────────────────────────
 
-    case "INPUT_CHANGED":
+    case "PAGE_META_CHANGED":
       return {
         ...state,
         variations: state.variations.map((v) =>
           v.id === payload.variationId
-            ? { ...v, inputs: { ...v.inputs, [payload.field]: payload.value }, updatedAt: new Date().toISOString() }
+            ? { ...v, pageMeta: { ...v.pageMeta, [payload.field]: payload.value }, updatedAt: new Date().toISOString() }
+            : v
+        ),
+      };
+
+    case "RESOURCE_FIELD_CHANGED":
+      return {
+        ...state,
+        variations: state.variations.map((v) =>
+          v.id === payload.variationId
+            ? {
+                ...v,
+                resources: (v.resources ?? []).map((r) =>
+                  r.id === payload.resourceId ? { ...r, [payload.field]: payload.value } : r
+                ),
+                updatedAt: new Date().toISOString(),
+              }
             : v
         ),
       };
@@ -112,7 +155,7 @@ export function reducer(state, action) {
         ...state,
         variations: state.variations.map((v) =>
           v.id === payload.variationId
-            ? { ...v, locked: { ...v.locked, [payload.field]: !v.locked[payload.field] } }
+            ? { ...v, locked: { ...v.locked, [payload.key]: !v.locked?.[payload.key] } }
             : v
         ),
       };

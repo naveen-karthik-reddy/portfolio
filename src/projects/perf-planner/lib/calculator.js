@@ -1,4 +1,10 @@
-import { getOptimalValue } from "./defaults.js";
+// Per-resource browser-physics simulator.
+//
+// Public API — all metric/score functions take (resources, pageMeta, profile, calibration).
+// Internally we walk the request list and compute each resource's start/end on a
+// timeline keyed off TCP slow-start, connection-pool reuse, and parallel cohorts.
+// FCP/LCP fall out of the critical path; TBT/CLS sum per-resource contributions.
+
 import { DEFAULT_SETTINGS } from "./defaultSettings.js";
 
 export const PROFILES = {
@@ -11,181 +17,190 @@ export function getProfile(profileKey, settings) {
   return profiles[profileKey] ?? PROFILES[profileKey];
 }
 
-const COMPRESSION_RATIOS = {
-  none:   { html: 1.0,  css: 1.0,  js: 1.0,  fonts: 1.0,  images: 1.0 },
-  gzip:   { html: 0.15, css: 0.15, js: 0.20, fonts: 0.70, images: 1.0 },
-  brotli: { html: 0.10, css: 0.12, js: 0.15, fonts: 0.65, images: 1.0 },
-};
-
-export function compressedSize(sizeKB, resourceType, compression) {
-  const ratio = COMPRESSION_RATIOS[compression]?.[resourceType] ?? 1.0;
-  return sizeKB * ratio;
-}
-
-// TCP slow-start simulation — returns download time in ms
+// TCP slow-start download time. `sizeKB` is the wire bytes (already compressed
+// by whatever encoding the server used); we never re-apply a compression ratio.
 export function tcpDownloadTime(bytes, rttMs, bandwidthKBs) {
-  if (bytes <= 0) return 0;
+  if (bytes <= 0 || bandwidthKBs <= 0) return 0;
   const bandwidthBps = bandwidthKBs * 1024;
   let remaining = bytes;
-  let window = 14 * 1024; // initial cwnd
+  let window = 14 * 1024; // initial cwnd ~= 14 KB
   let time = 0;
   while (remaining > 0) {
     const sent = Math.min(window, remaining);
     const transferMs = (sent / bandwidthBps) * 1000;
     time += Math.max(transferMs, rttMs); // each window takes at least 1 RTT
     remaining -= sent;
-    window = window * 2;
+    window *= 2;
   }
   return time;
 }
 
-function connectionOverhead(rttMs, cdn) {
-  return cdn ? 0 : rttMs * 2; // +2 RTTs for DNS+TCP+TLS when no CDN
+// Effective RTT depends on where the resource lives.
+function effRTT(rtt, source, cdn) {
+  if (source === "third-party-cdn") return rtt * 0.8;
+  if (source === "own-cdn")          return rtt * 0.4;
+  if (cdn) return rtt * 0.4;
+  return rtt;
 }
 
-function getEffectiveRTT(rtt, cdn) {
-  return cdn ? rtt * 0.4 : rtt;
+// DNS + TCP + TLS — paid on the first request to a given host only.
+function connSetup(rtt, source, cdn, isFirstToHost) {
+  if (!isFirstToHost) return 0;
+  if (source === "same-origin" && cdn) return 0;
+  if (source === "own-cdn")              return 0;
+  return rtt * 2;
 }
 
-// ── Metric calculations ──────────────────────────────────────────────
-
-function calcFCP(inputs, derived) {
-  const { htmlDownload, cssDownload, cssParseTime, fontDownload, connCost, cpuMultiplier } = derived;
-
-  let fcp = inputs.ttfb + connCost + htmlDownload;
-
-  // Render-blocking CSS delays FCP — unless critical CSS is inlined (avoids the blocking wait)
-  if (inputs.renderBlockingCSS && !inputs.inlineCriticalCSS) {
-    fcp += cssDownload + cssParseTime;
-  } else if (inputs.inlineCriticalCSS) {
-    // Small parse overhead for the inlined portion only
-    fcp += (inputs.cssSize * 0.05) * cpuMultiplier;
-  }
-
-  if (inputs.inlineJS > 0) {
-    fcp += inputs.inlineJS * 0.05 * cpuMultiplier;
-  }
-  if (inputs.fontDisplay === "block" && !inputs.fontsPreloaded) {
-    fcp += fontDownload;
-  }
-  fcp += 50 * cpuMultiplier;
-
-  return Math.max(fcp, 0);
+function hostKey(r) {
+  if (r.source === "third-party-cdn") return `tp:${r.id}`; // each third-party gets its own host
+  if (r.source === "own-cdn")          return "own-cdn";
+  return "same-origin";
 }
 
-function calcLCP(inputs, derived) {
-  const { fcp, htmlDownload, cssDownload, cssParseTime, lcpDownload, cpuMultiplier } = derived;
-
-  if (inputs.lcpType === "Text") {
-    return fcp + 20 * cpuMultiplier;
+// Run a parallel cohort: every resource starts now, bandwidth divided equally,
+// each finishes at its own (setup + slow-start download) time. Returns the
+// cohort's total elapsed (max finish) and a per-resource finish map.
+function downloadCohort(cohort, profile, meta, hostsOpen) {
+  if (cohort.length === 0) return { duration: 0, finishById: new Map() };
+  const share = profile.bandwidthKBs / cohort.length;
+  const finishById = new Map();
+  let duration = 0;
+  for (const r of cohort) {
+    const eRtt = effRTT(profile.rtt, r.source, meta.cdn);
+    const setup = connSetup(profile.rtt, r.source, meta.cdn, !hostsOpen.has(hostKey(r)));
+    hostsOpen.add(hostKey(r));
+    const bytes = (r.sizeKB ?? 0) * 1024 * (r.count ?? 1);
+    const dl = tcpDownloadTime(bytes, eRtt, share);
+    const total = setup + dl;
+    finishById.set(r.id, total);
+    if (total > duration) duration = total;
   }
-
-  let discoveryOffset = 0;
-  // If both preloaded AND fetchpriority, image downloads in parallel with HTML
-  const parallelWithHtml = inputs.lcpPreloaded && inputs.fetchpriority;
-  if (!parallelWithHtml) {
-    discoveryOffset += htmlDownload;
-  }
-  if (inputs.lcpType === "Background Image") {
-    discoveryOffset += cssDownload + cssParseTime;
-  }
-  if (inputs.lcpType === "Video") {
-    const videoDownload = derived.lcpDownload; // already capped to 500KB by caller
-    const imageReady = inputs.ttfb + htmlDownload + videoDownload;
-    return Math.max(fcp, imageReady);
-  }
-
-  const imageReady = inputs.ttfb + discoveryOffset + lcpDownload + inputs.lcpImageSize * 0.02 * cpuMultiplier;
-  return Math.max(fcp, imageReady);
+  return { duration, finishById };
 }
 
-function calcTBT(inputs, derived) {
-  const { cpuMultiplier } = derived;
+export function computeMetrics(resources, pageMeta, profile, calibration) {
+  const list = resources ?? [];
+  const meta = pageMeta ?? {};
+  const cpuMul = profile.cpuMultiplier;
 
-  // Long tasks: each task's blocking time = max(duration × cpuMul − 50ms, 0)
-  const perTaskBlocking = Math.max(0, inputs.avgLongTask * cpuMultiplier - 50);
-  const longTaskTBT = inputs.longTasks * perTaskBlocking;
+  // ── 1. HTML phase ───────────────────────────────────────────────
+  // The document downloads alone, full bandwidth, after TTFB + connection setup.
+  const html = list.find((r) => r.type === "html");
+  const htmlSource = html?.source ?? "same-origin";
+  const htmlSetup = connSetup(profile.rtt, htmlSource, meta.cdn, true);
+  const htmlBytes = (html?.sizeKB ?? 0) * 1024;
+  const eRttHtml = effRTT(profile.rtt, htmlSource, meta.cdn);
+  const htmlDownload = tcpDownloadTime(htmlBytes, eRttHtml, profile.bandwidthKBs);
+  const htmlFirstByte = (meta.ttfb ?? 0) + htmlSetup;
+  const htmlDone = htmlFirstByte + htmlDownload;
 
-  // Remaining JS execution beyond declared long tasks (script eval, smaller tasks)
-  // ~15% of remaining exec time bleeds into TBT as sub-threshold task clusters
-  const declaredLongTaskMs = inputs.longTasks * inputs.avgLongTask;
-  const remainingExecMs = Math.max(0, inputs.jsExecTime - declaredLongTaskMs);
-  const jsExecTBT = remainingExecMs * cpuMultiplier * 0.15;
+  const hostsOpen = new Set();
+  if (html) hostsOpen.add(hostKey(html));
 
-  // Third-party scripts create their own blocking tasks — each script is its own task
-  const tpCount = inputs.thirdPartyCount > 0 ? inputs.thirdPartyCount : 1;
-  const avgThirdPartyTaskMs = inputs.thirdPartyExec / tpCount;
-  const perThirdPartyBlocking = Math.max(0, avgThirdPartyTaskMs * cpuMultiplier - 50);
-  const thirdPartyTBT = tpCount * perThirdPartyBlocking;
-
-  return longTaskTBT + jsExecTBT + thirdPartyTBT;
-}
-
-// TTI: when the main thread becomes idle and the page is reliably interactive.
-// Modeled as FCP + the JS execution + long-task + third-party burden after first paint.
-function calcTTI(inputs, fcp, cpuMultiplier) {
-  // Total JS execution burden: take the larger of declared long-task total vs jsExecTime
-  // (they overlap — long tasks ARE part of JS execution)
-  const totalJsMs = Math.max(inputs.jsExecTime, inputs.longTasks * inputs.avgLongTask) * cpuMultiplier;
-  const thirdPartyMs = inputs.thirdPartyExec * cpuMultiplier * (inputs.thirdPartyBlocking ? 0.6 : 0.25);
-  // Minimum quiet window after FCP before interactions can reliably land
-  return Math.max(fcp + 500, fcp + totalJsMs + thirdPartyMs);
-}
-
-function calcCLS(inputs) {
-  return Math.min(
-    1.0,
-    inputs.cls +
-    (inputs.imagesMissingDims ? 0.05 : 0) +
-    (inputs.dynamicContent ? 0.10 : 0) +
-    (inputs.fontSwapShift ? 0.03 : 0)
+  // ── 2. Render-blocking cohort ──────────────────────────────────
+  // CSS/JS marked "blocking" hold up first paint. Inline CSS/JS don't.
+  const blocking = list.filter(
+    (r) => (r.type === "css" || r.type === "js")
+      && r.loading === "blocking"
+      && !r.inline
   );
-}
+  // If there's any inlined critical CSS, blocking CSS doesn't extend FCP.
+  const hasInlineCss = list.some((r) => r.type === "css" && r.inline);
+  const blockingForFcp = hasInlineCss
+    ? blocking.filter((r) => r.type !== "css")
+    : blocking;
+  const blockingResult = downloadCohort(blockingForFcp, profile, meta, new Set(hostsOpen));
 
-export function computeMetrics(inputs, profile, resourceImpact = null) {
-  const { rtt, bandwidthKBs, cpuMultiplier } = profile;
-  const effectiveRTT = getEffectiveRTT(rtt, inputs.cdn);
-  const connCost = connectionOverhead(effectiveRTT, inputs.cdn);
+  // Inline JS adds parse-on-main-thread cost to FCP.
+  const inlineJsKB = list
+    .filter((r) => r.type === "js" && r.inline)
+    .reduce((s, r) => s + (r.sizeKB ?? 0) * (r.count ?? 1), 0);
 
-  // Compressed byte sizes
-  const htmlBytes  = compressedSize(inputs.htmlSize,  "html",   inputs.compression) * 1024;
-  const cssBytes   = compressedSize(inputs.cssSize,   "css",    inputs.compression) * 1024;
-  const fontBytes  = compressedSize(inputs.fontSize,  "fonts",  inputs.compression) * 1024;
-  const lcpBytes   = inputs.lcpType === "Text"
-    ? 0
-    : inputs.lcpType === "Video"
-    ? compressedSize(Math.min(500, inputs.lcpImageSize), "images", inputs.compression) * 1024
-    : compressedSize(inputs.lcpImageSize, "images", inputs.compression) * 1024;
+  // ── 3. FCP ─────────────────────────────────────────────────────
+  let fcp = Math.max(htmlDone, htmlFirstByte + blockingResult.duration);
+  fcp += inlineJsKB * 0.05 * cpuMul;
+  fcp += 50 * cpuMul; // browser paint cost
 
-  const htmlDownload = tcpDownloadTime(htmlBytes,  effectiveRTT, bandwidthKBs);
-  const cssDownload  = tcpDownloadTime(cssBytes,   effectiveRTT, bandwidthKBs);
-  const cssParseTime = (inputs.cssSize / 100) * 10 * cpuMultiplier;
-  const fontDownload = tcpDownloadTime(fontBytes,  effectiveRTT, bandwidthKBs);
-  const lcpDownload  = tcpDownloadTime(lcpBytes,   effectiveRTT, bandwidthKBs);
+  // Block-display fonts that aren't preloaded delay first paint.
+  const blockFontMaxMs = list
+    .filter((r) => r.type === "font" && r.fontDisplay === "block" && r.loading !== "preload")
+    .reduce((m, r) => {
+      const eRtt = effRTT(profile.rtt, r.source, meta.cdn);
+      const dl = tcpDownloadTime((r.sizeKB ?? 0) * 1024, eRtt, profile.bandwidthKBs * 0.5);
+      return Math.max(m, dl);
+    }, 0);
+  fcp += blockFontMaxMs;
 
-  const derived = { effectiveRTT, htmlDownload, cssDownload, cssParseTime, fontDownload, lcpDownload, connCost, cpuMultiplier, bandwidthKBs };
-
-  let fcp = calcFCP(inputs, derived);
-  let lcp = calcLCP(inputs, { ...derived, fcp });
-  let tbt = calcTBT(inputs, derived);
-  let cls = calcCLS(inputs);
-
-  // Apply resource-list impact
-  if (resourceImpact) {
-    fcp += resourceImpact.extraBlockingMs ?? 0;
-    tbt += (resourceImpact.extraLongTaskTBT ?? 0) + (resourceImpact.extraExecMs ?? 0) * 0.15;
-    cls += resourceImpact.extraCLS ?? 0;
-    if (resourceImpact.hasLcpResource && resourceImpact.lcpResourceMs > 0) {
-      lcp = Math.max(fcp, inputs.ttfb + resourceImpact.lcpResourceMs);
+  // ── 4. LCP ─────────────────────────────────────────────────────
+  const lcpRes = list.find((r) => r.isLcp);
+  let lcp;
+  if (!lcpRes) {
+    // Text LCP: roughly tied to FCP plus a tiny render delay.
+    lcp = fcp + 20 * cpuMul;
+  } else {
+    // When was the LCP element discovered?
+    let discovery;
+    if (lcpRes.loading === "preload" && lcpRes.fetchpriority) {
+      discovery = 0; // truly parallel with HTML
+    } else if (lcpRes.loading === "preload") {
+      discovery = htmlFirstByte;
+    } else if (lcpRes.type === "image" || lcpRes.type === "video") {
+      discovery = htmlFirstByte; // parser hits <img> as HTML streams in
     } else {
-      lcp = Math.max(lcp, fcp);
+      // Image referenced via CSS background — wait for CSS too
+      discovery = htmlDone;
     }
+    const eRttLcp = effRTT(profile.rtt, lcpRes.source, meta.cdn);
+    const lcpSetup = connSetup(profile.rtt, lcpRes.source, meta.cdn, !hostsOpen.has(hostKey(lcpRes)));
+    const lcpBytes = (lcpRes.sizeKB ?? 0) * 1024 * (lcpRes.count ?? 1);
+    // LCP shares bandwidth with whatever else is in flight; rough: half.
+    const lcpDl = tcpDownloadTime(lcpBytes, eRttLcp, profile.bandwidthKBs * 0.5);
+    const lcpReady = discovery + lcpSetup + lcpDl;
+    const renderCost = (lcpRes.sizeKB ?? 0) * 0.02 * cpuMul;
+    lcp = Math.max(fcp, lcpReady + renderCost);
   }
 
-  const si  = fcp * 0.55 + lcp * 0.45;
-  const tti = calcTTI(inputs, fcp, cpuMultiplier);
+  // ── 5. TBT ─────────────────────────────────────────────────────
+  // Imported execTimeMs / longTaskMs are observed under whatever CPU throttle
+  // Lighthouse used at calibration time (4× for mobile-default, 1× for
+  // desktop). For other profiles we re-scale by cpuMul / calibrationCpuMul
+  // instead of multiplying through (which would double-count the throttle).
+  const calibrationCpu = calibration?.cpuSlowdownMultiplier ?? 4;
+  const execScale = cpuMul / calibrationCpu;
+  let tbt = 0;
+  for (const r of list) {
+    if (r.type !== "js") continue;
+    const longCount = r.longTaskCount ?? 0;
+    const longAvg = (r.avgLongTaskMs ?? 0) * execScale;
+    const exec = (r.execTimeMs ?? 0) * execScale;
+    const perLong = Math.max(0, longAvg - 50);
+    tbt += longCount * perLong;
+    const declaredLong = longCount * longAvg;
+    const residual = Math.max(0, exec - declaredLong);
+    tbt += residual * 0.08; // observed sub-50ms clusters typically yield ~8% as TBT
+  }
 
-  return { fcp, lcp, tbt, cls: Math.min(cls, 1.0), si, tti };
+  // ── 6. CLS ─────────────────────────────────────────────────────
+  let cls = 0;
+  for (const r of list) {
+    if (r.type === "image" && r.missingDimensions) cls += 0.05;
+    if (r.type === "font" && r.fontDisplay === "swap" && r.loading !== "preload") cls += 0.03;
+  }
+  cls = Math.min(1.0, cls);
+
+  // ── 7. SI / TTI ────────────────────────────────────────────────
+  const si = fcp * 0.55 + lcp * 0.45;
+  const totalJsExec = list.filter((r) => r.type === "js").reduce((s, r) => s + (r.execTimeMs ?? 0), 0) * execScale;
+  const thirdPartyExec = list
+    .filter((r) => r.type === "js" && r.source === "third-party-cdn")
+    .reduce((s, r) => s + (r.execTimeMs ?? 0), 0) * execScale;
+  const blockingThird = list.some((r) => r.source === "third-party-cdn" && r.loading === "blocking");
+  const tti = Math.max(
+    fcp + 500,
+    fcp + totalJsExec + thirdPartyExec * (blockingThird ? 0.6 : 0.25)
+  );
+
+  return { fcp, lcp, tbt, cls, si, tti };
 }
 
 // ── Scoring ──────────────────────────────────────────────────────────
@@ -196,7 +211,6 @@ const DEFAULT_SCORE_CURVES = {
   tbt: { median: 600,  p10: 200  },
   cls: { median: 0.25, p10: 0.10 },
   si:  { median: 3900, p10: 3387 },
-  tti: { median: 7300, p10: 3785 },
 };
 
 function erf(x) {
@@ -221,7 +235,7 @@ export function metricScore(value, metricKey, curves = null) {
   const curveSrc = curves ?? DEFAULT_SCORE_CURVES;
   const { median, p10 } = curveSrc[metricKey] ?? DEFAULT_SCORE_CURVES[metricKey];
   const sigma = Math.log(median / p10) / 0.9061;
-  const score = 100 * (1 - normalCDF(Math.log(value / median) / sigma));
+  const score = 100 * (1 - normalCDF(Math.log(Math.max(value, 0.0001) / median) / sigma));
   return Math.max(0, Math.min(100, Math.round(score)));
 }
 
@@ -233,16 +247,14 @@ export function computeScores(metrics, settings = null) {
   const tbt = metricScore(metrics.tbt, "tbt", curves);
   const cls = metricScore(metrics.cls, "cls", curves);
   const si  = metricScore(metrics.si,  "si",  curves);
-  const tti = metrics.tti != null ? metricScore(metrics.tti, "tti", curves) : 0;
   const overall = Math.round(
     fcp * (weights.fcp ?? 0.10) +
     lcp * (weights.lcp ?? 0.25) +
     tbt * (weights.tbt ?? 0.30) +
-    cls * (weights.cls ?? 0.15) +
-    si  * (weights.si  ?? 0.10) +
-    tti * (weights.tti ?? 0.10)
+    cls * (weights.cls ?? 0.25) +
+    si  * (weights.si  ?? 0.10)
   );
-  return { fcp, lcp, tbt, cls, si, tti, overall };
+  return { fcp, lcp, tbt, cls, si, overall };
 }
 
 export function scoreColor(score) {
@@ -253,200 +265,399 @@ export function scoreColor(score) {
 
 // ── Waterfall ────────────────────────────────────────────────────────
 
-export function computeWaterfall(inputs, profile) {
-  const { rtt, bandwidthKBs, cpuMultiplier } = profile;
-  const effectiveRTT = getEffectiveRTT(rtt, inputs.cdn);
-  const connCost     = connectionOverhead(effectiveRTT, inputs.cdn);
+export function computeWaterfall(resources, pageMeta, profile) {
+  const list = resources ?? [];
+  const meta = pageMeta ?? {};
+  const html = list.find((r) => r.type === "html");
+  const htmlSource = html?.source ?? "same-origin";
+  const htmlSetup = connSetup(profile.rtt, htmlSource, meta.cdn, true);
+  const eRttHtml = effRTT(profile.rtt, htmlSource, meta.cdn);
+  const htmlDownload = tcpDownloadTime((html?.sizeKB ?? 0) * 1024, eRttHtml, profile.bandwidthKBs);
 
-  const htmlBytes = compressedSize(inputs.htmlSize, "html", inputs.compression) * 1024;
-  const cssBytes  = compressedSize(inputs.cssSize,  "css",  inputs.compression) * 1024;
-  const jsBytes   = compressedSize(inputs.jsSize,   "js",   inputs.compression) * 1024;
-  const lcpBytes  = inputs.lcpType === "Text" ? 0
-    : compressedSize(inputs.lcpImageSize, "images", inputs.compression) * 1024;
+  // Aggregate blocking CSS / JS / LCP downloads at half-bandwidth, just for display.
+  function bulkDownload(pred, share = profile.bandwidthKBs * 0.5) {
+    const subset = list.filter(pred);
+    if (subset.length === 0) return 0;
+    const bytes = subset.reduce((s, r) => s + (r.sizeKB ?? 0) * 1024 * (r.count ?? 1), 0);
+    return tcpDownloadTime(bytes, profile.rtt, share);
+  }
 
-  const htmlDownload = tcpDownloadTime(htmlBytes, effectiveRTT, bandwidthKBs);
-  const cssDownload  = tcpDownloadTime(cssBytes,  effectiveRTT, bandwidthKBs);
-  const jsDownload   = tcpDownloadTime(jsBytes,   effectiveRTT, bandwidthKBs);
-  const lcpDownload  = tcpDownloadTime(lcpBytes,  effectiveRTT, bandwidthKBs);
-  const paintTime    = 50 * cpuMultiplier;
+  const cssDownload = bulkDownload((r) => r.type === "css" && r.loading === "blocking" && !r.inline);
+  const jsDownload  = bulkDownload((r) => r.type === "js"  && r.loading !== "lazy" && !r.inline);
+  const lcpDownload = bulkDownload((r) => r.isLcp && (r.type === "image" || r.type === "video"));
 
   return [
-    { label: "TTFB",    ms: Math.round(inputs.ttfb + connCost), color: "#6366f1" },
-    { label: "HTML",    ms: Math.round(htmlDownload),            color: "#3b82f6" },
-    { label: "CSS",     ms: Math.round(cssDownload),             color: "#f59e0b" },
-    { label: "JS",      ms: Math.round(jsDownload),              color: "#ef4444" },
-    { label: "LCP Res", ms: Math.round(lcpDownload),             color: "#10b981" },
-    { label: "Paint",   ms: Math.round(paintTime),               color: "#8b5cf6" },
+    { label: "TTFB",    ms: Math.round((meta.ttfb ?? 0) + htmlSetup), color: "#6366f1" },
+    { label: "HTML",    ms: Math.round(htmlDownload),                  color: "#3b82f6" },
+    { label: "CSS",     ms: Math.round(cssDownload),                   color: "#f59e0b" },
+    { label: "JS",      ms: Math.round(jsDownload),                    color: "#ef4444" },
+    { label: "LCP Res", ms: Math.round(lcpDownload),                   color: "#10b981" },
+    { label: "Paint",   ms: Math.round(50 * profile.cpuMultiplier),    color: "#8b5cf6" },
   ];
 }
 
-// ── Optimization Roadmap ─────────────────────────────────────────────
+// ── Per-Resource Waterfall ───────────────────────────────────────────
+//
+// Returns per-resource timing rows for a DevTools-style waterfall.
+// Timeline origin t=0 is navigation start.
+//
+// Two modes:
+//   Real-timing — when resources carry Lighthouse timestamps (startTimeMs /
+//     endTimeMs), use those directly for accurate bar positions.
+//   Simulation  — for manually-entered resources that have no measured timing,
+//     fall back to the TCP slow-start + RTT model.
 
-const ROADMAP_CONFIG = [
-  { field: "compression",        label: "Enable brotli compression",            effort: "Easy"   },
-  { field: "cdn",                label: "Enable CDN",                           effort: "Easy"   },
-  { field: "ttfb",               label: "Reduce TTFB",                          effort: "Medium" },
-  { field: "renderBlockingCSS",  label: "Remove render-blocking CSS",           effort: "Medium" },
-  { field: "inlineCriticalCSS",  label: "Inline critical CSS",                  effort: "Medium" },
-  { field: "jsLoading",          label: "Use defer/async for JS loading",       effort: "Easy"   },
-  { field: "jsSize",             label: "Reduce total JS size",                 effort: "Hard"   },
-  { field: "jsExecTime",         label: "Reduce JS execution time",             effort: "Hard"   },
-  { field: "longTasks",          label: "Break up long tasks",                  effort: "Hard"   },
-  { field: "avgLongTask",        label: "Shorten individual long tasks",        effort: "Hard"   },
-  { field: "lcpPreloaded",       label: "Preload LCP resource",                 effort: "Easy"   },
-  { field: "fetchpriority",      label: "Add fetchpriority=high to LCP image",  effort: "Easy"   },
-  { field: "imageFormat",        label: "Use AVIF/WebP image format",           effort: "Easy"   },
-  { field: "lcpImageSize",       label: "Optimize LCP image size",              effort: "Medium" },
-  { field: "thirdPartyBlocking", label: "Remove render-blocking third-party",   effort: "Medium" },
-  { field: "thirdPartyCount",    label: "Reduce third-party scripts",           effort: "Medium" },
-  { field: "thirdPartyExec",     label: "Defer third-party execution",          effort: "Medium" },
-  { field: "fontDisplay",        label: "Use font-display: optional or swap",   effort: "Easy"   },
-  { field: "fontsPreloaded",     label: "Preload web fonts",                    effort: "Easy"   },
-  { field: "cssSize",            label: "Reduce total CSS size",                effort: "Medium" },
-  { field: "inlineJS",           label: "Remove inline JS from <head>",         effort: "Medium" },
-  { field: "cls",                label: "Fix layout shift (CLS)",               effort: "Medium" },
-  { field: "imagesMissingDims",  label: "Add dimensions to all images",         effort: "Easy"   },
-  { field: "dynamicContent",     label: "Reserve space for dynamic content",    effort: "Medium" },
-  { field: "fontSwapShift",      label: "Reduce font-swap layout shift",        effort: "Medium" },
-];
+function splitSetup(setupMs, rtt) {
+  const requestMs = Math.max(1, rtt * 0.1);
+  if (setupMs <= 0) return { dnsMs: 0, tcpMs: 0, sslMs: 0, requestMs };
+  return { dnsMs: rtt * 0.5, tcpMs: rtt * 0.7, sslMs: rtt * 0.8, requestMs };
+}
 
-// Fixed absolute targets — these represent "green zone" performance.
-// Using fixed targets (not relative %) ensures the roadmap gain grows
-// monotonically as the current value worsens.
-const ROADMAP_TARGETS = {
-  // Numeric — lower is better, target is the green-zone ceiling
-  ttfb:              150,
-  htmlSize:          30,
-  inlineJS:          0,
-  cssSize:           60,
-  cssFiles:          2,
-  jsSize:            150,
-  largestBundle:     100,
-  jsFiles:           4,
-  jsExecTime:        300,
-  longTasks:         1,
-  avgLongTask:       80,
-  lcpImageSize:      100,
-  fontCount:         2,
-  fontSize:          60,
-  thirdPartyCount:   1,
-  thirdPartySize:    60,
-  thirdPartyExec:    150,
-  cls:               0.05,
-};
+// True when a resource carries valid measured Lighthouse timestamps.
+function hasRealTiming(r) {
+  return r != null
+    && typeof r.startTimeMs === "number"
+    && typeof r.endTimeMs   === "number"
+    && r.endTimeMs > r.startTimeMs;
+}
 
-// Returns true when the current value is already at or better than the roadmap target.
-function fieldIsOptimal(field, value) {
-  // Special-case ordered-string fields where multiple values are "good"
-  switch (field) {
-    case "protocol":          return value !== "HTTP/1.1";
-    case "jsLoading":         return value !== "render-blocking";
-    case "compression":       return value === "brotli";
-    case "imageFormat":       return value === "AVIF" || value === "WebP";
-    case "fontDisplay":       return value === "optional" || value === "swap";
-    // Boolean fields — target is the OPTIMAL_VALUES entry
-    case "cdn":               return value === true;
-    case "renderBlockingCSS": return value === false;
-    case "inlineCriticalCSS": return value === true;
-    case "cssPreloaded":      return value === true;
-    case "lcpPreloaded":      return value === true;
-    case "fetchpriority":     return value === true;
-    case "fontsPreloaded":    return value === true;
-    case "thirdPartyBlocking":return value === false;
-    case "imagesMissingDims": return value === false;
-    case "dynamicContent":    return value === false;
-    case "fontSwapShift":     return value === false;
-    default: {
-      const target = ROADMAP_TARGETS[field];
-      if (target === undefined) return true;
-      return Number(value) <= Number(target);
+// Build a simulated row object with all granular phases.
+function makeRow(r, phase, startMs, setup, rtt, dlMs) {
+  const { dnsMs, tcpMs, sslMs, requestMs } = splitSetup(setup, rtt);
+  return {
+    id: r.id, name: r.name || r.type, type: r.type,
+    loading: r.loading, isLcp: !!r.isLcp, phase,
+    startMs, stallMs: 0,
+    dnsMs, tcpMs, sslMs, requestMs, ttfbMs: 0, downloadMs: dlMs,
+    endMs: startMs + dnsMs + tcpMs + sslMs + requestMs + dlMs,
+  };
+}
+
+// Build a real-timing row from Lighthouse-measured timestamps.
+// responseReceivedMs stores networkRequestTime (when request bytes hit the wire).
+// For HTTP/2 multiplexed connections this is nearly equal to startTimeMs.
+// overhead (startMs→sendMs) = connection setup + request sent + TTFB; requestMs is carved out.
+function makeRowFromReal(r, phase, rtt = 40) {
+  const startMs   = Math.round(r.startTimeMs);
+  const endMs     = Math.round(r.endTimeMs);
+  const sendMs    = typeof r.responseReceivedMs === "number"
+    ? Math.round(r.responseReceivedMs) : startMs;
+  const overhead  = Math.max(0, sendMs - startMs);
+  const requestMs = overhead > 0 ? Math.min(Math.max(1, Math.round(rtt * 0.1)), overhead) : 0;
+  return {
+    id: r.id, name: r.name || r.type, type: r.type,
+    loading: r.loading, isLcp: !!r.isLcp, phase,
+    startMs, stallMs: 0,
+    dnsMs: 0, tcpMs: 0, sslMs: 0,
+    requestMs,
+    ttfbMs:     Math.max(0, overhead - requestMs),
+    downloadMs: Math.max(0, endMs - sendMs),
+    endMs,
+    protocol: r.protocol ?? null,
+    entity:   r.entity   ?? null,
+  };
+}
+
+
+export function computeResourceWaterfall(resources, pageMeta, profile, calibration) {
+  const list = resources ?? [];
+  const meta = pageMeta ?? {};
+  const rtt  = profile.rtt;
+
+  const html = list.find((r) => r.type === "html");
+
+  // ── Detect real-timing mode ──────────────────────────────────────
+  // Use Lighthouse timestamps when the HTML row (or the majority of sub-resources)
+  // carries measured timing. Manually added resources fall back to simulation.
+  const subResources = list.filter((r) => r.type !== "html");
+  let realCount = 0;
+  for (const r of subResources) if (hasRealTiming(r)) realCount++;
+  const useRealTiming = hasRealTiming(html)
+    || (realCount > 0 && realCount >= Math.ceil(subResources.length * 0.5));
+
+  // ── Simulation reference for HTML (needed for simulation-mode cohorts) ───
+  const htmlSource    = html?.source ?? "same-origin";
+  const htmlSetup     = connSetup(rtt, htmlSource, meta.cdn, true);
+  const { dnsMs: hDns, tcpMs: hTcp, sslMs: hSsl, requestMs: hReq } = splitSetup(htmlSetup, rtt);
+  const htmlTtfbVal   = meta.ttfb ?? 0;
+  const htmlDlVal     = tcpDownloadTime((html?.sizeKB ?? 0) * 1024, effRTT(rtt, htmlSource, meta.cdn), profile.bandwidthKBs);
+  const htmlFirstByte = hDns + hTcp + hSsl + hReq + htmlTtfbVal;
+  const htmlDone      = htmlFirstByte + htmlDlVal;
+  const hostsOpen     = new Set();
+  if (html) hostsOpen.add(hostKey(html));
+
+  const rows = [];
+
+  // ── HTML row ─────────────────────────────────────────────────────
+  if (html) {
+    if (hasRealTiming(html)) {
+      const startMs   = Math.round(html.startTimeMs);
+      const sendMs    = typeof html.responseReceivedMs === "number"
+        ? Math.round(html.responseReceivedMs) : startMs;
+      const endMs     = Math.round(html.endTimeMs);
+      const netMs     = Math.max(0, endMs - sendMs);
+      const overhead  = Math.max(0, sendMs - startMs);
+      const requestMs = overhead > 0 ? Math.min(Math.max(1, Math.round(rtt * 0.1)), overhead) : 0;
+      const ttfbMs    = Math.max(0, overhead - requestMs);
+      rows.push({
+        id: html.id, name: html.name || "document", type: "html",
+        loading: html.loading ?? "blocking", isLcp: false, phase: "blocking",
+        startMs, endMs, stallMs: 0,
+        dnsMs: 0, tcpMs: 0, sslMs: 0,
+        requestMs, ttfbMs, downloadMs: netMs,
+      });
+    } else {
+      rows.push({
+        id: html.id, name: html.name || "document", type: "html",
+        loading: html.loading ?? "blocking", isLcp: false, phase: "blocking",
+        startMs: 0, stallMs: 0,
+        dnsMs: hDns, tcpMs: hTcp, sslMs: hSsl,
+        requestMs: hReq, ttfbMs: htmlTtfbVal, downloadMs: htmlDlVal,
+        endMs: htmlDone,
+      });
     }
   }
-}
 
-// Returns the absolute target for a field (used in the hypothetical scenario).
-function getRoadmapTarget(field, _cur) {
-  switch (field) {
-    case "protocol":          return "HTTP/2";
-    case "jsLoading":         return "defer";
-    case "compression":       return "brotli";
-    case "imageFormat":       return "AVIF";
-    case "fontDisplay":       return "optional";
-    case "cdn":               return true;
-    case "renderBlockingCSS": return false;
-    case "inlineCriticalCSS": return true;
-    case "cssPreloaded":      return true;
-    case "lcpPreloaded":      return true;
-    case "fetchpriority":     return true;
-    case "fontsPreloaded":    return true;
-    case "thirdPartyBlocking":return false;
-    case "imagesMissingDims": return false;
-    case "dynamicContent":    return false;
-    case "fontSwapShift":     return false;
-    default:
-      return ROADMAP_TARGETS[field] ?? null;
+  if (useRealTiming) {
+    // ── Real-timing mode: use Lighthouse-measured timestamps ─────────
+    const htmlRefEnd = hasRealTiming(html) ? Math.round(html.endTimeMs) : htmlDone;
+
+    for (const r of subResources) {
+      if (hasRealTiming(r)) {
+        const phase = r.isLcp ? "lcp"
+          : r.loading === "blocking" ? "blocking"
+          : r.loading === "lazy" ? "lazy" : "deferred";
+        rows.push(makeRowFromReal(r, phase, rtt));
+      } else {
+        // Manually added resource without measured timing: simulate at end of HTML.
+        const setup = connSetup(rtt, r.source, meta.cdn, false);
+        const dlMs  = tcpDownloadTime((r.sizeKB ?? 0) * 1024 * (r.count ?? 1), effRTT(rtt, r.source, meta.cdn), profile.bandwidthKBs * 0.5);
+        const phase = r.isLcp ? "lcp" : (r.loading ?? "deferred");
+        rows.push(makeRow(r, phase, htmlRefEnd, setup, rtt, dlMs));
+      }
+    }
+  } else {
+    // ── Simulation mode: cohort-based TCP slow-start model ───────────
+    const schedStep = Math.max(1, Math.round(rtt * 0.04));
+
+    // Blocking CSS / JS
+    const blockingCohort = list.filter(
+      (r) => (r.type === "css" || r.type === "js") && r.loading === "blocking" && !r.inline && !r.isLcp
+    );
+    const blockShare = blockingCohort.length > 0 ? profile.bandwidthKBs / blockingCohort.length : profile.bandwidthKBs;
+
+    blockingCohort.forEach((r, idx) => {
+      const setup = connSetup(rtt, r.source, meta.cdn, !hostsOpen.has(hostKey(r)));
+      hostsOpen.add(hostKey(r));
+      const dlMs  = tcpDownloadTime((r.sizeKB ?? 0) * 1024 * (r.count ?? 1), effRTT(rtt, r.source, meta.cdn), blockShare);
+      rows.push(makeRow(r, "blocking", htmlFirstByte + idx * schedStep, setup, rtt, dlMs));
+    });
+
+    // Deferred / async / module / preload
+    const deferList = list.filter(
+      (r) => !r.inline && !r.isLcp && r.type !== "html"
+        && !(r.type === "css" && r.loading === "blocking")
+        && !(r.type === "js"  && r.loading === "blocking")
+        && r.loading !== "lazy"
+    );
+    const deferShare = deferList.length > 0 ? (profile.bandwidthKBs * 0.5) / deferList.length : profile.bandwidthKBs * 0.5;
+
+    deferList.forEach((r, idx) => {
+      const setup     = connSetup(rtt, r.source, meta.cdn, !hostsOpen.has(hostKey(r)));
+      hostsOpen.add(hostKey(r));
+      const dlMs      = tcpDownloadTime((r.sizeKB ?? 0) * 1024 * (r.count ?? 1), effRTT(rtt, r.source, meta.cdn), deferShare);
+      const baseStart = (r.loading === "preload" && r.fetchpriority) ? 0 : htmlFirstByte;
+      rows.push(makeRow(r, "deferred", baseStart + idx * schedStep, setup, rtt, dlMs));
+    });
+
+    // Lazy
+    const lazyList  = list.filter((r) => r.loading === "lazy" && !r.isLcp && !r.inline);
+    const lazyShare = lazyList.length > 0 ? (profile.bandwidthKBs * 0.5) / lazyList.length : profile.bandwidthKBs * 0.5;
+
+    lazyList.forEach((r, idx) => {
+      const setup = connSetup(rtt, r.source, meta.cdn, !hostsOpen.has(hostKey(r)));
+      hostsOpen.add(hostKey(r));
+      const dlMs  = tcpDownloadTime((r.sizeKB ?? 0) * 1024 * (r.count ?? 1), effRTT(rtt, r.source, meta.cdn), lazyShare);
+      rows.push(makeRow(r, "lazy", htmlDone + idx * schedStep, setup, rtt, dlMs));
+    });
+
+    // LCP resource (hoisted above its cohort so it gets full bandwidth)
+    const lcpRes = list.find((r) => r.isLcp && !r.inline);
+    if (lcpRes) {
+      const dupIdx = rows.findIndex((rw) => rw.id === lcpRes.id);
+      if (dupIdx !== -1) rows.splice(dupIdx, 1);
+      let lcpStart;
+      if (lcpRes.loading === "preload" && lcpRes.fetchpriority) lcpStart = 0;
+      else if (lcpRes.loading === "preload")                    lcpStart = htmlFirstByte;
+      else if (lcpRes.type === "image" || lcpRes.type === "video") lcpStart = htmlFirstByte;
+      else                                                         lcpStart = htmlDone;
+      const setupLcp = connSetup(rtt, lcpRes.source, meta.cdn, !hostsOpen.has(hostKey(lcpRes)));
+      const dlLcp    = tcpDownloadTime((lcpRes.sizeKB ?? 0) * 1024 * (lcpRes.count ?? 1), effRTT(rtt, lcpRes.source, meta.cdn), profile.bandwidthKBs * 0.5);
+      rows.push(makeRow(lcpRes, "lcp", lcpStart, setupLcp, rtt, dlLcp));
+    }
   }
+
+  rows.sort((a, b) => a.startMs - b.startMs || a.endMs - b.endMs);
+
+  const { fcp: fcpMs, lcp: lcpMs } = computeMetrics(list, meta, profile, calibration);
+  const totalMs = Math.max(...rows.map((r) => r.endMs), lcpMs, 1);
+
+  return { rows, fcpMs: Math.round(fcpMs), lcpMs: Math.round(lcpMs), totalMs: Math.round(totalMs) };
 }
 
-function describeRoadmapChange(field, cur, target) {
-  if (typeof target === "boolean") return target ? "enable" : "disable";
-  if (typeof target === "string")  return `${cur} → ${target}`;
-  return `${typeof cur === "number" ? (Number.isInteger(cur) ? cur : cur.toFixed(2)) : cur} → ${Number.isInteger(target) ? target : target.toFixed(2)}`;
+// ── Optimization Roadmap (per-resource) ──────────────────────────────
+
+const EFFORT = { Easy: "Easy", Medium: "Medium", Hard: "Hard" };
+
+function shortName(name, max = 24) {
+  if (!name) return "resource";
+  return name.length > max ? name.slice(0, max - 1) + "…" : name;
 }
 
-export function computeRoadmap(inputs, locked, mobileScores, desktopScores, settings = null) {
-  const currentMobile  = mobileScores.overall;
-  const currentDesktop = desktopScores.overall;
+function withResourcePatched(resources, id, patch) {
+  return resources.map((r) => (r.id === id ? { ...r, ...patch } : r));
+}
 
-  // Compute current metrics once outside the loop (no resource impact — roadmap is input-only)
-  const curMobileMet  = computeMetrics(inputs, PROFILES.mobile);
-  const curDesktopMet = computeMetrics(inputs, PROFILES.desktop);
+function diffMetricsImproved(curMetrics, hypMetrics) {
+  const out = [];
+  const KEYS = ["fcp", "lcp", "tbt", "cls", "si"];
+  for (const k of KEYS) {
+    if (hypMetrics[k] < curMetrics[k] * 0.97) {
+      const diff = curMetrics[k] - hypMetrics[k];
+      const unit = k === "cls" ? "" : "ms";
+      out.push(`${k.toUpperCase()} -${k === "cls" ? diff.toFixed(2) : Math.round(Math.abs(diff))}${unit}`);
+    }
+  }
+  return out;
+}
 
-  const suggestions = [];
-  const METRIC_KEYS = ["fcp", "lcp", "tbt", "cls", "si", "tti"];
+export function computeRoadmap(resources, pageMeta, locked, profile, calibration, settings) {
+  const list = resources ?? [];
+  const meta = pageMeta ?? {};
 
-  for (const { field, label, effort } of ROADMAP_CONFIG) {
-    if (locked[field]) continue;
-    if (fieldIsOptimal(field, inputs[field])) continue;
+  const curMetrics = computeMetrics(list, meta, profile, calibration);
+  const curScore   = computeScores(curMetrics, settings).overall;
 
-    const target = getRoadmapTarget(field, inputs[field]);
-    if (target === null || target === undefined) continue;
+  const candidates = [];
 
-    // Apply this single change hypothetically
-    const hypothetical = { ...inputs, [field]: target };
-    const mMet = computeMetrics(hypothetical, PROFILES.mobile);
-    const dMet = computeMetrics(hypothetical, PROFILES.desktop);
-    const mSc  = computeScores(mMet, settings);
-    const dSc  = computeScores(dMet, settings);
-
-    const mobileGain  = mSc.overall - currentMobile;
-    const desktopGain = dSc.overall - currentDesktop;
-
-    // Only include if mobile score strictly improves (prevents phantom suggestions)
-    if (mobileGain <= 0) continue;
-
-    // Show which metrics got better (≥3% lower value = improvement for all metrics)
-    const metricsImproved = METRIC_KEYS
-      .filter((k) => mMet[k] < curMobileMet[k] * 0.97)
-      .map((k) => {
-        const diff = curMobileMet[k] - mMet[k];
-        const unit = k === "cls" ? "" : "ms";
-        return `${k.toUpperCase()} -${k === "cls" ? diff.toFixed(2) : Math.round(Math.abs(diff))}${unit}`;
+  for (const r of list) {
+    if (r.type === "image" && !["AVIF", "WebP"].includes(r.imageFormat)) {
+      candidates.push({
+        key: `r:${r.id}:format`, resourceId: r.id,
+        label: `Convert ${shortName(r.name)} to AVIF`,
+        changeDesc: `${r.imageFormat} → AVIF`, effort: EFFORT.Easy,
+        patch: { resourceId: r.id, fields: { imageFormat: "AVIF" } },
       });
+    }
+    if (r.type === "js" && r.loading === "blocking" && !r.inline) {
+      candidates.push({
+        key: `r:${r.id}:loading`, resourceId: r.id,
+        label: `Defer ${shortName(r.name)}`, changeDesc: "blocking → defer",
+        effort: r.source === "third-party-cdn" ? EFFORT.Medium : EFFORT.Easy,
+        patch: { resourceId: r.id, fields: { loading: "defer" } },
+      });
+    }
+    if (r.isLcp && r.loading !== "preload") {
+      candidates.push({
+        key: `r:${r.id}:preload`, resourceId: r.id,
+        label: `Preload ${shortName(r.name)}`, changeDesc: `${r.loading} → preload`,
+        effort: EFFORT.Easy,
+        patch: { resourceId: r.id, fields: { loading: "preload" } },
+      });
+    }
+    if (r.isLcp && r.type === "image" && !r.fetchpriority) {
+      candidates.push({
+        key: `r:${r.id}:fetchpriority`, resourceId: r.id,
+        label: `Add fetchpriority=high to ${shortName(r.name)}`,
+        changeDesc: "fetchpriority: high", effort: EFFORT.Easy,
+        patch: { resourceId: r.id, fields: { fetchpriority: true } },
+      });
+    }
+    if (r.type === "image" && r.missingDimensions) {
+      candidates.push({
+        key: `r:${r.id}:dims`, resourceId: r.id,
+        label: `Add dimensions to ${shortName(r.name)}`,
+        changeDesc: "set width/height", effort: EFFORT.Easy,
+        patch: { resourceId: r.id, fields: { missingDimensions: false } },
+      });
+    }
+    if (r.type === "font" && (r.fontDisplay === "swap" || r.fontDisplay === "block")) {
+      candidates.push({
+        key: `r:${r.id}:fontdisplay`, resourceId: r.id,
+        label: `Use font-display: optional on ${shortName(r.name)}`,
+        changeDesc: `${r.fontDisplay} → optional`, effort: EFFORT.Easy,
+        patch: { resourceId: r.id, fields: { fontDisplay: "optional" } },
+      });
+    }
+    if (r.type === "js" && r.sizeKB > 100) {
+      const target = Math.max(50, Math.round(r.sizeKB * 0.5));
+      const execTarget = Math.round((r.execTimeMs ?? 0) * 0.5);
+      candidates.push({
+        key: `r:${r.id}:size`, resourceId: r.id,
+        label: `Halve ${shortName(r.name)}`, changeDesc: `${r.sizeKB} → ${target} KB`,
+        effort: EFFORT.Hard,
+        patch: { resourceId: r.id, fields: { sizeKB: target, execTimeMs: execTarget } },
+      });
+    }
+    if (r.type === "image" && r.sizeKB > 150) {
+      const target = Math.round(r.sizeKB * 0.6);
+      candidates.push({
+        key: `r:${r.id}:size`, resourceId: r.id,
+        label: `Compress ${shortName(r.name)}`, changeDesc: `${r.sizeKB} → ${target} KB`,
+        effort: EFFORT.Medium,
+        patch: { resourceId: r.id, fields: { sizeKB: target } },
+      });
+    }
+    if (r.type === "css" && r.loading === "blocking" && r.sizeKB <= 30 && !r.inline) {
+      candidates.push({
+        key: `r:${r.id}:inline`, resourceId: r.id,
+        label: `Inline critical CSS from ${shortName(r.name)}`, changeDesc: "inline true",
+        effort: EFFORT.Medium,
+        patch: { resourceId: r.id, fields: { inline: true } },
+      });
+    }
+  }
 
-    suggestions.push({
-      field,
-      label,
-      currentVal: inputs[field],
-      optimalVal: target,
-      changeDesc: describeRoadmapChange(field, inputs[field], target),
-      mobileGain: Math.round(mobileGain),
-      desktopGain: Math.round(desktopGain),
-      metricsImproved,
-      effort,
+  if (!meta.cdn) {
+    candidates.push({
+      key: "p:cdn", label: "Enable CDN", changeDesc: "off → on",
+      effort: EFFORT.Easy, patch: { meta: { cdn: true } },
     });
   }
 
-  // Sort by mobile gain descending — strictly decreasing from worse inputs
+  if ((meta.ttfb ?? 0) > 200) {
+    candidates.push({
+      key: "p:ttfb", label: "Reduce server response time (TTFB)",
+      changeDesc: `${Math.round(meta.ttfb)} → 150 ms`, effort: EFFORT.Medium,
+      patch: { meta: { ttfb: 150 } },
+    });
+  }
+
+  const suggestions = [];
+  for (const c of candidates) {
+    if (locked?.[c.key]) continue;
+    let hypResources = list;
+    let hypMeta = meta;
+    if (c.patch.resourceId) hypResources = withResourcePatched(list, c.patch.resourceId, c.patch.fields);
+    if (c.patch.meta) hypMeta = { ...meta, ...c.patch.meta };
+    const hypMetrics = computeMetrics(hypResources, hypMeta, profile, calibration);
+    const hypScore   = computeScores(hypMetrics, settings).overall;
+    const mobileGain = hypScore - curScore;
+    if (mobileGain <= 0) continue;
+    const desktopProfile = settings?.networkProfiles?.desktop ?? PROFILES.desktop;
+    const dCur = computeScores(computeMetrics(list, meta, desktopProfile, calibration), settings).overall;
+    const dHyp = computeScores(computeMetrics(hypResources, hypMeta, desktopProfile, calibration), settings).overall;
+    suggestions.push({
+      key: c.key,
+      resourceId: c.resourceId,
+      label: c.label,
+      changeDesc: c.changeDesc,
+      effort: c.effort,
+      mobileGain: Math.round(mobileGain),
+      desktopGain: Math.round(dHyp - dCur),
+      metricsImproved: diffMetricsImproved(curMetrics, hypMetrics),
+    });
+  }
+
   return suggestions.sort((a, b) => b.mobileGain - a.mobileGain);
 }

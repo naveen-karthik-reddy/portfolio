@@ -1,13 +1,13 @@
 import {
   Box, Typography, Select, MenuItem, FormControl, Button, IconButton,
-  Tooltip, Divider,
+  Tooltip, Divider, Chip,
 } from "@mui/material";
-import { LayersOutlined, Compare, Settings, MenuBookOutlined } from "@mui/icons-material";
+import { LayersOutlined, Compare, Settings, MenuBookOutlined, Science } from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
 import { Link } from "react-router-dom";
 import { useApp } from "../../context/useApp.js";
 
-export default function TopBar({ onPagesOpen, onSettingsOpen }) {
+export default function TopBar({ onPagesOpen, onSettingsOpen, onCalibrationOpen, simMobileScore, simDesktopScore }) {
   const { state, dispatch } = useApp();
   const theme  = useTheme();
   const isDark = theme.palette.mode === "dark";
@@ -71,6 +71,30 @@ export default function TopBar({ onPagesOpen, onSettingsOpen }) {
 
       {activePage && (
         <>
+          {/* Calibration delta chip — only when this page has a calibrated baseline.
+              Compares against the dashboard side that matches calibration.formFactor. */}
+          {activePage.calibration && (() => {
+            const calFf = activePage.calibration.formFactor === "desktop" ? "desktop" : "mobile";
+            const sim = calFf === "desktop" ? simDesktopScore : simMobileScore;
+            if (sim == null) return null;
+            const delta = sim - activePage.calibration.realScore;
+            const abs = Math.abs(delta);
+            const color = abs <= 1 ? "success" : abs <= 5 ? "warning" : "error";
+            const ffLabel = calFf === "desktop" ? "Desktop" : "Mobile";
+            return (
+              <Tooltip title={`${ffLabel} simulated ${sim} vs real ${activePage.calibration.realScore} — click to recalibrate`} arrow>
+                <Chip
+                  size="small"
+                  color={color}
+                  icon={<Science sx={{ fontSize: 14 }} />}
+                  label={`${ffLabel.slice(0, 3)} Δ ${delta >= 0 ? "+" : ""}${delta}`}
+                  onClick={() => onCalibrationOpen?.("recalibrate", activePage.id)}
+                  sx={{ fontWeight: 700, cursor: "pointer" }}
+                />
+              </Tooltip>
+            );
+          })()}
+
           {/* Compare button */}
           <Button
             size="small"

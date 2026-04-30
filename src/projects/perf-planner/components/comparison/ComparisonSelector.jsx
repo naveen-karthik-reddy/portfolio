@@ -36,8 +36,9 @@ export default function ComparisonSelector() {
             {pageVars.map((v) => {
               const selected = comparisonVariationIds.includes(v.id);
               const disabled = !selected && comparisonVariationIds.length >= 4;
-              const metrics  = computeMetrics(v.inputs, PROFILES.mobile);
-              const scores   = computeScores(metrics);
+              const settings = page.scoringCurves ? { scoringCurves: page.scoringCurves } : null;
+              const metrics  = computeMetrics(v.resources ?? [], v.pageMeta ?? {}, PROFILES.mobile, page.calibration);
+              const scores   = computeScores(metrics, settings);
               const color    = scoreColor(scores.overall);
 
               return (

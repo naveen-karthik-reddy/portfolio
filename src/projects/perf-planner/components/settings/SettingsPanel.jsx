@@ -90,7 +90,7 @@ export default function SettingsPanel({ open, onClose }) {
 
   // Validate weights sum to 1.0
   const w = local.scoringWeights;
-  const weightSum = (w.fcp + w.lcp + w.tbt + w.cls + w.si + (w.tti ?? 0));
+  const weightSum = (w.fcp + w.lcp + w.tbt + w.cls + w.si);
   const weightOk  = Math.abs(weightSum - 1.0) < 0.001;
 
   return (
@@ -143,7 +143,7 @@ export default function SettingsPanel({ open, onClose }) {
           <Typography variant="caption" sx={{ color: weightOk ? "text.disabled" : "error.main", display: "block", mb: 1 }}>
             Sum: {weightSum.toFixed(3)} {weightOk ? "(✓ valid)" : "(⚠ must equal 1.0)"}
           </Typography>
-          {["fcp", "lcp", "tbt", "cls", "si", "tti"].map((k) => (
+          {["fcp", "lcp", "tbt", "cls", "si"].map((k) => (
             <NumField
               key={k}
               label={k.toUpperCase()}
@@ -156,7 +156,7 @@ export default function SettingsPanel({ open, onClose }) {
 
         {/* Scoring Curves */}
         <Section title="Scoring Curves (Lighthouse log-normal)">
-          {["fcp", "lcp", "tbt", "cls", "si", "tti"].map((k) => (
+          {["fcp", "lcp", "tbt", "cls", "si"].map((k) => (
             <Box key={k} sx={{ mb: 1.5 }}>
               <Typography variant="caption" sx={{ fontWeight: 700, color: "text.secondary", display: "block", mb: 0.5 }}>{k.toUpperCase()}</Typography>
               <Box sx={{ display: "flex", gap: 1 }}>

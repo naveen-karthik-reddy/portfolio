@@ -1,5 +1,6 @@
-import { DEFAULT_INPUTS } from "./defaults.js";
 import { DEFAULT_SETTINGS } from "./defaultSettings.js";
+
+const EXPORT_VERSION = 4;
 
 function triggerDownload(filename, obj) {
   const blob = new Blob([JSON.stringify(obj, null, 2)], { type: "application/json" });
@@ -15,14 +16,18 @@ export function downloadPageAsJSON(page, variations) {
   triggerDownload(
     `${page.name.replace(/\s+/g, "-").toLowerCase()}-perf-profile.json`,
     {
-      exportVersion: 2,
+      exportVersion: EXPORT_VERSION,
       exportedAt: new Date().toISOString(),
-      page: { name: page.name },
+      page: {
+        name: page.name,
+        scoringCurves: page.scoringCurves ?? null,
+        calibration:   page.calibration   ?? null,
+      },
       variations: variations.map((v) => ({
         name: v.name,
-        isBaseline: v.isBaseline,
-        locked: v.locked,
-        inputs: v.inputs,
+        isBaseline: !!v.isBaseline,
+        locked: v.locked ?? {},
+        pageMeta: v.pageMeta ?? { ttfb: 0, cdn: false },
         resources: v.resources ?? [],
       })),
     }
@@ -30,7 +35,7 @@ export function downloadPageAsJSON(page, variations) {
 }
 
 export function downloadSettingsAsJSON(settings) {
-  triggerDownload("perf-planner-settings.json", { exportVersion: 2, type: "settings", settings });
+  triggerDownload("perf-planner-settings.json", { exportVersion: EXPORT_VERSION, type: "settings", settings });
 }
 
 export function parseImportFile(file) {
@@ -39,13 +44,22 @@ export function parseImportFile(file) {
     reader.onload = (e) => {
       try {
         const data = JSON.parse(e.target.result);
-        if (![1, 2].includes(data.exportVersion)) throw new Error("Unsupported export version");
+        if (data.exportVersion !== EXPORT_VERSION) {
+          throw new Error("Export version not supported — please re-export from this version");
+        }
         if (!data.page?.name) throw new Error("Missing page name");
         if (!Array.isArray(data.variations)) throw new Error("Missing variations array");
 
         const now       = new Date().toISOString();
         const newPageId = crypto.randomUUID();
-        const page      = { id: newPageId, name: data.page.name, createdAt: now, updatedAt: now };
+        const page      = {
+          id: newPageId,
+          name: data.page.name,
+          createdAt: now,
+          updatedAt: now,
+          scoringCurves: data.page.scoringCurves ?? null,
+          calibration:   data.page.calibration   ?? null,
+        };
 
         const variations = data.variations.map((v, i) => ({
           id: crypto.randomUUID(),
@@ -53,7 +67,7 @@ export function parseImportFile(file) {
           name: v.name ?? `Variation ${i + 1}`,
           isBaseline: v.isBaseline ?? i === 0,
           locked: v.locked ?? {},
-          inputs: { ...DEFAULT_INPUTS, ...(v.inputs ?? {}) },
+          pageMeta: v.pageMeta ?? { ttfb: 0, cdn: false },
           resources: Array.isArray(v.resources) ? v.resources : [],
           createdAt: now,
           updatedAt: now,
@@ -77,7 +91,6 @@ export function parseSettingsFile(file) {
         const data = JSON.parse(e.target.result);
         if (data.type !== "settings") throw new Error("Not a settings file");
         if (!data.settings) throw new Error("Missing settings object");
-        // Merge with defaults so any new keys are present
         const merged = {
           networkProfiles: { ...DEFAULT_SETTINGS.networkProfiles, ...data.settings.networkProfiles },
           scoringWeights:  { ...DEFAULT_SETTINGS.scoringWeights,  ...data.settings.scoringWeights  },

@@ -3,73 +3,95 @@ import { Box, CircularProgress } from "@mui/material";
 import { AppProvider } from "./context/AppContext.jsx";
 import { useApp } from "./context/useApp.js";
 import { computeMetrics, computeScores, computeRoadmap, PROFILES } from "./lib/calculator.js";
-import { computeResourceImpact } from "./lib/resourceSimulator.js";
 import { useAutoSave } from "./hooks/useAutoSave.js";
 import TopBar from "./components/layout/TopBar.jsx";
 import VariationTabs from "./components/layout/VariationTabs.jsx";
-import InputPanel from "./components/input/InputPanel.jsx";
+import PageMetaBar from "./components/input/PageMetaBar.jsx";
+import ResourcePanel from "./components/resources/ResourcePanel.jsx";
 import ImpactDashboard from "./components/dashboard/ImpactDashboard.jsx";
 import OptimizationRoadmap from "./components/roadmap/OptimizationRoadmap.jsx";
 import ComparisonMode from "./components/comparison/ComparisonMode.jsx";
 import SettingsPanel from "./components/settings/SettingsPanel.jsx";
 import PageManager from "./components/pages/PageManager.jsx";
+import CalibrationPanel from "./components/calibration/CalibrationPanel.jsx";
 
 function PerfPlanner() {
   const { state } = useApp();
-  const { dbReady, variations, activeVariationId, activePageId, comparisonMode, settings } = state;
+  const { dbReady, pages, variations, activeVariationId, activePageId, comparisonMode, settings } = state;
 
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [pageManagerOpen, setPageManagerOpen] = useState(true);
+  const [calibrationDialog, setCalibrationDialog] = useState({ open: false, mode: "create", pageId: null });
 
   // Derived values
+  const activePage           = pages.find((p) => p.id === activePageId) ?? null;
   const activeVariation      = variations.find((v) => v.id === activeVariationId) ?? null;
   const activePageVariations = variations.filter((v) => v.pageId === activePageId);
   const baselineVariation    =
     activePageVariations.find((v) => v.isBaseline) ?? activePageVariations[0] ?? null;
   const isBaseline = activeVariation?.id === baselineVariation?.id;
 
+  // Page-level calibrated curves take precedence over global settings curves
+  const effectiveSettings = useMemo(() => (
+    activePage?.scoringCurves
+      ? { ...settings, scoringCurves: activePage.scoringCurves }
+      : settings
+  ), [settings, activePage?.scoringCurves]);
+
   // Auto-save active variation on every change (500ms debounce)
   useAutoSave(activeVariation);
 
-  // Resource impact from the resource list
-  const mobileResourceImpact  = activeVariation
-    ? computeResourceImpact(activeVariation.inputs, activeVariation.resources ?? [], "mobile",  settings)
-    : null;
-  const desktopResourceImpact = activeVariation
-    ? computeResourceImpact(activeVariation.inputs, activeVariation.resources ?? [], "desktop", settings)
-    : null;
-
-  // Compute metrics + scores
+  // Compute metrics + scores — aggregateInputs in calculator.js already
+  // sums per-resource bytes and exec time, so no additive resourceImpact pass.
   const mobileProfile  = settings?.networkProfiles?.mobile  ?? PROFILES.mobile;
   const desktopProfile = settings?.networkProfiles?.desktop ?? PROFILES.desktop;
+  const calibration    = activePage?.calibration ?? null;
 
-  const mobileMetrics  = activeVariation ? computeMetrics(activeVariation.inputs, mobileProfile,  mobileResourceImpact)  : null;
-  const desktopMetrics = activeVariation ? computeMetrics(activeVariation.inputs, desktopProfile, desktopResourceImpact) : null;
-  const mobileScores   = mobileMetrics  ? computeScores(mobileMetrics,  settings) : null;
-  const desktopScores  = desktopMetrics ? computeScores(desktopMetrics, settings) : null;
+  const mobileMetrics  = activeVariation
+    ? computeMetrics(activeVariation.resources ?? [], activeVariation.pageMeta ?? {}, mobileProfile,  calibration)
+    : null;
+  const desktopMetrics = activeVariation
+    ? computeMetrics(activeVariation.resources ?? [], activeVariation.pageMeta ?? {}, desktopProfile, calibration)
+    : null;
+  const mobileScores   = mobileMetrics  ? computeScores(mobileMetrics,  effectiveSettings) : null;
+  const desktopScores  = desktopMetrics ? computeScores(desktopMetrics, effectiveSettings) : null;
 
   const baselineMobileMetrics  = (!isBaseline && baselineVariation)
-    ? computeMetrics(baselineVariation.inputs, mobileProfile)  : null;
+    ? computeMetrics(baselineVariation.resources ?? [], baselineVariation.pageMeta ?? {}, mobileProfile,  calibration)
+    : null;
   const baselineDesktopMetrics = (!isBaseline && baselineVariation)
-    ? computeMetrics(baselineVariation.inputs, desktopProfile) : null;
+    ? computeMetrics(baselineVariation.resources ?? [], baselineVariation.pageMeta ?? {}, desktopProfile, calibration)
+    : null;
 
   // Roadmap — keyed on activeVariation so it recomputes only when inputs/locks change
   const roadmapItems = useMemo(() => {
     if (!activeVariation) return [];
-    const mSc = computeScores(computeMetrics(activeVariation.inputs, PROFILES.mobile), settings);
-    const dSc = computeScores(computeMetrics(activeVariation.inputs, PROFILES.desktop), settings);
-    return computeRoadmap(activeVariation.inputs, activeVariation.locked, mSc, dSc, settings);
-  }, [activeVariation, settings]);
+    return computeRoadmap(
+      activeVariation.resources ?? [],
+      activeVariation.pageMeta ?? {},
+      activeVariation.locked ?? {},
+      PROFILES.mobile,
+      calibration,
+      effectiveSettings,
+    );
+  }, [activeVariation, calibration, effectiveSettings]);
 
   // Tab scores for all active-page variations
   const tabScores = useMemo(() => {
     const result = {};
     activePageVariations.forEach((v) => {
-      const m = computeMetrics(v.inputs, PROFILES.mobile);
-      result[v.id] = computeScores(m, settings).overall;
+      const m = computeMetrics(v.resources ?? [], v.pageMeta ?? {}, PROFILES.mobile, calibration);
+      result[v.id] = computeScores(m, effectiveSettings).overall;
     });
     return result;
-  }, [activePageVariations, settings]);
+  }, [activePageVariations, calibration, effectiveSettings]);
+
+  function openCalibration(mode, pageId) {
+    setCalibrationDialog({ open: true, mode, pageId });
+  }
+  function closeCalibration() {
+    setCalibrationDialog((c) => ({ ...c, open: false }));
+  }
 
   if (!dbReady) {
     return (
@@ -85,6 +107,7 @@ function PerfPlanner() {
       <Box sx={{ display: "flex", flexDirection: "column" }}>
         <PageManager onClose={() => setPageManagerOpen(false)} />
         <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+        <CalibrationPanel open={calibrationDialog.open} mode={calibrationDialog.mode} pageId={calibrationDialog.pageId} onClose={closeCalibration} />
       </Box>
     );
   }
@@ -92,28 +115,41 @@ function PerfPlanner() {
   if (comparisonMode) {
     return (
       <Box sx={{ display: "flex", flexDirection: "column" }}>
-        <TopBar onPagesOpen={() => setPageManagerOpen(true)} onSettingsOpen={() => setSettingsOpen(true)} />
+        <TopBar
+          onPagesOpen={() => setPageManagerOpen(true)}
+          onSettingsOpen={() => setSettingsOpen(true)}
+          onCalibrationOpen={openCalibration}
+          simMobileScore={mobileScores?.overall}
+          simDesktopScore={desktopScores?.overall}
+        />
         <ComparisonMode />
         <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+        <CalibrationPanel open={calibrationDialog.open} mode={calibrationDialog.mode} pageId={calibrationDialog.pageId} onClose={closeCalibration} />
       </Box>
     );
   }
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", height: "calc(100vh - 130px)", minHeight: 500 }}>
-      <TopBar onPagesOpen={() => setPageManagerOpen(true)} onSettingsOpen={() => setSettingsOpen(true)} />
+      <TopBar
+        onPagesOpen={() => setPageManagerOpen(true)}
+        onSettingsOpen={() => setSettingsOpen(true)}
+        onCalibrationOpen={openCalibration}
+        simOverallScore={mobileScores?.overall}
+      />
       <VariationTabs
         variations={activePageVariations}
         activeVariationId={activeVariationId}
         tabScores={tabScores}
       />
       <Box sx={{ display: "flex", flex: 1, overflow: "hidden" }}>
-        {/* Input panel — left 40% */}
-        <Box sx={{ width: "40%", overflowY: "auto", borderRight: 1, borderColor: "divider" }}>
-          <InputPanel />
+        {/* Resource editor — left 32% */}
+        <Box sx={{ width: "32%", overflowY: "auto", borderRight: 1, borderColor: "divider", display: "flex", flexDirection: "column" }}>
+          <PageMetaBar />
+          <ResourcePanel />
         </Box>
-        {/* Dashboard + roadmap — right 60% */}
-        <Box sx={{ width: "60%", overflowY: "auto", p: 2, display: "flex", flexDirection: "column", gap: 3 }}>
+        {/* Dashboard + roadmap — right 68% */}
+        <Box sx={{ width: "68%", overflowY: "auto", p: 2, display: "flex", flexDirection: "column", gap: 3 }}>
           <ImpactDashboard
             mobileMetrics={mobileMetrics}
             mobileScores={mobileScores}
@@ -121,13 +157,17 @@ function PerfPlanner() {
             desktopScores={desktopScores}
             baselineMobileMetrics={baselineMobileMetrics}
             baselineDesktopMetrics={baselineDesktopMetrics}
-            inputs={activeVariation?.inputs}
+            resources={activeVariation?.resources}
+            pageMeta={activeVariation?.pageMeta}
             isBaseline={isBaseline}
+            calibratedFormFactor={activePage?.calibration?.formFactor ?? null}
+            calibration={calibration}
           />
           <OptimizationRoadmap items={roadmapItems} />
         </Box>
       </Box>
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+      <CalibrationPanel open={calibrationDialog.open} mode={calibrationDialog.mode} pageId={calibrationDialog.pageId} onClose={closeCalibration} />
     </Box>
   );
 }

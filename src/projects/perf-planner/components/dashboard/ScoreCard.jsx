@@ -5,7 +5,7 @@ import { DEFAULT_SETTINGS } from "../../lib/defaultSettings.js";
 import { useApp } from "../../context/useApp.js";
 import ScoreGauge from "./ScoreGauge.jsx";
 import MetricRow from "./MetricRow.jsx";
-import WaterfallBar from "./WaterfallBar.jsx";
+import ResourceWaterfall from "./ResourceWaterfall.jsx";
 
 const METRIC_DEFS = [
   { key: "fcp", label: "FCP" },
@@ -13,7 +13,6 @@ const METRIC_DEFS = [
   { key: "tbt", label: "TBT" },
   { key: "cls", label: "CLS" },
   { key: "si",  label: "SI"  },
-  { key: "tti", label: "TTI" },
 ];
 
 export default function ScoreCard({ profileLabel, metrics, scores, baselineMetrics, waterfall }) {
@@ -63,13 +62,19 @@ export default function ScoreCard({ profileLabel, metrics, scores, baselineMetri
       ))}
 
       {/* Waterfall */}
-      {waterfall && waterfall.length > 0 && (
+      {waterfall?.rows?.length > 0 && (
         <>
           <Divider sx={{ mt: 1.5, mb: 1 }} />
           <Typography variant="caption" color="text.disabled" sx={{ display: "block", mb: 0.75 }}>
             Network Waterfall
           </Typography>
-          <WaterfallBar segments={waterfall} />
+          <ResourceWaterfall
+            key={`${state.activePageId ?? "default"}-${state.activeVariationId ?? "default"}`}
+            rows={waterfall.rows}
+            fcpMs={waterfall.fcpMs}
+            lcpMs={waterfall.lcpMs}
+            totalMs={waterfall.totalMs}
+          />
         </>
       )}
     </Box>

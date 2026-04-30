@@ -10,7 +10,7 @@ function formatValue(key, value) {
   return `${Math.round(value)}ms`;
 }
 
-const METRIC_KEYS = ["fcp", "lcp", "tbt", "cls", "si", "tti"];
+const METRIC_KEYS = ["fcp", "lcp", "tbt", "cls", "si"];
 
 export default function ComparisonColumn({ page, variation, metrics, scores, bestMetrics, worstMetrics }) {
   const theme  = useTheme();
