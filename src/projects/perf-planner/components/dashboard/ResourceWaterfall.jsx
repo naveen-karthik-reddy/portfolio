@@ -12,6 +12,8 @@ const PHASE = {
   request:  { color: "#1a6c5e", label: "Request Sent"        },
   ttfb:     { color: "#c0c0c0", label: "Waiting (TTFB)"      },
   download: { color: null,      label: "Content Download"    },
+  parse:    { color: "#06b6d4", label: "Parse / Compile"     },
+  eval:     { color: "#d946ef", label: "Script Evaluation"   },
 };
 
 const TYPE_DL_COLOR = {
@@ -26,7 +28,7 @@ const TYPE_DL_COLOR = {
 
 const TYPE_SHORT = { html:"DOC", js:"JS", css:"CSS", font:"FONT", image:"IMG", video:"VID", other:"—" };
 
-const PHASE_ORDER = ["stall","dns","tcp","ssl","request","ttfb","download"];
+const PHASE_ORDER = ["stall","dns","tcp","ssl","request","ttfb","download","parse","eval"];
 
 // Returns the ruler tick interval (ms) for a given visible time range.
 // Targets ~6-10 ticks regardless of zoom level.
@@ -66,6 +68,8 @@ function buildSegments(row, viewStart, visibleMs) {
     { key: "request",  durationMs: row.requestMs  ?? 0 },
     { key: "ttfb",     durationMs: row.ttfbMs     ?? 0 },
     { key: "download", durationMs: row.downloadMs ?? 0 },
+    { key: "parse",    durationMs: row.parseMs    ?? 0 },
+    { key: "eval",     durationMs: row.evalMs     ?? 0 },
   ];
 
   const dlColor = TYPE_DL_COLOR[row.type] ?? "#94a3b8";
@@ -400,6 +404,24 @@ export default function ResourceWaterfall({ rows, fcpMs, lcpMs, totalMs }) {
           const isDimmed  = row.phase === "deferred" || row.phase === "lazy";
           const typeColor = TYPE_DL_COLOR[row.type] ?? "#94a3b8";
 
+          const tooltipRows = [
+            { label: "Type",         value: `${TYPE_SHORT[row.type] ?? row.type} · ${row.loading}`, dot: null },
+            ...(row.protocol        ? [{ label: "Protocol",     value: row.protocol.toUpperCase(),  dot: null }] : []),
+            ...(row.entity          ? [{ label: "Entity",       value: row.entity,                  dot: null }] : []),
+            { label: "Start",        value: fmt(row.startMs),                                        dot: null },
+            ...(row.stallMs   > 0   ? [{ label: "Stalled",      value: fmt(row.stallMs),   dot: PHASE.stall.color   }] : []),
+            ...(row.dnsMs     > 0   ? [{ label: "DNS",          value: fmt(row.dnsMs),     dot: PHASE.dns.color     }] : []),
+            ...(row.tcpMs     > 0   ? [{ label: "Initial Conn", value: fmt(row.tcpMs),     dot: PHASE.tcp.color     }] : []),
+            ...(row.sslMs     > 0   ? [{ label: "SSL/TLS",      value: fmt(row.sslMs),     dot: PHASE.ssl.color     }] : []),
+            ...(row.requestMs > 0   ? [{ label: "Request Sent", value: fmt(row.requestMs), dot: PHASE.request.color }] : []),
+            ...(row.ttfbMs    > 0   ? [{ label: "Waiting",      value: fmt(row.ttfbMs),    dot: PHASE.ttfb.color    }] : []),
+            { label: "Download",     value: fmt(row.downloadMs ?? 0),                                dot: typeColor },
+            ...(row.parseMs   > 0   ? [{ label: "Parse/Compile",    value: fmt(row.parseMs), dot: PHASE.parse.color }] : []),
+            ...(row.evalMs    > 0   ? [{ label: "Script Eval",      value: fmt(row.evalMs),  dot: PHASE.eval.color  }] : []),
+            { label: "Total",        value: fmt(row.endMs - row.startMs),                            dot: null },
+            { label: "Finish",       value: fmt(row.endMs),                                          dot: null },
+          ];
+
           const tooltipContent = (
             <Box sx={{ lineHeight: 1.85, fontSize: "0.66rem" }}>
               <Typography sx={{ fontWeight: 700, color: typeColor, fontSize: "0.72rem", mb: 0.5, display: "block" }}>
@@ -407,24 +429,13 @@ export default function ResourceWaterfall({ rows, fcpMs, lcpMs, totalMs }) {
                 {isLcp && <span style={{ color: "#ffa400", marginLeft: 4 }}>★ LCP</span>}
               </Typography>
               <Box sx={{ display: "grid", gridTemplateColumns: "auto 1fr", columnGap: 1.5, rowGap: 0.2 }}>
-                {[
-                  ["Type",     `${TYPE_SHORT[row.type] ?? row.type} · ${row.loading}`],
-                  ...(row.protocol ? [["Protocol",     row.protocol.toUpperCase()]] : []),
-                  ...(row.entity   ? [["Entity",       row.entity]]                 : []),
-                  ["Start",    fmt(row.startMs)],
-                  ...(row.stallMs   > 0 ? [["Stalled",      fmt(row.stallMs)]]   : []),
-                  ...(row.dnsMs     > 0 ? [["DNS",          fmt(row.dnsMs)]]     : []),
-                  ...(row.tcpMs     > 0 ? [["Initial Conn", fmt(row.tcpMs)]]     : []),
-                  ...(row.sslMs     > 0 ? [["SSL/TLS",      fmt(row.sslMs)]]     : []),
-                  ...(row.requestMs > 0 ? [["Request Sent", fmt(row.requestMs)]] : []),
-                  ...(row.ttfbMs    > 0 ? [["Waiting",      fmt(row.ttfbMs)]]    : []),
-                  ["Download", fmt(row.downloadMs)],
-                  ["Total",    fmt(row.endMs - row.startMs)],
-                  ["Finish",   fmt(row.endMs)],
-                ].map(([k, v]) => (
-                  <Fragment key={k}>
-                    <Box component="span" sx={{ color: "text.disabled", fontSize: "0.6rem" }}>{k}</Box>
-                    <Box component="span" sx={{ fontWeight: 700 }}>{v}</Box>
+                {tooltipRows.map(({ label, value, dot }) => (
+                  <Fragment key={label}>
+                    <Box component="span" sx={{ color: "text.disabled", fontSize: "0.6rem", display: "flex", alignItems: "center", gap: 0.5 }}>
+                      {dot && <Box component="span" sx={{ display: "inline-block", width: 6, height: 6, borderRadius: "50%", bgcolor: dot, flexShrink: 0 }} />}
+                      {label}
+                    </Box>
+                    <Box component="span" sx={{ fontWeight: 700 }}>{value}</Box>
                   </Fragment>
                 ))}
               </Box>

@@ -37,6 +37,28 @@ This is a single-page React portfolio site deployed to GitHub Pages at `naveen-k
 
 **Deployment**: `vite.config.js` sets `base: '/'` for root domain. Change to `'/portfolio'` for GitHub Pages subdirectory deployment.
 
+## Perf-Planner maintenance rule
+
+`src/projects/perf-planner/REFERENCE.md` is the single source of truth for the perf-planner project.
+**Update it whenever you change any file inside `src/projects/perf-planner/`.** Specifically:
+
+- Added/removed/renamed a file → update §2 (Project Structure)
+- Changed a data schema (Page, Variation, Resource, Settings, Waterfall Row) → update §3
+- Added/changed/removed a reducer action → update §4
+- Changed metric computation (FCP, LCP, TBT, CLS, SI) → update §5.1
+- Changed waterfall generation or bar scaling → update §5.3
+- Changed roadmap suggestions → update §5.4
+- Changed Lighthouse import logic → update §6
+- Changed curve fitting → update §7
+- Changed IndexedDB schema (version bump) → update §8
+- Changed export/import format → update §9
+- Changed waterfall phase colors or interaction → update §11
+- Changed component data flow or props → update §12
+- Changed auto-save behavior → update §13
+- Changed any known limitation → update §15
+
+Keep section numbers in REFERENCE.md stable — add new sections at the end if needed.
+
 ## ESLint note
 
 `no-unused-vars` ignores variables matching `/^[A-Z_]/` — uppercase components imported but not directly called won't error.

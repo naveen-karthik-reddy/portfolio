@@ -15,7 +15,18 @@ function fitMetric(metricKey, value, targetScore) {
   if (!base) return base;
   if (!Number.isFinite(value) || value <= 0) return { ...base };
 
-  let lo = 0.05, hi = 20;
+  // Boundary scores (0 or 100) are ill-conditioned: almost any k produces
+  // the same boundary score, so the search converges on an arbitrary k.
+  // The default curve already handles these cases correctly — skip fitting.
+  if (targetScore <= 1 || targetScore >= 99) return { ...base };
+
+  // If the default curve already lands within tolerance, no adjustment needed.
+  const defaultScore = metricScore(value, metricKey, { [metricKey]: base });
+  if (Math.abs(defaultScore - targetScore) <= 0.5) return { ...base };
+
+  // Search range kept tight around k=1 so the first guess (k=1.525) is
+  // near the default rather than at k=10 which causes CLS to be inflated 10×.
+  let lo = 0.05, hi = 3;
   // metricScore is monotonically increasing in median (larger median =
   // more lenient = higher score) for the metric values we care about
   // (lower-is-better). Binary-search k.

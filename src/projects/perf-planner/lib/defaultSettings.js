@@ -15,7 +15,7 @@ export const DEFAULT_SETTINGS = {
     lcp: { median: 4000, p10: 2500 },
     tbt: { median: 600,  p10: 200  },
     cls: { median: 0.25, p10: 0.10 },
-    si:  { median: 3900, p10: 3387 },
+    si:  { median: 5800, p10: 3387 },
   },
   connectionModel: {
     http1MaxConnections: 6,

@@ -1,6 +1,7 @@
 # Perf-Planner — Complete Technical Reference
 
-This file is the single source of truth for understanding and modifying the perf-planner project. Read this before touching any file.
+This file is the single source of truth for understanding and modifying the perf-planner project.
+**Keep it updated whenever you change any file in this directory.**
 
 ---
 
@@ -19,45 +20,55 @@ The primary workflow is always Lighthouse-first. Manual mode exists as a fallbac
 
 ```
 src/projects/perf-planner/
-├── index.jsx                        ← root layout, metric computation, auto-save
+├── index.jsx                        ← root component; metric computation, auto-save, layout switcher
 ├── context/
-│   ├── AppContext.jsx               ← React context + Provider, DB init, state bootstrap
-│   ├── contextObject.js             ← initial state shape
-│   └── reducer.js                   ← all state mutations (action types below)
+│   ├── AppContext.jsx               ← React context provider; DB init, settings migration on mount
+│   ├── contextObject.js             ← createContext() only
+│   └── reducer.js                   ← all state mutations (all action types documented in §4)
 ├── lib/
-│   ├── calculator.js                ← CORE: computeMetrics, computeScores, computeRoadmap, computeResourceWaterfall
-│   ├── resourceSimulator.js         ← computeResourceImpact (incremental impact; less used)
-│   ├── lighthouseImporter.js        ← parseLighthouseReport → resources + calibration
+│   ├── calculator.js                ← CORE: computeMetrics, computeScores, computeRoadmap,
+│   │                                          computeResourceWaterfall, computeWaterfall, scoreColor
+│   ├── resourceSimulator.js         ← computeResourceImpact (incremental per-resource impact)
+│   ├── lighthouseImporter.js        ← parseLighthouseReport → resources + calibration payload
 │   ├── defaultSettings.js           ← all default values (network profiles, scoring curves, resource shape)
 │   ├── db.js                        ← IndexedDB schema (version 4), CRUD helpers
 │   ├── curveFit.js                  ← fits log-normal curves to match Lighthouse real score
 │   └── exportImport.js              ← JSON export/import for pages+variations and settings
+├── hooks/
+│   ├── useAutoSave.js               ← 500ms debounce; saves active variation to IndexedDB
+│   └── useContextMenu.js            ← context menu position state + global close listeners
 ├── components/
 │   ├── layout/
-│   │   ├── TopBar.jsx               ← page picker, calibration delta chip, mode toggles, settings button
-│   │   └── VariationTabs.jsx        ← variation tab strip, right-click menu, score badges
+│   │   ├── TopBar.jsx               ← app title, page quick-switcher, calibration Δ chip,
+│   │   │                              compare button, settings icon, guide link
+│   │   ├── VariationTabs.jsx        ← tab strip with score badges, rename, duplicate, add-variation
+│   │   └── TabContextMenu.jsx       ← right-click context menu: rename, duplicate, set baseline, delete
 │   ├── input/
 │   │   └── PageMetaBar.jsx          ← TTFB input + CDN toggle (affects active variation only)
 │   ├── dashboard/
-│   │   ├── ImpactDashboard.jsx      ← mobile/desktop toggle, renders ScoreCard(s)
-│   │   ├── ScoreCard.jsx            ← score gauge + 5 metric rows + waterfall
-│   │   └── ResourceWaterfall.jsx    ← interactive Chrome-DevTools-style waterfall
+│   │   ├── ImpactDashboard.jsx      ← mobile/desktop toggle; computes both waterfalls; renders ScoreCard
+│   │   ├── ScoreCard.jsx            ← score gauge + 5 metric rows + ResourceWaterfall
+│   │   ├── ScoreGauge.jsx           ← SVG arc gauge coloured by scoreColor()
+│   │   ├── MetricRow.jsx            ← single metric row: label, value, delta pill, sub-score bar, pts
+│   │   ├── ResourceWaterfall.jsx    ← interactive Chrome DevTools-style waterfall (zoom/pan)
+│   │   └── WaterfallBar.jsx         ← simple stacked bar (legacy; not used by ResourceWaterfall)
 │   ├── resources/
-│   │   ├── ResourcePanel.jsx        ← left sidebar resource list with inline impact deltas
-│   │   └── ResourceDialog.jsx       ← modal to add/edit a resource
+│   │   ├── ResourcePanel.jsx        ← left-sidebar resource list; per-resource score impact deltas
+│   │   └── ResourceDialog.jsx       ← add/edit resource modal with type-specific fields
 │   ├── roadmap/
-│   │   ├── OptimizationRoadmap.jsx  ← ranked suggestion list
-│   │   └── RoadmapCard.jsx          ← single suggestion card with Apply + Lock
+│   │   ├── OptimizationRoadmap.jsx  ← renders sorted suggestions; dispatches Apply/Lock
+│   │   └── RoadmapCard.jsx          ← single suggestion card: mobile gain, effort, desktop gain, metrics
 │   ├── comparison/
-│   │   ├── ComparisonMode.jsx       ← full-page side-by-side layout
-│   │   ├── ComparisonSelector.jsx   ← variation checkboxes (max 4)
-│   │   └── ComparisonColumn.jsx     ← one variation column with metric highlights
+│   │   ├── ComparisonMode.jsx       ← full-page side-by-side layout (2–4 variations)
+│   │   ├── ComparisonSelector.jsx   ← left sidebar: checkboxes to pick variations (grouped by page)
+│   │   └── ComparisonColumn.jsx     ← one variation column with score + metric rows + best/worst highlight
 │   ├── settings/
-│   │   └── SettingsPanel.jsx        ← drawer with all simulation parameters
+│   │   └── SettingsPanel.jsx        ← right drawer: network profiles, scoring weights/curves,
+│   │                                   connection model, export/import/reset
 │   ├── pages/
-│   │   └── PageManager.jsx          ← page CRUD, import/export, calibration trigger
+│   │   └── PageManager.jsx          ← page cards; calibrate/rename/export/delete per page; empty state
 │   └── calibration/
-│       └── CalibrationPanel.jsx     ← Lighthouse JSON upload + preview + create/recalibrate
+│       └── CalibrationPanel.jsx     ← Lighthouse JSON upload+paste; fitted-curves table; create/recalibrate
 ```
 
 ---
@@ -80,15 +91,16 @@ src/projects/perf-planner/
   } | null,
   calibration: {           // null = manually created page (no Lighthouse run)
     realScore: number,
-    realMetrics: { fcp, lcp, tbt, cls, si, tti },
+    realMetrics: { fcp, lcp, tbt, cls, si, tti },   // all ms except cls
     realMetricScores: { fcp, lcp, tbt, cls, si, tti },
     sourceUrl: string,
     fetchTime: string,     // ISO
     lhVersion: string,
     formFactor: "mobile" | "desktop",
-    cpuSlowdownMultiplier: number,
+    cpuSlowdownMultiplier: number,   // 4 for mobile, 1 for desktop by default
     throttlingRttMs: number | null,
     throttlingThroughputKbps: number | null,
+    resourceHash: string,  // fingerprint: type:sizeKB:loading:source:count joined by comma
     importedAt: string     // ISO
   } | null
 }
@@ -109,7 +121,8 @@ src/projects/perf-planner/
   },
   pageMeta: {
     ttfb: number,          // ms; server response time (0–2000)
-    cdn: boolean           // reduces same-origin RTT by ~60%
+    cdn: boolean,          // reduces same-origin RTT by ~60%
+    isSpaRendered: boolean // detected from Lighthouse; FCP extends to include JS exec
   },
   resources: Resource[],
   createdAt: string,
@@ -126,12 +139,18 @@ src/projects/perf-planner/
   source: "same-origin" | "own-cdn" | "third-party-cdn",
   loading: "blocking" | "defer" | "async" | "preload" | "module" | "lazy",
   sizeKB: number,
-  count: number,           // bundled/repeated count; bytes = sizeKB * count * 1024
+  count: number,           // bundled/repeated count; wire bytes = sizeKB × count × 1024
 
   // JS only
   execTimeMs: number,      // measured at calibration CPU; scaled to profile CPU in calculator
-  longTaskCount: number,   // tasks > 50ms
+  longTaskCount: number,   // tasks > 50ms (from Lighthouse long-tasks audit)
   avgLongTaskMs: number,
+  evalMs: number,          // V8 script evaluation time from Lighthouse bootup-time audit
+  parseMs: number,         // V8 parse/compile time from Lighthouse bootup-time audit
+
+  // Lighthouse import snapshots (JS only) — used for proportional bar scaling
+  importedExecTimeMs: number | undefined,  // execTimeMs at import time (after mainthread distribution)
+  importedSizeKB: number | undefined,      // sizeKB at import time
 
   // Image only
   imageFormat: "WebP" | "AVIF" | "JPEG" | "PNG" | "GIF",
@@ -146,9 +165,9 @@ src/projects/perf-planner/
   isLcp: boolean,          // marks the LCP element
 
   // Populated from Lighthouse (absent on manually-added resources)
-  startTimeMs: number | undefined,
-  endTimeMs: number | undefined,
-  responseReceivedMs: number | undefined,  // networkRequestTime (request sent time)
+  startTimeMs: number | undefined,         // navigation-relative; from rendererStartTime or startTime×1000
+  endTimeMs: number | undefined,           // from networkEndTime or endTime×1000
+  responseReceivedMs: number | undefined,  // networkRequestTime or responseReceivedTime×1000
   protocol: "HTTP/1.1" | "HTTP/2" | "HTTP/3" | null,
   entity: string | null    // e.g. "Google Analytics"
 }
@@ -165,12 +184,12 @@ src/projects/perf-planner/
   scoringWeights: {        // must sum to 1.0; TTI was removed — 5 metrics only
     fcp: 0.10, lcp: 0.25, tbt: 0.30, cls: 0.25, si: 0.10
   },
-  scoringCurves: {         // log-normal CDF parameters matching Lighthouse 12-13
+  scoringCurves: {         // log-normal CDF parameters
     fcp: { median: 3000, p10: 1800 },
     lcp: { median: 4000, p10: 2500 },
     tbt: { median: 600,  p10: 200  },
     cls: { median: 0.25, p10: 0.10 },
-    si:  { median: 3900, p10: 3387 }
+    si:  { median: 5800, p10: 3387 }
   },
   connectionModel: {
     http1MaxConnections: 6,
@@ -194,16 +213,20 @@ src/projects/perf-planner/
 
   // Absolute times from navigation start (ms)
   startMs: number,
-  endMs: number,
+  endMs: number,           // includes download + parse + eval for JS
 
-  // Phase durations (ms); all ?? 0 in buildSegments — safe to be absent
-  stallMs: number,         // waiting for connection slot (always 0 currently)
+  // Network phase durations (ms); ?? 0 safe in buildSegments
+  stallMs: number,         // always 0 currently
   dnsMs: number,
   tcpMs: number,
   sslMs: number,
-  requestMs: number,       // ≈ rtt * 0.1; carved from connection overhead
+  requestMs: number,       // ≈ rtt × 0.1; carved from connection overhead
   ttfbMs: number,
   downloadMs: number,
+
+  // CPU phase durations (ms); JS only — 0 for all other types
+  parseMs: number,         // V8 parse/compile; scales with sizeKB / importedSizeKB
+  evalMs: number,          // V8 evaluation; scales with execTimeMs / importedExecTimeMs
 
   // From Lighthouse only
   protocol: string | null,
@@ -215,7 +238,7 @@ src/projects/perf-planner/
 
 ## 4. State Shape & Reducer Actions
 
-### App State (context/AppContext.jsx)
+### App State
 ```js
 {
   dbReady: boolean,
@@ -233,31 +256,31 @@ src/projects/perf-planner/
 
 | Action | Payload | Effect |
 |--------|---------|--------|
-| `INIT_LOADED` | `{ pages, variations, settings }` | Bootstrap state from DB |
-| `PAGE_CREATED` | `{ page, variation }` | Add page + blank baseline |
-| `PAGE_CREATED_FROM_LIGHTHOUSE` | `{ page, variation }` | Add page + calibrated baseline |
-| `PAGE_RECALIBRATED` | `{ pageId, scoringCurves, calibration, pageMeta, resources }` | Update page + baseline |
+| `INIT_LOADED` | `{ pages, variations, activePageId, activeVariationId, settings }` | Bootstrap state from DB |
+| `PAGE_CREATED` | `page` object | Append page |
+| `PAGE_CREATED_FROM_LIGHTHOUSE` | `{ page, baseline }` | Add page + baseline variation; set both as active |
+| `PAGE_RECALIBRATED` | `{ pageId, scoringCurves, calibration, baselinePageMeta, baselineResources, updatedAt }` | Update page curves + calibration; update baseline pageMeta + resources |
 | `PAGE_RENAMED` | `{ id, name, updatedAt }` | Rename page |
-| `PAGE_DELETED` | `{ id }` | Remove page + all its variations |
-| `PAGE_IMPORTED` | `{ page, variations }` | Add imported page + all variations |
+| `PAGE_DELETED` | `{ id }` | Remove page + all its variations; auto-select sibling |
+| `PAGE_IMPORTED` | `{ page, variations }` | Add imported page + all variations; set first as active |
 | `SET_ACTIVE_PAGE` | `{ pageId, variationId }` | Switch active page + variation |
-| `VARIATION_CREATED` | `{ variation }` | Clone baseline, add as new variation |
-| `VARIATION_RENAMED` | `{ id, name }` | Rename variation |
-| `VARIATION_DUPLICATED` | `{ variation }` | Deep copy with new id |
-| `VARIATION_DELETED` | `{ id }` | Remove, auto-select sibling |
-| `VARIATION_SET_BASELINE` | `{ id }` | Mark as baseline, unmark others |
+| `VARIATION_CREATED` | variation object | Append variation |
+| `VARIATION_RENAMED` | `{ id, name, updatedAt }` | Rename variation |
+| `VARIATION_DUPLICATED` | variation object (new id) | Append copy |
+| `VARIATION_DELETED` | `{ id }` | Remove; auto-select sibling |
+| `VARIATION_SET_BASELINE` | `{ pageId, variationId }` | Mark as baseline; unmark all others for that page |
 | `SET_ACTIVE_VARIATION` | `{ id }` | Switch active variation |
-| `PAGE_META_CHANGED` | `{ variationId, field, value }` | Mutate pageMeta.ttfb or .cdn |
-| `RESOURCE_FIELD_CHANGED` | `{ variationId, resourceId, field, value }` | Mutate single resource field |
+| `PAGE_META_CHANGED` | `{ variationId, field, value }` | Mutate `pageMeta.ttfb` or `.cdn` |
+| `RESOURCE_FIELD_CHANGED` | `{ variationId, resourceId, field, value }` | Mutate single field; spreads `...r` so snapshot fields survive |
 | `RESOURCE_ADDED` | `{ variationId, resource }` | Append resource |
-| `RESOURCE_UPDATED` | `{ variationId, resource }` | Replace resource by id |
+| `RESOURCE_UPDATED` | `{ variationId, resource }` | Replace resource by id (whole object) |
 | `RESOURCE_DELETED` | `{ variationId, resourceId }` | Remove resource |
-| `LOCK_TOGGLED` | `{ variationId, key }` | Toggle locked[key] |
-| `SETTINGS_LOADED` | `{ settings }` | Replace settings |
-| `SETTINGS_UPDATED` | `{ settings }` | Replace settings + save |
-| `COMPARISON_OPENED` | — | Set comparisonMode = true |
-| `COMPARISON_CLOSED` | — | Set comparisonMode = false |
-| `COMPARISON_VARIATION_TOGGLED` | `{ id }` | Add/remove from comparisonVariationIds (max 4) |
+| `LOCK_TOGGLED` | `{ variationId, key }` | Toggle `locked[key]` |
+| `SETTINGS_LOADED` | settings object | Replace settings (initial load) |
+| `SETTINGS_UPDATED` | settings object | Replace settings |
+| `COMPARISON_OPENED` | — | `comparisonMode = true`, clear ids |
+| `COMPARISON_CLOSED` | — | `comparisonMode = false`, clear ids |
+| `COMPARISON_VARIATION_TOGGLED` | `{ variationId }` | Add/remove from ids (max 4) |
 
 ---
 
@@ -266,95 +289,135 @@ src/projects/perf-planner/
 ### 5.1 computeMetrics(resources, pageMeta, profile, calibration) → Metrics
 
 Returns `{ fcp, lcp, tbt, cls, si, tti }` all in ms except CLS.
-TTI is computed internally and returned but is **not used in scoring**. The 5 scored metrics are fcp, lcp, tbt, cls, si.
+TTI is computed and returned but **not used in scoring**. The 5 scored metrics are fcp, lcp, tbt, cls, si.
 
-**Key sub-functions:**
+**Internal helpers:**
 
-- `connSetup(rtt, source, meta, isFirstConn)` — DNS+TCP+TLS overhead in ms; 0 if CDN/own-CDN
-- `effRTT(rtt, source, meta)` — RTT adjusted for CDN (×0.4 for own-CDN/CDN same-origin)
-- `tcpDownloadTime(bytes, rttMs, bandwidthKBs)` — slow-start model: each RTT doubles window until bandwidth-limited
-- `splitSetup(setupMs, rtt)` — splits connection overhead into `{ dnsMs, tcpMs, sslMs, requestMs }` where requestMs = rtt×0.1
-- `makeRow(r, phase, startMs, setup, rtt, dlMs)` — builds simulated waterfall row with stallMs:0
-- `makeRowFromReal(r, phase, rtt)` — builds real-timing waterfall row; carves requestMs from overhead
+- `tcpDownloadTime(bytes, rttMs, bandwidthKBs)` — TCP slow-start: each RTT doubles window until bandwidth-limited; initial cwnd = 14KB
+- `effRTT(rtt, source, cdn)` — adjusts RTT: `own-cdn` → ×0.4, `third-party-cdn` → ×0.8, same-origin with CDN → ×0.4
+- `connSetup(rtt, source, cdn, isFirstToHost)` — DNS+TCP+TLS overhead; 0 if CDN/own-cdn or not first to host
+- `hostKey(r)` — `"same-origin"` | `"own-cdn"` | `"tp:{id}"` (each third-party gets its own key)
+- `splitSetup(setupMs, rtt)` → `{ dnsMs: rtt×0.5, tcpMs: rtt×0.7, sslMs: rtt×0.8, requestMs: max(1, rtt×0.1) }`
+- `downloadCohort(cohort, profile, meta, hostsOpen)` → runs a parallel cohort; each resource gets `bandwidth/n` share
 
-**FCP computation:**
-1. HTML first byte = DNS+TCP+SSL+requestMs+TTFB (simulation) OR measured startMs→responseReceivedMs (real)
-2. Render-blocking cohort downloads in parallel; cohort time = max download time across blocking resources (per resource: bandwidth / concurrent × slow-start model)
-3. FCP = max(HTML done, HTML first byte + blocking cohort) + inline parse + blocking-font download + 50ms paint
+**FCP computation (steps):**
+1. HTML downloads alone: `htmlFirstByte = ttfb + connSetup`; `htmlDone = htmlFirstByte + htmlDownload`
+2. Render-blocking CSS/JS (not inlined): download in parallel cohort starting at `htmlFirstByte`; if inline critical CSS exists, blocking CSS is excluded from FCP
+3. Inline JS adds parse cost: `inlineJsKB × 0.05 × cpuMul`
+4. SPA path (`pageMeta.isSpaRendered`): for own deferred JS, FCP extends to `htmlFirstByte + setup + download + execTimeMs × execScale`
+5. `fcp += 50 × cpuMul` (browser paint cost)
+6. Block-display fonts without preload add their download time
 
 **LCP computation:**
-- LCP resource discovery time depends on loading strategy:
-  - `preload + fetchpriority` → t=0
-  - `preload` → HTML first byte
-  - `blocking` image → HTML first byte
-  - CSS-referenced → CSS download complete
-  - lazy → after FCP
-- LCP download uses 50% of bandwidth (priority share)
-- LCP = discovery + connection overhead + download + render cost (0.02ms/KB × cpuMul)
+- Discovery time depends on loading: `preload+fetchpriority` → 0, `preload` → htmlFirstByte, image/video → htmlFirstByte, CSS-referenced → htmlDone
+- LCP download uses 50% of bandwidth; `renderCost = sizeKB × 0.02 × cpuMul`
+- `lcp = max(fcp, discovery + setup + lcpDownload + renderCost)`
+
+**Real FCP/LCP substitution (§5.1 step 7):**
+After computing simulated fcp/lcp but **before** computing SI/TTI, if:
+- `calibration.realMetrics.fcp` and `calibration.resourceHash` both exist
+- Calibration form factor matches active profile form factor (desktop if `rtt < 100`, else mobile)
+- Current resource hash equals `calibration.resourceHash`
+
+…then `fcp` and `lcp` are replaced with the real Lighthouse values. SI and TTI are derived from these real values, making scorecard and waterfall markers consistent.
 
 **TBT computation:**
-- Calibration CPU → profile CPU scale factor: `calibrationCpu / profileCpu` (e.g., real run at 4× mobile, sim at 1× desktop → scale = 0.25)
-- Per JS resource with longTasks: `longTaskCount × max(0, avgLongTaskMs × scale - 50)`
-- Per JS resource without: `max(0, execTimeMs × scale) × 0.08` (heuristic for sub-50ms tasks)
+- `execScale = profile.cpuMultiplier / calibration.cpuSlowdownMultiplier` (rescales between profiles)
+- Per JS resource: `longTaskCount × max(0, avgLongTaskMs × execScale − 50)` + residual heuristic (`max(0, exec - declaredLong) × 0.08`)
 
 **CLS computation:**
-- Missing image dimensions: +0.05 per image
-- font-display swap/block without preload: +0.03 per font
+- Missing image dimensions: `+0.05` per image
+- `font-display: swap/block` without preload: `+0.03` per font
 - Capped at 1.0
+
+**SI / TTI:**
+- `si = fcp × 0.55 + lcp × 0.45`
+- `tti = max(fcp + 500, fcp + totalJsExec + thirdPartyExec × 0.25)` (0.6 if third-party is blocking)
+
+---
 
 ### 5.2 computeScores(metrics, settings) → { fcp, lcp, tbt, cls, si, overall }
 
-Log-normal CDF: `score = 100 × (1 - Φ(ln(value/median) / σ))` where `σ = ln(median/p10) / 0.9061`
+Log-normal CDF: `score = 100 × (1 − Φ(ln(value/median) / σ))` where `σ = ln(median/p10) / 0.9061`
 
-Overall = weighted sum across **5 metrics only** (fcp×0.10 + lcp×0.25 + tbt×0.30 + cls×0.25 + si×0.10). TTI is not scored. Uses page-level scoringCurves if present, else settings.scoringCurves.
+`overall = round(fcp×0.10 + lcp×0.25 + tbt×0.30 + cls×0.25 + si×0.10)`
 
-`scoreColor(score)`: ≥90 → `#0cce6b`, ≥50 → `#ffa400`, else `#ff4e42`
+Uses `page.scoringCurves` if present (from calibration), else `settings.scoringCurves`.
+
+`scoreColor(score)`: `≥90` → `#0cce6b`, `≥50` → `#ffa400`, else `#ff4e42`
+
+---
 
 ### 5.3 computeResourceWaterfall(resources, pageMeta, profile, calibration) → { rows, fcpMs, lcpMs, totalMs }
 
-**Real-timing mode** (activated when HTML or >50% of sub-resources have `startTimeMs`):
-- Uses Lighthouse timestamps directly
-- `makeRowFromReal(r, phase, rtt)`: requestMs = min(max(1, rtt×0.1), overhead); ttfbMs = overhead − requestMs; downloadMs = endMs − sendMs
-- Manually-added resources (no timing) fall back to simulation at htmlRefEnd
+**Mode detection (real vs simulation):**
+```
+subResources = resources where type !== "html"
+realCount = subResources with valid startTimeMs + endTimeMs + endMs > startMs
+useRealTiming = (html has real timing) || (realCount >= ceil(subResources.length × 0.5))
+```
+Real timing is always preferred — it captures HTTP/2 multiplexing, connection reuse, and browser prioritization that TCP simulation cannot reproduce.
+
+**Real-timing mode:**
+- HTML row: built directly from `startTimeMs/endTimeMs/responseReceivedMs`
+- Sub-resources with timestamps: `makeRowFromReal(r, phase, rtt)` — carves `requestMs = min(max(1, rtt×0.1), overhead)` from overhead; `ttfbMs = overhead − requestMs`; `downloadMs = endMs − sendMs`
+- **Download adjustment** (when user changes `sizeKB`): `sizeRatio = sizeKB / importedSizeKB`; if `|sizeRatio − 1| > 0.005`, scales `downloadMs × sizeRatio` and recomputes `endMs`; start time stays anchored to real measurement
+- Sub-resources without timestamps: simulate at `htmlRefEnd` (TCP model)
 
 **Simulation mode:**
-- HTML first: DNS+TCP+SSL+requestMs+TTFB+download, startMs=0
-- Blocking cohort: parallel download starting at htmlFirstByte, staggered by `rtt×0.04` ms
-- Deferred/async/preload cohort: starts at htmlFirstByte, later stagger
-- Lazy: starts at htmlDone
-- LCP: hoisted above its cohort with 50% bandwidth share
+- MAX_SIM_CONCURRENT = 8 (caps bandwidth sharing)
+- Blocking cohort: staggered by `rtt × 0.04` ms per resource
+- Deferred/async/preload: start at `htmlFirstByte`; `fetchpriority` preloads start at 0
+- Lazy: start at `htmlDone`
+- LCP resource: hoisted above its cohort, 50% bandwidth share
 
-Row phase field:
-- `"blocking"` — render-blocking resource
-- `"deferred"` — deferred/async/module/preload
-- `"lazy"` — lazy-loaded
-- `"lcp"` — the LCP resource
+**Parse/eval CPU extension (applied after all rows built):**
+```
+calibCpu = calibration.cpuSlowdownMultiplier ?? 4
+cpuScale = profile.cpuMultiplier / calibCpu
+
+for each JS row:
+  sizeRatio = importedSizeKB > 0 ? sizeKB / importedSizeKB : 1
+  execRatio = importedExecTimeMs > 0 ? execTimeMs / importedExecTimeMs : 1
+  row.parseMs = round((res.parseMs ?? 0) × sizeRatio × cpuScale)   ← parse ∝ bytes
+  row.evalMs  = round((res.evalMs  ?? 0) × execRatio × cpuScale)   ← eval ∝ code complexity
+  row.endMs  += row.parseMs + row.evalMs
+```
+
+Rationale: parsing is proportional to bytes tokenised; evaluation is proportional to code complexity (execTimeMs). Both fields use their own independent ratio so changes to one don't affect the other. When resources are unmodified (ratio = 1), exact Lighthouse bootup-time values are used.
+
+**FCP/LCP markers:**
+`computeMetrics(list, meta, profile, calibration)` is called and its result used for `fcpMs`/`lcpMs`, making waterfall markers and scorecard rows identical.
+
+---
 
 ### 5.4 computeRoadmap(resources, pageMeta, locked, profile, calibration, settings) → Suggestion[]
 
-Each candidate applies a patch, recomputes mobile score, returns if gain > 0 and not locked.
+Each candidate applies a hypothetical patch, recomputes score, returns if `gain > 0` and not locked.
+Suggestions are sorted by `mobileGain` descending.
 
 **Per-resource candidates:**
 
 | Key pattern | Condition | Patch | Effort |
-|------------|-----------|-------|--------|
-| `r:{id}:format` | image not AVIF/WebP | `imageFormat: "AVIF"` + sizeKB×0.45 | Easy |
-| `r:{id}:loading` | JS blocking | `loading: "defer"` | Easy/Medium |
+|-------------|-----------|-------|--------|
+| `r:{id}:format` | image not AVIF/WebP | `imageFormat: "AVIF"` | Easy |
+| `r:{id}:loading` | JS blocking | `loading: "defer"` | Easy/Medium (3rd-party = Medium) |
 | `r:{id}:preload` | LCP not preloaded | `loading: "preload"` | Easy |
-| `r:{id}:fetchpriority` | LCP image without FP | `fetchpriority: true` | Easy |
-| `r:{id}:dimensions` | image missingDimensions | `missingDimensions: false` | Easy |
-| `r:{id}:fontDisplay` | font swap/block | `fontDisplay: "optional"` | Easy |
-| `r:{id}:size` | JS >100KB or image >150KB | halve or ×0.6 | Medium |
+| `r:{id}:fetchpriority` | LCP image without fetchpriority | `fetchpriority: true` | Easy |
+| `r:{id}:dims` | image missingDimensions | `missingDimensions: false` | Easy |
+| `r:{id}:fontdisplay` | font swap/block | `fontDisplay: "optional"` | Easy |
+| `r:{id}:size` | JS >100KB | halve `sizeKB` + halve `execTimeMs` | Hard |
+| `r:{id}:size` | image >150KB | `sizeKB × 0.6` | Medium |
 | `r:{id}:inline` | critical CSS ≤30KB blocking | `inline: true` | Medium |
 
 **Page-level candidates:**
 
 | Key | Condition | Patch | Effort |
 |-----|-----------|-------|--------|
-| `p:cdn` | !meta.cdn | `cdn: true` | Easy |
-| `p:ttfb` | meta.ttfb > 200 | `ttfb: 150` | Hard |
+| `p:cdn` | `!meta.cdn` | `cdn: true` | Easy |
+| `p:ttfb` | `meta.ttfb > 200` | `ttfb: 150` | Medium |
 
-Lock key format matches suggestion key — stored in `variation.locked`.
+Lock key stored in `variation.locked` matches suggestion key exactly.
 
 ---
 
@@ -364,182 +427,291 @@ Lock key format matches suggestion key — stored in `variation.locked`.
 
 **Supports:** LH 10, 11, 12, 13+ (both field naming conventions)
 
-**Key extraction logic:**
+**Step-by-step extraction:**
 
-1. **Metrics:** `audit.numericValue` from: `first-contentful-paint`, `largest-contentful-paint`, `total-blocking-time`, `cumulative-layout-shift`, `speed-index`, `interactive`
-2. **Profile detection:** `configSettings.formFactor`, `cpuSlowdownMultiplier` (default 4 mobile/1 desktop)
-3. **CDN detection:** Response header check (CF-Ray, X-Amz-CF-Id, X-Vercel-Id, X-Cache) + host pattern match (cloudfront, fastly, akamai, cloudflare, vercel, netlify)
-4. **TTFB:** `server-response-time` audit `numericValue`
-5. **Resources from `network-requests` audit:**
-   - Type mapping: Document→html, Stylesheet→css, Script→js, Font→font, Image/SVG→image, Media→video
-   - Loading strategy classification:
-     - CSS: blocking if in `render-blocking-resources` audit; else preload
-     - JS: blocking if in `render-blocking-resources`; VeryLow priority → async; else defer
-     - Image: LCP/High priority → preload; Low priority/offscreen → lazy; else blocking
-     - Font: always preload
-   - LCP resource: detected from `lcp-breakdown-insight` (LH13+) or `largest-contentful-paint-element` (older)
-   - Long tasks: from `long-tasks` audit per URL; remaining distributed from `mainthread-work-breakdown` proportional to JS size
-   - Unsized images: from `unsized-images` audit
-6. **Real timing (LH13+):** `rendererStartTime`, `networkRequestTime`, `networkEndTime` (already ms)
-   **LH≤12:** `startTime`, `responseReceivedTime`, `endTime` (seconds → ×1000)
-7. **HTML row:** synthesized from all Document-type requests; first by startTime for timing
-8. **Curve fitting:** `fitCurves(realMetrics, realMetricScores, realScore)` from curveFit.js
+1. **Metrics** — `audit.numericValue` from: `first-contentful-paint`, `largest-contentful-paint`, `total-blocking-time`, `cumulative-layout-shift`, `speed-index`, `interactive`
+2. **Profile detection** — `configSettings.formFactor` + `cpuSlowdownMultiplier` (default 4/1); throttling RTT + throughput
+3. **CDN detection** — response header check (`CF-Ray`, `X-Amz-CF-Id`, `X-Vercel-Id`, `X-Cache`) + host pattern match (`cloudfront`, `fastly`, `akamai`, `cloudflare`, `vercel`, `netlify`)
+4. **TTFB** — `server-response-time` audit `numericValue`
+5. **Bootup times** — `buildBootupByUrl()` extracts per-URL `{ evalMs, parseMs }` from `bootup-time` audit (`scripting` / `scriptParseCompile` columns)
+6. **Long tasks** — `buildLongTasksByUrl()` aggregates `long-tasks` audit by URL
+7. **Blocking URLs** — `buildBlockingUrls()` from `render-blocking-resources` (LH ≤12) and `render-blocking-insight` (LH 13+)
+8. **Offscreen images** — `buildOffscreenSet()` from `offscreen-images`
+9. **LCP element** — `findLcpElementInfo()` walks `lcp-breakdown-insight` (LH 13+), `largest-contentful-paint-element` (older), then `prioritize-lcp-image` as fallback
+10. **Resources from `network-requests`:**
+    - Type mapping: Document→html, Stylesheet→css, Script→js, Font→font, Image→image, Media→video
+    - Loading strategy (`classifyLoading`): CSS: blocking if in blocking set, else preload; JS: blocking if in blocking set, VeryLow priority→async, else defer; Image/Video: LCP or high priority→preload, offscreen→lazy, else blocking; Font: always preload; XHR/Fetch: lazy
+    - `evalMs`/`parseMs` populated from `bootupByUrl`
+    - Real timing (LH13+): `rendererStartTime`, `networkRequestTime`, `networkEndTime` (ms already); LH≤12: `startTime`/`responseReceivedTime`/`endTime` (seconds ×1000)
+11. **HTML row synthesized** — aggregates all Document-type requests; uses earliest one's timing
+12. **LCP fallback** — if image LCP detected but URL not matched, flags the largest image
+13. **Mainthread-work distribution** — remaining mainthread work (beyond declared long tasks) distributed across JS resources proportional to `sizeKB`; this prevents simulated TBT collapsing to ~0
+14. **Import snapshots** — after all distribution:
+    ```js
+    for each JS resource:
+      r.importedExecTimeMs = r.execTimeMs  // final value after distribution
+      r.importedSizeKB     = r.sizeKB
+    ```
+15. **SPA detection** — if own-origin deferred JS has `>200ms` total exec, `isSpaRendered = true`
+16. **resourceHash fingerprint** — `resources.map(r => type:round(sizeKB):loading:source:count).join(",")` stored in calibration
+
+**CalibrationPayload returned:**
+```js
+{
+  name, sourceUrl, fetchTime, lhVersion,
+  formFactor, cpuSlowdownMultiplier, throttlingRttMs, throttlingThroughputKbps,
+  pageMeta: { ttfb, cdn, isSpaRendered },
+  resources,        // Resource[] with Lighthouse timing + bootup + snapshot fields
+  resourceHash,     // fingerprint string
+  realScore,
+  realMetrics,
+  realMetricScores,
+}
+```
 
 ---
 
 ## 7. Curve Fitting — curveFit.js
 
-Called during calibration to adjust per-metric log-normal curves so the computed overall score matches the real Lighthouse score.
+### fitCurves(realMetrics, realMetricScores, realScore) → scoringCurves
 
-**Algorithm:**
-1. Start with default curves
-2. For each metric, adjust median/p10 so `computeScore(realMetricValue, curve) ≈ realMetricScore`
-3. Verify that overall (weighted sum) matches realScore within tolerance
-4. Returns `scoringCurves` object stored on the Page
+**Pass 1 — per-metric binary search:**
+For each of `[fcp, lcp, tbt, cls, si]`:
+- Skip if score is 0/1 (boundary — ill-conditioned) or default curve already matches within 0.5 points
+- Binary search scalar `k ∈ [0.05, 3]` to scale `median` and `p10` uniformly until `metricScore(value, scaled) ≈ targetScore` (40 iterations, tolerance 0.5)
 
-These fitted curves are used instead of global settings curves when computing scores for this page.
+**Pass 2 — uniform residual nudge:**
+After per-metric fitting, if `|computeScores(realMetrics, fitted).overall − realScore| > 1`:
+- Binary search global scale factor `k ∈ [0.5, 2]` applied to all 5 curves simultaneously (12 iterations, tolerance 1 point)
+
+Result: scoring curves where the simulator reproduces both per-metric scores and the overall score within 1 point.
 
 ---
 
 ## 8. IndexedDB Schema — db.js
 
-**Database:** `perf-planner`, version 4
+**Database:** `perf-planner`, **version 4**
 
-| Store | Key | Indexes | Notes |
-|-------|-----|---------|-------|
-| `pages` | `id` | — | |
-| `variations` | `id` | `pageId` | One per-page index for efficient page-scoped queries |
-| `settings` | `id` | — | Always single row with id="global" |
+| Store | Key | Indexes |
+|-------|-----|---------|
+| `pages` | `id` | — |
+| `variations` | `id` | `pageId` (non-unique) |
+| `settings` | `id` | — |
 
-**DB version history:** Version 4 added `variations.locked` field. Migration drops & recreates variations store.
+**Version history:**
+- v1: created `pages` + `variations` stores
+- v2: added `settings` store  
+- v3: dropped + recreated `pages` + `variations` (schema change)
+- v4: dropped + recreated `pages` + `variations` again (replaced `inputs` with `pageMeta` + resource-shaped `resources`); `settings` store survives all upgrades
 
-**CRUD helpers exported:** `savePage`, `deletePage`, `saveVariation`, `deleteVariation`, `saveSettings`, `loadAll`
+**Exported CRUD helpers:** `openDB`, `getAllPages`, `savePage`, `deletePage`, `getAllVariations`, `saveVariation`, `deleteVariation`, `getVariationsByPageId`, `deleteVariationsByPageId`, `getSettings`, `saveSettings`
+
+`deletePage(id)` cascades: deletes all variations for that page first.
 
 ---
 
-## 9. ResourceWaterfall.jsx — Interaction Model
+## 9. Export/Import — exportImport.js
 
-The waterfall is fully self-contained. Props: `{ rows, fcpMs, lcpMs, totalMs }`.
+**Export version:** 4
 
-**State:**
-- `zoom` (1–80×) — current zoom level
+**`downloadPageAsJSON(page, variations)`** — downloads `{page-name}-perf-profile.json`:
+```json
+{
+  "exportVersion": 4,
+  "exportedAt": "ISO",
+  "page": { "name", "scoringCurves", "calibration" },
+  "variations": [{ "name", "isBaseline", "locked", "pageMeta", "resources" }]
+}
+```
+
+**`downloadSettingsAsJSON(settings)`** — downloads `perf-planner-settings.json`
+
+**`parseImportFile(file)`** — validates `exportVersion === 4`; assigns new UUIDs to page + variations; returns `{ page, variations }`
+
+**`parseSettingsFile(file)`** — merges imported settings with `DEFAULT_SETTINGS` (missing fields fall back to defaults)
+
+---
+
+## 10. Resource Simulator — resourceSimulator.js
+
+`computeResourceImpact(pageMeta, resources, profileKey, settings)` — computes incremental metric impact of a resource list (used less frequently than `computeMetrics`). Protocol-aware (HTTP/1.1 uses connection-pool queue model, HTTP/2 and HTTP/3 use multiplexed bandwidth sharing with QUIC gain).
+
+Returns `{ extraBlockingMs, extraExecMs, extraLongTaskTBT, extraCLS, lcpResourceMs, hasLcpResource }`.
+
+**Not used in the main data flow** — `computeMetrics` in calculator.js is the authoritative metric source.
+
+---
+
+## 11. ResourceWaterfall.jsx — Interaction Model
+
+Props: `{ rows, fcpMs, lcpMs, totalMs }`
+
+**Zoom/pan state:**
+- `zoom` (1–80×, default: auto-fits first ~10s on first render)
 - `viewStart` (ms) — left edge of visible window
-- `isDragging` — cursor state
 
-**Zoom:** wheel event on ruler area, or Ctrl+wheel anywhere. Anchor point is mouse X position.
+**Zoom:** wheel on ruler or Ctrl+wheel on rows. Anchor point = mouse X position.
 
-**Pan:** mousedown + mousemove on timeline (document-level to handle drag-out). RAF-throttled.
+**Pan:** mousedown+drag on timeline; document-level listeners so drag-out works. RAF-throttled.
 
-**Touch:** touchstart/move/end on timeline for mobile pan.
-
-**Rendering:**
-- Grid lines: CSS `backgroundImage` with multiple `linear-gradient` entries (one per tick) — applied to both ruler and every row's timeline cell. Single CSS property replaces N×M DOM elements.
-- Segments: absolute-positioned `Box` elements. Phase height tiers: stall/dns/tcp/ssl → 32% inset; request → 40% inset; ttfb/download → 18% inset.
-- Stall segment: CSS diagonal hatch via `repeating-linear-gradient(45deg, ...)` instead of solid color.
-- Tooltip: transparent hit-area Box spanning the full bar width; real segments are `pointerEvents: none`.
+**Touch:** `touchstart/move/end` for mobile pan.
 
 **Phase colors:**
 ```js
-stall:    "#aaaaaa"  // gray hatch
-dns:      "#009d57"  // green
-tcp:      "#e58d1a"  // orange
-ssl:      "#9b52b5"  // purple
-request:  "#1a6c5e"  // dark teal (thin stripe)
-ttfb:     "#c0c0c0"  // light gray
-download: TYPE_DL_COLOR[row.type]  // per resource type
+const PHASE = {
+  stall:    { color: "#aaaaaa", label: "Queueing / Stalled"  },  // diagonal hatch
+  dns:      { color: "#009d57", label: "DNS Lookup"          },
+  tcp:      { color: "#e58d1a", label: "Initial Connection"  },
+  ssl:      { color: "#9b52b5", label: "SSL/TLS"             },
+  request:  { color: "#1a6c5e", label: "Request Sent"        },  // thin stripe
+  ttfb:     { color: "#c0c0c0", label: "Waiting (TTFB)"      },
+  download: { color: null,      label: "Content Download"    },  // TYPE_DL_COLOR[row.type]
+  parse:    { color: "#06b6d4", label: "Parse / Compile"     },  // cyan
+  eval:     { color: "#d946ef", label: "Script Evaluation"   },  // magenta
+};
+
+const TYPE_DL_COLOR = {
+  html: "#3b82f6", js: "#ef4444", css: "#f59e0b",
+  font: "#c084fc", image: "#22c55e", video: "#38bdf8", other: "#94a3b8",
+};
 ```
 
-**Download colors (TYPE_DL_COLOR):**
-```js
-html: "#3b82f6", js: "#ef4444", css: "#f59e0b",
-font: "#c084fc", image: "#22c55e", video: "#38bdf8", other: "#94a3b8"
-```
+**Phase height tiers in segments:**
+- `stall/dns/tcp/ssl` → `top: 32%, bottom: 32%` (narrow)
+- `request` → `top: 40%, bottom: 40%` (very narrow stripe)
+- `ttfb/download/parse/eval` → `top: 18%, bottom: 18%` (full height)
+
+**Rendering:**
+- Grid lines: single `backgroundImage` CSS with multiple `linear-gradient` entries (one per tick). Applied to ruler + all row timeline cells — replaces N×M DOM elements.
+- Segments: `pointerEvents: none`; tooltip hit-area is a separate transparent `Box` spanning the whole bar.
+- End-time label: shown right of bar when `4% < endPct < 96%`.
+- Pan progress bar at bottom when `zoom > 1`.
+
+**PHASE_ORDER:** `["stall","dns","tcp","ssl","request","ttfb","download","parse","eval"]`
 
 ---
 
-## 10. Component Data Flow
+## 12. Component Data Flow
 
 ```
 index.jsx
-  ├── reads: activeVariation, baselineVariation, settings, page
-  ├── computes: metrics (mobile+desktop), scores, roadmap, waterfall (mobile+desktop)
-  ├── passes to ImpactDashboard: { mobileMetrics, desktopMetrics, mobileScores, desktopScores,
-  │                                 mobileWaterfall, desktopWaterfall, baselineMetrics,
-  │                                 baselineScores, calibration, effectiveSettings }
-  ├── passes to ResourcePanel: { resources, pageMeta, metrics, scores }
-  └── passes to OptimizationRoadmap: { roadmap, locked, dispatch }
+  ├── useMemo: mobileMetrics, desktopMetrics (computeMetrics ×2)
+  ├── useMemo: mobileScores, desktopScores (computeScores ×2)
+  ├── useMemo: baselineMobileMetrics, baselineDesktopMetrics (computeMetrics ×2; skipped when isBaseline)
+  ├── useMemo: roadmapItems (computeRoadmap; always uses PROFILES.mobile)
+  ├── useMemo: tabScores (computeMetrics + computeScores per tab; always mobile)
+  ├── useAutoSave(activeVariation) — 500ms debounce
+  │
+  ├── TopBar — props: onPagesOpen, onSettingsOpen, onCalibrationOpen, simMobileScore, simDesktopScore
+  │            (calibration Δ chip reads calibration.formFactor to pick which score to compare)
+  ├── VariationTabs — props: variations, activeVariationId, tabScores
+  ├── PageMetaBar — reads/dispatches active variation pageMeta
+  ├── ResourcePanel — reads active variation resources; per-resource score deltas via computeMetrics
+  ├── ImpactDashboard — receives pre-computed metrics+scores; computes both waterfalls internally:
+  │   │  computeResourceWaterfall(resources, pageMeta, PROFILES.mobile,  calibration)
+  │   │  computeResourceWaterfall(resources, pageMeta, PROFILES.desktop, calibration)
+  │   └── ScoreCard
+  │       ├── ScoreGauge (SVG arc)
+  │       ├── MetricRow ×5 (with baseline delta pills)
+  │       └── ResourceWaterfall (rows, fcpMs, lcpMs, totalMs)
+  ├── OptimizationRoadmap — receives pre-computed roadmapItems; dispatches RESOURCE_FIELD_CHANGED /
+  │                         PAGE_META_CHANGED; patchFromSuggestionKey maps key→field/value
+  ├── SettingsPanel — drawer; reads/dispatches settings
+  ├── PageManager — page cards; triggers calibration dialog; file import
+  └── CalibrationPanel — Lighthouse JSON upload; parseLighthouseReport → fitCurves → dispatch
+                         PAGE_CREATED_FROM_LIGHTHOUSE or PAGE_RECALIBRATED
 
-ImpactDashboard → ScoreCard (one per selected profile)
-  └── ScoreCard → ResourceWaterfall (rows+fcpMs+lcpMs+totalMs)
-
-ResourcePanel → ResourceDialog (modal, controlled by parent)
-OptimizationRoadmap → RoadmapCard[] (Apply/Lock dispatch to reducer)
+ComparisonMode (when state.comparisonMode = true)
+  ├── ComparisonSelector — sidebar checkboxes; max 4 variations
+  └── ComparisonColumn ×N — computeMetrics + computeScores per column (mobile only)
 ```
 
-All heavy computation (`computeMetrics`, `computeScores`, `computeRoadmap`, `computeResourceWaterfall`) runs synchronously in `useMemo` blocks in `index.jsx`. There is no background worker. For pages with >100 resources, this could be a bottleneck — the current design is acceptable for typical pages (10–50 resources).
+All heavy computation runs synchronously in `useMemo` in `index.jsx` or in render in `ImpactDashboard`. No background workers.
 
 ---
 
-## 11. Auto-Save
+## 13. Auto-Save
 
-`useAutoSave(variation, dispatch)` — 500ms debounce on variation identity change. Calls `saveVariation(variation)` to IndexedDB. Explicit saves also happen in ResourceDialog and VariationTabs after mutations to avoid the debounce lag on critical operations.
+`useAutoSave(variation)` — 500ms debounce on variation object identity change. Calls `saveVariation(variation)` to IndexedDB. The debounce cleans up on unmount or when variation changes before the timer fires.
+
+Explicit saves also happen in:
+- `VariationTabs` / `TabContextMenu` — after rename, duplicate, set-baseline
+- `CalibrationPanel` — `savePage` + `saveVariation` immediately on apply
+- `OptimizationRoadmap` — relies on auto-save (dispatches reducer, auto-save picks it up)
 
 ---
 
-## 12. Settings Migration
+## 14. Settings Migration
 
-On init, if `settings.scoringWeights.tti` exists (old schema), the reducer resets settings to defaults. This handles the TTI weight removal silently without a DB version bump.
+On `AppContext.jsx` init, if `settings.scoringWeights.tti != null` (old schema that included TTI), settings are reset to `DEFAULT_SETTINGS.scoringWeights` + `DEFAULT_SETTINGS.scoringCurves` and re-saved. This handles TTI removal silently without a DB version bump.
 
 ---
 
-## 13. Known Limitations
+## 15. Known Limitations
 
-- **Network model:** No real bandwidth contention modelling — parallel downloads get equal shares. No request prioritization beyond phase classification. RTT is treated as constant (no jitter).
-- **Execution time:** CPU-only scaling (`cpuMultiplier` ratio). No memory pressure, GC pauses, or layout/style recalc modelling.
-- **Calibration scope:** Curves are fitted at the calibration CPU throttle level. Scaling to other profiles is an approximation (linear CPU ratio only).
-- **Stall phase:** `stallMs = 0` always. HTTP/1.1 connection-pool stall is already encoded in staggered `startMs` values in the waterfall; it is not separated into a visible stall segment.
+- **Network model:** No real bandwidth contention — parallel downloads get equal shares. No request prioritization beyond phase classification. RTT constant (no jitter). HTTP/2 multiplexing estimated via cohort share, not real stream scheduling.
+- **Execution time:** CPU-only scaling via `cpuMultiplier` ratio. No memory pressure, GC pauses, layout/style recalc.
+- **Calibration scope:** Curves fitted at calibration CPU throttle. Scaling to other profiles is linear CPU ratio only.
+- **Stall phase:** `stallMs = 0` always. HTTP/1.1 connection-pool stall is encoded in staggered `startMs` in simulation mode, not separated into a visible stall segment.
 - **Comparison mode:** Always uses mobile profile. Desktop comparison not implemented.
-- **Max 4 comparisons:** Hard cap in `COMPARISON_VARIATION_TOGGLED` reducer.
+- **Max 4 comparisons:** Hard cap in reducer.
+- **resourceHash sensitivity:** Hash uses `round(sizeKB)` — changes < 0.5KB to sizeKB won't be detected as modified. This is intentional to avoid floating-point noise.
 
 ---
 
-## 14. Adding a New Roadmap Suggestion
+## 16. Adding a New Roadmap Suggestion
 
-1. In `calculator.js` → `computeRoadmap()`, add a new `candidates.push({...})` block following the existing pattern
+1. In `calculator.js` → `computeRoadmap()`, add `candidates.push({...})` following existing pattern
 2. Key format: `r:{resourceId}:{field}` for per-resource, `p:{name}` for page-level
-3. `patch` shape: `{ resourceId, fields: {...} }` for resource patch; `{ meta: {...} }` for pageMeta patch
-4. The `applyPatch()` function in `OptimizationRoadmap.jsx` already handles both patch shapes via dispatch
+3. `patch` shape: `{ resourceId, fields: {...} }` for resource; `{ meta: {...} }` for pageMeta
+4. In `OptimizationRoadmap.jsx` → `patchFromSuggestionKey()`, add the key suffix → field mapping
+5. For page-level: add to `pageMetaTargetForKey()` as well
 
-## 15. Adding a New Phase to the Waterfall
+---
 
-1. Add field to row object in `makeRow()` and `makeRowFromReal()` in `calculator.js`
-2. Add entry to `PHASE` constant in `ResourceWaterfall.jsx`
-3. Add to `PHASE_ORDER` array
-4. Add to `buildSegments()` phases array
-5. Add height tier in segment `sx` condition
-6. Add tooltip row in `tooltipContent` grid
-7. Add legend swatch in the PHASE_ORDER map at bottom
+## 17. Adding a New Phase to the Waterfall
 
-## 16. Adding a New Resource Field
+1. Add duration field to `makeRow()` and `makeRowFromReal()` in `calculator.js` (initialize to 0)
+2. Update `endMs` calculation if the phase extends total duration
+3. Add to `PHASE` constant in `ResourceWaterfall.jsx` with color + label
+4. Add to `PHASE_ORDER` array
+5. Add to `buildSegments()` phases array with `durationMs: row.newPhaseMs ?? 0`
+6. Add height tier in segment `sx` top/bottom condition
+7. Add tooltip row in `tooltipRows` array (conditional on `> 0`)
+8. Add legend swatch in the `PHASE_ORDER.map()` at bottom — set appropriate width/height for narrow vs full-height phases
 
-1. Add to `defaultSettings.js` resource shape defaults
-2. Add UI in `ResourceDialog.jsx` (conditional by type if needed)
-3. Dispatch `RESOURCE_FIELD_CHANGED` or include in `RESOURCE_UPDATED` payload
+---
+
+## 18. Adding a New Resource Field
+
+1. Add with default to `DEFAULT_RESOURCE` in `defaultSettings.js`
+2. Add UI in `ResourceDialog.jsx` (guard by `type === "js"` etc. as needed)
+3. Field will be preserved automatically by:
+   - `RESOURCE_FIELD_CHANGED` reducer (spreads `...r`)
+   - `ResourceDialog` initialising form with `{ ...resource }` → onSave(form) → `RESOURCE_UPDATED`
 4. Use in `calculator.js` metric computation as needed
 5. Update `lighthouseImporter.js` if the field can be detected from Lighthouse data
+6. Export shape: `RESOURCE_UPDATED` / auto-save handles persistence automatically; `exportImport.js` serialises the full resource array so new fields export for free
 
 ---
 
-## 17. File Locations for Common Tasks
+## 19. File Locations for Common Tasks
 
 | Task | File |
 |------|------|
-| Change how FCP is computed | `calculator.js` → `computeMetrics()` |
+| Change how FCP/LCP is computed | `calculator.js` → `computeMetrics()` |
+| Change real vs simulated FCP/LCP switching | `calculator.js` → resourceHash block in `computeMetrics()` |
+| Change waterfall bar behavior | `calculator.js` → `computeResourceWaterfall()` |
+| Change parse/eval bar scaling | `calculator.js` → CPU extension block in `computeResourceWaterfall()` |
 | Change scoring thresholds | `defaultSettings.js` → `scoringCurves` |
-| Add/remove a scoring metric | `calculator.js` + `defaultSettings.js` + `SettingsPanel.jsx` |
+| Change scoring weights | `defaultSettings.js` → `scoringWeights` |
 | Change waterfall colors | `ResourceWaterfall.jsx` → `PHASE` and `TYPE_DL_COLOR` |
-| Add a new page meta field | `PageMetaBar.jsx` + `defaultSettings.js` + `calculator.js` + `exportImport.js` |
+| Add a new roadmap suggestion | `calculator.js` → `computeRoadmap()` + `OptimizationRoadmap.jsx` → `patchFromSuggestionKey()` |
+| Change calibration panel fields | `CalibrationPanel.jsx` + `lighthouseImporter.js` |
 | Fix Lighthouse parsing for a new LH version | `lighthouseImporter.js` |
-| Change IndexedDB schema | `db.js` → bump version + add migration |
-| Change roadmap suggestions | `calculator.js` → `computeRoadmap()` |
+| Change IndexedDB schema | `db.js` → bump `DB_VERSION` + add migration block |
+| Add a new page meta field | `PageMetaBar.jsx` + `defaultSettings.js` + `calculator.js` + `exportImport.js` |
 | Change comparison behavior | `ComparisonMode.jsx` + `ComparisonColumn.jsx` |
+| Change export/import format | `exportImport.js` → bump `EXPORT_VERSION` + update parse logic |
+| Change metric scoring formula | `calculator.js` → `metricScore()` |
+| Change curve fitting algorithm | `curveFit.js` → `fitMetric()` and/or `fitCurves()` |

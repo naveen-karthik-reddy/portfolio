@@ -82,6 +82,8 @@ export function computeMetrics(resources, pageMeta, profile, calibration) {
   const list = resources ?? [];
   const meta = pageMeta ?? {};
   const cpuMul = profile.cpuMultiplier;
+  const calibrationCpu = calibration?.cpuSlowdownMultiplier ?? 4;
+  const execScale = cpuMul / calibrationCpu;
 
   // ── 1. HTML phase ───────────────────────────────────────────────
   // The document downloads alone, full bandwidth, after TTFB + connection setup.
@@ -119,6 +121,24 @@ export function computeMetrics(resources, pageMeta, profile, calibration) {
   // ── 3. FCP ─────────────────────────────────────────────────────
   let fcp = Math.max(htmlDone, htmlFirstByte + blockingResult.duration);
   fcp += inlineJsKB * 0.05 * cpuMul;
+
+  // SPA hydration path: React/Vue/Angular pages show nothing until their
+  // own deferred JS downloads and executes, even though the browser doesn't
+  // list that JS as render-blocking. Extend FCP to include that cost.
+  if (meta.isSpaRendered) {
+    for (const r of list) {
+      if (r.type !== "js" || r.loading === "blocking" || r.inline) continue;
+      if (r.source === "third-party-cdn") continue; // 3rd-party scripts run independently
+      if (!r.execTimeMs) continue;
+      const eRtt = effRTT(profile.rtt, r.source, meta.cdn);
+      const setup = connSetup(profile.rtt, r.source, meta.cdn, !hostsOpen.has(hostKey(r)));
+      hostsOpen.add(hostKey(r));
+      const bytes = (r.sizeKB ?? 0) * 1024 * (r.count ?? 1);
+      const dl = tcpDownloadTime(bytes, eRtt, profile.bandwidthKBs * 0.5);
+      fcp = Math.max(fcp, htmlFirstByte + setup + dl + r.execTimeMs * execScale);
+    }
+  }
+
   fcp += 50 * cpuMul; // browser paint cost
 
   // Block-display fonts that aren't preloaded delay first paint.
@@ -165,8 +185,7 @@ export function computeMetrics(resources, pageMeta, profile, calibration) {
   // Lighthouse used at calibration time (4× for mobile-default, 1× for
   // desktop). For other profiles we re-scale by cpuMul / calibrationCpuMul
   // instead of multiplying through (which would double-count the throttle).
-  const calibrationCpu = calibration?.cpuSlowdownMultiplier ?? 4;
-  const execScale = cpuMul / calibrationCpu;
+  // (calibrationCpu and execScale are declared at the top of this function)
   let tbt = 0;
   for (const r of list) {
     if (r.type !== "js") continue;
@@ -189,6 +208,24 @@ export function computeMetrics(resources, pageMeta, profile, calibration) {
   cls = Math.min(1.0, cls);
 
   // ── 7. SI / TTI ────────────────────────────────────────────────
+  // When resources are unmodified and the active profile matches the calibration
+  // form factor, substitute real Lighthouse FCP/LCP so metric rows, scores, and
+  // waterfall markers all show the same number. SI/TTI are re-derived from these
+  // real values so they stay consistent too.
+  if (calibration?.realMetrics?.fcp && calibration?.resourceHash) {
+    const calFF  = calibration.formFactor ?? "mobile";
+    const profFF = profile.rtt < 100 ? "desktop" : "mobile";
+    if (calFF === profFF) {
+      const curHash = list
+        .map((r) => `${r.type}:${Math.round(r.sizeKB ?? 0)}:${r.loading}:${r.source}:${r.count ?? 1}`)
+        .join(",");
+      if (curHash === calibration.resourceHash) {
+        fcp = calibration.realMetrics.fcp;
+        lcp = calibration.realMetrics.lcp;
+      }
+    }
+  }
+
   const si = fcp * 0.55 + lcp * 0.45;
   const totalJsExec = list.filter((r) => r.type === "js").reduce((s, r) => s + (r.execTimeMs ?? 0), 0) * execScale;
   const thirdPartyExec = list
@@ -367,8 +404,10 @@ export function computeResourceWaterfall(resources, pageMeta, profile, calibrati
   const html = list.find((r) => r.type === "html");
 
   // ── Detect real-timing mode ──────────────────────────────────────
-  // Use Lighthouse timestamps when the HTML row (or the majority of sub-resources)
-  // carries measured timing. Manually added resources fall back to simulation.
+  // Always prefer Lighthouse-measured timestamps — they capture HTTP/2
+  // multiplexing, connection reuse, and browser prioritisation that no
+  // cohort model can reproduce. When the user edits a resource we adjust
+  // that resource's bar proportionally rather than discarding all timing.
   const subResources = list.filter((r) => r.type !== "html");
   let realCount = 0;
   for (const r of subResources) if (hasRealTiming(r)) realCount++;
@@ -427,7 +466,20 @@ export function computeResourceWaterfall(resources, pageMeta, profile, calibrati
         const phase = r.isLcp ? "lcp"
           : r.loading === "blocking" ? "blocking"
           : r.loading === "lazy" ? "lazy" : "deferred";
-        rows.push(makeRowFromReal(r, phase, rtt));
+        const row = makeRowFromReal(r, phase, rtt);
+        // If the user changed file size, scale the download segment proportionally.
+        // Start time stays anchored to the real measurement (priority / connection
+        // reuse is unchanged); only the transfer duration grows or shrinks.
+        const sizeRatio = (r.importedSizeKB ?? 0) > 0
+          ? (r.sizeKB ?? 0) / r.importedSizeKB : 1;
+        if (Math.abs(sizeRatio - 1) > 0.005) {
+          row.downloadMs = Math.max(0, Math.round(row.downloadMs * sizeRatio));
+          row.endMs = row.startMs
+            + (row.stallMs   ?? 0) + (row.dnsMs ?? 0) + (row.tcpMs ?? 0)
+            + (row.sslMs     ?? 0) + (row.requestMs ?? 0)
+            + (row.ttfbMs    ?? 0) + row.downloadMs;
+        }
+        rows.push(row);
       } else {
         // Manually added resource without measured timing: simulate at end of HTML.
         const setup = connSetup(rtt, r.source, meta.cdn, false);
@@ -440,11 +492,18 @@ export function computeResourceWaterfall(resources, pageMeta, profile, calibrati
     // ── Simulation mode: cohort-based TCP slow-start model ───────────
     const schedStep = Math.max(1, Math.round(rtt * 0.04));
 
+    // Bandwidth sharing is capped at 8 concurrent streams to avoid absurdly small
+    // per-resource shares on pages with many resources (HTTP/2 prioritisation means
+    // browsers rarely saturate more than ~6-8 streams simultaneously).
+    const MAX_SIM_CONCURRENT = 8;
+
     // Blocking CSS / JS
     const blockingCohort = list.filter(
       (r) => (r.type === "css" || r.type === "js") && r.loading === "blocking" && !r.inline && !r.isLcp
     );
-    const blockShare = blockingCohort.length > 0 ? profile.bandwidthKBs / blockingCohort.length : profile.bandwidthKBs;
+    const blockShare = blockingCohort.length > 0
+      ? profile.bandwidthKBs / Math.min(blockingCohort.length, MAX_SIM_CONCURRENT)
+      : profile.bandwidthKBs;
 
     blockingCohort.forEach((r, idx) => {
       const setup = connSetup(rtt, r.source, meta.cdn, !hostsOpen.has(hostKey(r)));
@@ -460,7 +519,9 @@ export function computeResourceWaterfall(resources, pageMeta, profile, calibrati
         && !(r.type === "js"  && r.loading === "blocking")
         && r.loading !== "lazy"
     );
-    const deferShare = deferList.length > 0 ? (profile.bandwidthKBs * 0.5) / deferList.length : profile.bandwidthKBs * 0.5;
+    const deferShare = deferList.length > 0
+      ? (profile.bandwidthKBs * 0.5) / Math.min(deferList.length, MAX_SIM_CONCURRENT)
+      : profile.bandwidthKBs * 0.5;
 
     deferList.forEach((r, idx) => {
       const setup     = connSetup(rtt, r.source, meta.cdn, !hostsOpen.has(hostKey(r)));
@@ -472,7 +533,9 @@ export function computeResourceWaterfall(resources, pageMeta, profile, calibrati
 
     // Lazy
     const lazyList  = list.filter((r) => r.loading === "lazy" && !r.isLcp && !r.inline);
-    const lazyShare = lazyList.length > 0 ? (profile.bandwidthKBs * 0.5) / lazyList.length : profile.bandwidthKBs * 0.5;
+    const lazyShare = lazyList.length > 0
+      ? (profile.bandwidthKBs * 0.5) / Math.min(lazyList.length, MAX_SIM_CONCURRENT)
+      : profile.bandwidthKBs * 0.5;
 
     lazyList.forEach((r, idx) => {
       const setup = connSetup(rtt, r.source, meta.cdn, !hostsOpen.has(hostKey(r)));
@@ -499,7 +562,28 @@ export function computeResourceWaterfall(resources, pageMeta, profile, calibrati
 
   rows.sort((a, b) => a.startMs - b.startMs || a.endMs - b.endMs);
 
+  // Extend each JS row with CPU phases after the download bar.
+  // Parse scales with sizeKB (tokenising ∝ bytes); eval scales with execTimeMs
+  // (code complexity). For unmodified resources both ratios are 1 → exact
+  // Lighthouse bootup-time values. No mode-switching needed.
+  {
+    const calibCpu = calibration?.cpuSlowdownMultiplier ?? 4;
+    const cpuScale = profile.cpuMultiplier / calibCpu;
+    for (const row of rows) {
+      const res = list.find((r) => r.id === row.id);
+      if (!res || res.type !== "js") continue;
+      const sizeRatio = (res.importedSizeKB ?? 0) > 0
+        ? (res.sizeKB ?? 0) / res.importedSizeKB : 1;
+      const execRatio = (res.importedExecTimeMs ?? 0) > 0
+        ? (res.execTimeMs ?? 0) / res.importedExecTimeMs : 1;
+      row.parseMs = Math.round((res.parseMs ?? 0) * sizeRatio * cpuScale);
+      row.evalMs  = Math.round((res.evalMs  ?? 0) * execRatio * cpuScale);
+      row.endMs  += row.parseMs + row.evalMs;
+    }
+  }
+
   const { fcp: fcpMs, lcp: lcpMs } = computeMetrics(list, meta, profile, calibration);
+
   const totalMs = Math.max(...rows.map((r) => r.endMs), lcpMs, 1);
 
   return { rows, fcpMs: Math.round(fcpMs), lcpMs: Math.round(lcpMs), totalMs: Math.round(totalMs) };

@@ -90,6 +90,7 @@ export default function CalibrationPanel({ open, mode = "create", pageId = null,
       cpuSlowdownMultiplier: parsed.cpuSlowdownMultiplier,
       throttlingRttMs: parsed.throttlingRttMs,
       throttlingThroughputKbps: parsed.throttlingThroughputKbps,
+      resourceHash: parsed.resourceHash,
       importedAt: now,
     };
 

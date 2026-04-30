@@ -102,6 +102,18 @@ function shortName(url) {
   }
 }
 
+function buildBootupByUrl(report) {
+  const byUrl = {};
+  for (const it of audit(report, "bootup-time")?.details?.items ?? []) {
+    if (!it.url) continue;
+    byUrl[it.url] = {
+      evalMs:  Math.round(clampNonNegative(it.scripting          ?? 0)),
+      parseMs: Math.round(clampNonNegative(it.scriptParseCompile ?? 0)),
+    };
+  }
+  return byUrl;
+}
+
 function buildLongTasksByUrl(report) {
   const a = audit(report, "long-tasks");
   const items = a?.details?.items ?? [];
@@ -240,7 +252,7 @@ function detectCdnFlag(items, finalUrl) {
   return false;
 }
 
-function buildResources(report, finalUrl, longTasksByUrl, blockingUrls, unsizedImageUrls, lcpElementUrl) {
+function buildResources(report, finalUrl, longTasksByUrl, bootupByUrl, blockingUrls, unsizedImageUrls, lcpElementUrl) {
   const items = audit(report, "network-requests")?.details?.items ?? [];
 
   const fontDisplayAudit = audit(report, "font-display");
@@ -295,6 +307,8 @@ function buildResources(report, finalUrl, longTasksByUrl, blockingUrls, unsizedI
       longTaskCount: type === "js" && longTaskInfo ? longTaskInfo.count : 0,
       avgLongTaskMs: type === "js" && longTaskInfo && longTaskInfo.count > 0
         ? Math.round(longTaskInfo.totalMs / longTaskInfo.count) : 0,
+      evalMs:  type === "js" ? (bootupByUrl[it.url]?.evalMs  ?? 0) : 0,
+      parseMs: type === "js" ? (bootupByUrl[it.url]?.parseMs ?? 0) : 0,
       imageFormat: type === "image" ? detectImageFormat(it.url, it.mimeType) : "WebP",
       fetchpriority,
       missingDimensions: type === "image" ? unsizedImageUrls.has(it.url) : false,
@@ -374,8 +388,9 @@ export function parseLighthouseReport(jsonOrText) {
   const blockingUrls     = buildBlockingUrls(report);
   const unsizedImageUrls = buildUnsizedImageUrls(report);
   const lcpInfo = findLcpElementInfo(report);
+  const bootupByUrl = buildBootupByUrl(report);
   const { resources, lcpElementUrl } = buildResources(
-    report, finalUrl, longTasksByUrl, blockingUrls, unsizedImageUrls, lcpInfo.url
+    report, finalUrl, longTasksByUrl, bootupByUrl, blockingUrls, unsizedImageUrls, lcpInfo.url
   );
 
   // Synthesize a single HTML resource for the document
@@ -411,6 +426,8 @@ export function parseLighthouseReport(jsonOrText) {
     execTimeMs: 0,
     longTaskCount: 0,
     avgLongTaskMs: 0,
+    evalMs: 0,
+    parseMs: 0,
     imageFormat: "WebP",
     fetchpriority: false,
     missingDimensions: false,
@@ -453,15 +470,40 @@ export function parseLighthouseReport(jsonOrText) {
     }
   }
 
+  // Snapshot execTimeMs after all distribution so the waterfall can scale
+  // parse/eval bars proportionally when the user edits execution time.
+  for (const r of resources) {
+    if (r.type === "js") {
+      r.importedExecTimeMs = r.execTimeMs ?? 0;
+      r.importedSizeKB     = r.sizeKB     ?? 0;
+    }
+  }
+
   const ttfb = Math.round(clampNonNegative(audit(report, "server-response-time")?.numericValue, 0));
+
+  // Detect SPA/client-rendered pattern: if own (non-third-party) deferred JS
+  // has significant execution time, the page is likely React/Vue/Angular and
+  // shows nothing until that JS runs — even though the browser marks it defer.
+  const ownDeferExec = resources
+    .filter((r) => r.type === "js" && r.loading !== "blocking" && r.source !== "third-party-cdn")
+    .reduce((s, r) => s + (r.execTimeMs ?? 0), 0);
+  const isSpaRendered = ownDeferExec > 200;
 
   const pageMeta = {
     ttfb,
     cdn: detectCdnFlag(networkItems, finalUrl),
+    isSpaRendered,
   };
 
   let name = "Imported Page";
   try { name = new URL(finalUrl).host; } catch { /* keep default */ }
+
+  // Fingerprint of the imported resource list — used by computeResourceWaterfall to
+  // detect whether resources have been modified since import, so it can decide
+  // between using real Lighthouse FCP/LCP vs. the simulation.
+  const resourceHash = resources
+    .map((r) => `${r.type}:${Math.round(r.sizeKB ?? 0)}:${r.loading}:${r.source}:${r.count ?? 1}`)
+    .join(",");
 
   return {
     name,
@@ -474,6 +516,7 @@ export function parseLighthouseReport(jsonOrText) {
     throttlingThroughputKbps,
     pageMeta,
     resources,
+    resourceHash,
     realScore,
     realMetrics,
     realMetricScores,
