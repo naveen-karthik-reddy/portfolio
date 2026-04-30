@@ -200,12 +200,7 @@ export function computeMetrics(resources, pageMeta, profile, calibration) {
   }
 
   // ── 6. CLS ─────────────────────────────────────────────────────
-  let cls = 0;
-  for (const r of list) {
-    if (r.type === "image" && r.missingDimensions) cls += 0.05;
-    if (r.type === "font" && r.fontDisplay === "swap" && r.loading !== "preload") cls += 0.03;
-  }
-  cls = Math.min(1.0, cls);
+  const cls = calibration?.realMetrics?.cls ?? 0;
 
   // ── 7. SI / TTI ────────────────────────────────────────────────
   // When resources are unmodified and the active profile matches the calibration
@@ -655,22 +650,6 @@ export function computeRoadmap(resources, pageMeta, locked, profile, calibration
         label: `Add fetchpriority=high to ${shortName(r.name)}`,
         changeDesc: "fetchpriority: high", effort: EFFORT.Easy,
         patch: { resourceId: r.id, fields: { fetchpriority: true } },
-      });
-    }
-    if (r.type === "image" && r.missingDimensions) {
-      candidates.push({
-        key: `r:${r.id}:dims`, resourceId: r.id,
-        label: `Add dimensions to ${shortName(r.name)}`,
-        changeDesc: "set width/height", effort: EFFORT.Easy,
-        patch: { resourceId: r.id, fields: { missingDimensions: false } },
-      });
-    }
-    if (r.type === "font" && (r.fontDisplay === "swap" || r.fontDisplay === "block")) {
-      candidates.push({
-        key: `r:${r.id}:fontdisplay`, resourceId: r.id,
-        label: `Use font-display: optional on ${shortName(r.name)}`,
-        changeDesc: `${r.fontDisplay} → optional`, effort: EFFORT.Easy,
-        patch: { resourceId: r.id, fields: { fontDisplay: "optional" } },
       });
     }
     if (r.type === "js" && r.sizeKB > 100) {

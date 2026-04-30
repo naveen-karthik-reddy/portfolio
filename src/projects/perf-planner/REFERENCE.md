@@ -7,12 +7,7 @@ This file is the single source of truth for understanding and modifying the perf
 
 ## 1. What This Tool Is
 
-A **Core Web Vitals what-if simulator** with two modes of operation:
-
-- **Lighthouse-calibrated mode** — user uploads a Lighthouse JSON; the tool extracts all resource timings, fits its scoring curves to match the real score, then lets the user explore hypothetical changes as calibrated predictions.
-- **Manual mode** — user builds a resource list from scratch; the tool runs a TCP slow-start network model to estimate timings and scores.
-
-The primary workflow is always Lighthouse-first. Manual mode exists as a fallback.
+A **Core Web Vitals what-if simulator** — user uploads a Lighthouse JSON; the tool extracts all resource timings, fits its scoring curves to match the real score, then lets the user explore hypothetical changes as calibrated predictions.
 
 ---
 
@@ -89,7 +84,7 @@ src/projects/perf-planner/
     cls: { median, p10 },
     si:  { median, p10 }
   } | null,
-  calibration: {           // null = manually created page (no Lighthouse run)
+  calibration: {           // null = page created before a Lighthouse run was imported
     realScore: number,
     realMetrics: { fcp, lcp, tbt, cls, si, tti },   // all ms except cls
     realMetricScores: { fcp, lcp, tbt, cls, si, tti },
@@ -164,7 +159,7 @@ src/projects/perf-planner/
   inline: boolean,         // CSS/JS inlined in HTML document
   isLcp: boolean,          // marks the LCP element
 
-  // Populated from Lighthouse (absent on manually-added resources)
+  // Populated from Lighthouse
   startTimeMs: number | undefined,         // navigation-relative; from rendererStartTime or startTime×1000
   endTimeMs: number | undefined,           // from networkEndTime or endTime×1000
   responseReceivedMs: number | undefined,  // networkRequestTime or responseReceivedTime×1000
@@ -326,9 +321,8 @@ After computing simulated fcp/lcp but **before** computing SI/TTI, if:
 - Per JS resource: `longTaskCount × max(0, avgLongTaskMs × execScale − 50)` + residual heuristic (`max(0, exec - declaredLong) × 0.08`)
 
 **CLS computation:**
-- Missing image dimensions: `+0.05` per image
-- `font-display: swap/block` without preload: `+0.03` per font
-- Capped at 1.0
+- `cls = calibration.realMetrics.cls`; `0` if calibration is absent.
+- Not simulated from resource properties.
 
 **SI / TTI:**
 - `si = fcp × 0.55 + lcp × 0.45`
@@ -404,8 +398,6 @@ Suggestions are sorted by `mobileGain` descending.
 | `r:{id}:loading` | JS blocking | `loading: "defer"` | Easy/Medium (3rd-party = Medium) |
 | `r:{id}:preload` | LCP not preloaded | `loading: "preload"` | Easy |
 | `r:{id}:fetchpriority` | LCP image without fetchpriority | `fetchpriority: true` | Easy |
-| `r:{id}:dims` | image missingDimensions | `missingDimensions: false` | Easy |
-| `r:{id}:fontdisplay` | font swap/block | `fontDisplay: "optional"` | Easy |
 | `r:{id}:size` | JS >100KB | halve `sizeKB` + halve `execTimeMs` | Hard |
 | `r:{id}:size` | image >150KB | `sizeKB × 0.6` | Medium |
 | `r:{id}:inline` | critical CSS ≤30KB blocking | `inline: true` | Medium |
@@ -652,6 +644,7 @@ On `AppContext.jsx` init, if `settings.scoringWeights.tti != null` (old schema t
 - **Network model:** No real bandwidth contention — parallel downloads get equal shares. No request prioritization beyond phase classification. RTT constant (no jitter). HTTP/2 multiplexing estimated via cohort share, not real stream scheduling.
 - **Execution time:** CPU-only scaling via `cpuMultiplier` ratio. No memory pressure, GC pauses, layout/style recalc.
 - **Calibration scope:** Curves fitted at calibration CPU throttle. Scaling to other profiles is linear CPU ratio only.
+- **CLS not simulated:** CLS always reflects the imported Lighthouse value (`calibration.realMetrics.cls`); `0` if calibration is absent. Resource changes (image dimensions, font-display) do not affect the CLS score.
 - **Stall phase:** `stallMs = 0` always. HTTP/1.1 connection-pool stall is encoded in staggered `startMs` in simulation mode, not separated into a visible stall segment.
 - **Comparison mode:** Always uses mobile profile. Desktop comparison not implemented.
 - **Max 4 comparisons:** Hard cap in reducer.

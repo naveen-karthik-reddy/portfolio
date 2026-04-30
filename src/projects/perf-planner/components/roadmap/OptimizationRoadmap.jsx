@@ -74,8 +74,6 @@ function patchFromSuggestionKey(suggestion, resource) {
   if (key.endsWith(":loading"))       return { loading: "defer" };
   if (key.endsWith(":preload"))       return { loading: "preload" };
   if (key.endsWith(":fetchpriority")) return { fetchpriority: true };
-  if (key.endsWith(":dims"))          return { missingDimensions: false };
-  if (key.endsWith(":fontdisplay"))   return { fontDisplay: "optional" };
   if (key.endsWith(":inline"))        return { inline: true };
   if (key.endsWith(":size")) {
     const target = parseSizeFromChangeDesc(suggestion.changeDesc, resource.sizeKB);
