@@ -80,11 +80,13 @@ The overall score is a weighted combination of five Core Web Vitals metrics. Und
 
 Each score card contains a waterfall — a timeline showing every file your page loads as a horizontal bar. The bar spans the resource's full lifecycle, broken into the same timing phases Chrome DevTools shows: DNS lookup, initial connection, SSL handshake, request sent, waiting for the first byte (TTFB), and content download. Each phase has a distinct colour matching Chrome's conventions.
 
-The download bar uses a colour per resource type — red for JavaScript, amber for CSS, blue for HTML documents, purple for fonts, green for images — so you can identify what's consuming time at a glance.
+The download bar uses a colour per resource type — red for JavaScript, amber for CSS, blue for HTML documents, purple for fonts, green for images, teal for API requests (XHR and Fetch calls) — so you can identify what's consuming time at a glance.
+
+One thing the waterfall makes explicit that standard Lighthouse summaries hide: for most resources on a well-optimised page, the bar is mostly grey "Waiting (TTFB)" with only a small coloured download segment at the end. A 1 KB script sitting next to a 150 KB library can have identical finish times — not because the small file is slow to download, but because both requests were queued on the same H2/H3 connection and the server responded to them in parallel. The tool decomposes the download time into server wait and actual transfer, so you can see at a glance whether your time is going into bytes-in-flight or into the server deciding to send them.
 
 Two vertical markers show where FCP and LCP fall across your resource timeline. If LCP fires long after most resources have finished, that tells you your LCP element isn't being prioritised. If FCP is late, look at what render-blocking resources appear before it.
 
-You can scroll over the ruler to zoom into any time window and drag to pan. This is useful for dense pages where bars compress together at the default scale.
+You can scroll over the ruler to zoom into any time window, drag horizontally to pan, and drag vertically to scroll through long resource lists. This is useful for dense pages with many requests where bars compress together at the default scale.
 
 When you import from Lighthouse, the waterfall uses your actual measured timings — so the bars reflect what really happened in the browser, not a model approximation.
 

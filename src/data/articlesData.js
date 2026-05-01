@@ -1,5 +1,14 @@
 export const articlesData = [
   {
+    id: "holdings-analyzer",
+    title: "Holdings Analyzer — A Portfolio Dashboard from Your Zerodha CSV",
+    excerpt:
+      "Upload your Zerodha Console holdings export and get a full portfolio dashboard: P&L, dividend income, valuation ratios, risk metrics, analyst ratings, and financial calculators — instantly.",
+    date: "2026-05-01",
+    readTime: "8 min read",
+    tags: ["Finance", "React", "Portfolio", "NSE"],
+  },
+  {
     id: "web-performance-planner",
     title: "Web Performance Planner — Building a Lighthouse Score Simulator",
     excerpt:
