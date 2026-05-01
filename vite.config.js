@@ -1,13 +1,19 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// https://vite.dev/config/
 export default defineConfig({
-  plugins: [
-    react(),
-  ],
-  // Base path for assets
-  // Use '/' for root domain deployment (e.g., naveenkarthik.com)
-  // Use '/portfolio' for subdirectory deployment (e.g., github.com/username/portfolio)
+  plugins: [react()],
   base: '/',
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-mui': ['@mui/material', '@mui/icons-material', '@mui/system', '@emotion/react', '@emotion/styled'],
+          'vendor-motion': ['framer-motion'],
+          'vendor-recharts': ['recharts'],
+        },
+      },
+    },
+  },
 })

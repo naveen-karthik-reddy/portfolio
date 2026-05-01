@@ -24,11 +24,10 @@ import ReactMarkdown from "react-markdown";
 
 import { articlesData, getArticleBySlug } from "../data/articlesData";
 
-/* Load all markdown files eagerly as raw strings at build time */
+/* Lazy loaders for markdown files — each article is fetched on demand */
 const markdownFiles = import.meta.glob("../articles/*.md", {
   query: "?raw",
   import: "default",
-  eager: true,
 });
 
 /* Load all article images so Vite hashes them for production */
@@ -322,8 +321,13 @@ function ArticleView({ article }) {
   const isDark = theme.palette.mode === "dark";
   const grad = `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`;
   const [copied, setCopied] = useState(false);
+  const [content, setContent] = useState("");
 
-  const content = markdownFiles[`../articles/${article.id}.md`] ?? "";
+  useEffect(() => {
+    const loader = markdownFiles[`../articles/${article.id}.md`];
+    if (loader) loader().then((text) => setContent(text ?? ""));
+  }, [article.id]);
+
   const headings = parseHeadings(content);
 
   const handleCopy = () => {

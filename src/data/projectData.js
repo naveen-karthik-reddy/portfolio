@@ -6,10 +6,10 @@ export const projectData = [
     excerpt: "Upload your Zerodha holdings CSV and get an instant portfolio dashboard — allocation breakdown, top gainers & losers, and a full sortable holdings table.",
     tags: ["React", "Recharts", "MUI", "CSV"],
     points: [
-      "Parses Zerodha KITE holdings CSV in the browser and computes total investment, current value, and overall P&L instantly with no server uploads",
-      "Pie chart allocation breakdown by stock with a Recharts PieChart; highlights top 5 holdings and groups the rest as 'Others'",
-      "Top gainers and losers panels sorted by absolute P&L, each showing current price, average price, and return percentage",
-      "Sortable, searchable holdings table with columns for quantity, average price, current price, invested value, and net P&L",
+      "Parses a Zerodha KITE holdings CSV entirely in the browser — no server uploads — then fires live NSE requests to fetch dividend yields, valuation ratios, beta, analyst consensus, and 52-week ranges for every holding automatically",
+      "Six analysis tabs (Overview, Holdings, Dividends, Fundamentals, Risk, Analyst) with color-coded thresholds and sortable tables; every cell is editable inline and updates P&L aggregates and charts in real time",
+      "Risk tab flags high-risk positions by comparing beta and debt-to-equity against configurable thresholds, with a 52-week range progress bar that instantly surfaces holdings drifting toward annual lows",
+      "Four compounding calculators (SIP, Lumpsum, Goal, CAGR) with synchronized slider and text inputs; Recharts stacked-area charts separate invested principal from market-generated returns over the full horizon",
     ],
   },
   {
@@ -20,12 +20,11 @@ export const projectData = [
     tags: ["React", "IndexedDB", "MUI", "Performance"],
     articleSlug: "web-performance-planner",
     points: [
-      "Models all six Core Web Vitals (FCP, LCP, TBT, CLS, SI, TTI) using Lighthouse's log-normal scoring curves and published metric weights",
-      "Simulates mobile (150ms RTT, 200 KB/s, 4× CPU throttle) and desktop profiles simultaneously with a per-request TCP slow-start download model",
-      "Resource panel simulates individual files with HTTP/1.1 queue delays, HTTP/2 multiplexing, and HTTP/3 QUIC gain per resource type and loading strategy",
-      "Optimization roadmap ranks 24 levers by score gain with Easy / Medium / Hard effort labels; locked fields are excluded from suggestions",
-      "Comparison mode shows up to four variations side by side, highlighting best and worst values per metric across pages",
-      "Full IndexedDB persistence with JSON export/import; customizable scoring weights, network profiles, and scoring curves in the settings panel",
+      "Imports a real Lighthouse JSON report and fits simulation curves to match the measured score exactly — every what-if change is a calibrated, deterministic prediction against your actual page, not a generic estimate",
+      "Scores all five Core Web Vitals (FCP, LCP, TBT, CLS, SI) via Lighthouse's log-normal curves and metric weights; simulates mobile (150 ms RTT, 200 KB/s, 4× CPU) and desktop profiles simultaneously",
+      "Network waterfall decomposes each resource into DNS, connection, SSL, TTFB, and transfer phases; TTFB is estimated from file size and bandwidth so small files show proportional download bars instead of inflated ones",
+      "Optimization roadmap ranks every fix by score gain with Easy / Medium / Hard effort labels; applying a suggestion patches the variation instantly — no code changes, no redeploy",
+      "Comparison mode shows up to four named variations side by side with best/worst highlighting per metric; work persists to IndexedDB with JSON export so calibrated baselines can be shared with teammates",
     ],
   },
 ];
