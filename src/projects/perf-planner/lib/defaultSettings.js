@@ -37,6 +37,7 @@ export const DEFAULT_RESOURCE = {
   execTimeMs: 0,         // JS only
   longTaskCount: 0,      // JS only
   avgLongTaskMs: 0,      // JS only
+  longTaskTimings: undefined, // JS only — populated from Lighthouse; [{startMs, durationMs}]
   imageFormat: "WebP",   // image only
   fetchpriority: false,  // image only
   missingDimensions: false, // image only

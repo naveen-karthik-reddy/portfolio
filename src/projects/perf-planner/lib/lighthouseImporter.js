@@ -121,9 +121,13 @@ function buildLongTasksByUrl(report) {
   for (const it of items) {
     const url = it.url;
     if (!url) continue;
-    if (!byUrl[url]) byUrl[url] = { count: 0, totalMs: 0 };
+    if (!byUrl[url]) byUrl[url] = { count: 0, totalMs: 0, tasks: [] };
     byUrl[url].count += 1;
     byUrl[url].totalMs += clampNonNegative(it.duration);
+    byUrl[url].tasks.push({
+      startMs:    clampNonNegative(it.startTime ?? 0),
+      durationMs: clampNonNegative(it.duration),
+    });
   }
   return byUrl;
 }
@@ -307,6 +311,8 @@ function buildResources(report, finalUrl, longTasksByUrl, bootupByUrl, blockingU
       longTaskCount: type === "js" && longTaskInfo ? longTaskInfo.count : 0,
       avgLongTaskMs: type === "js" && longTaskInfo && longTaskInfo.count > 0
         ? Math.round(longTaskInfo.totalMs / longTaskInfo.count) : 0,
+      longTaskTimings: type === "js" && longTaskInfo?.tasks?.length > 0
+        ? longTaskInfo.tasks : undefined,
       evalMs:  type === "js" ? (bootupByUrl[it.url]?.evalMs  ?? 0) : 0,
       parseMs: type === "js" ? (bootupByUrl[it.url]?.parseMs ?? 0) : 0,
       imageFormat: type === "image" ? detectImageFormat(it.url, it.mimeType) : "WebP",
@@ -453,15 +459,18 @@ export function parseLighthouseReport(jsonOrText) {
     }
   }
 
-  // Distribute mainthread-work-breakdown total across JS resources by sizeKB.
-  // The `long-tasks` audit only captures tasks > 50ms, missing most JS exec.
-  // Without this, simulated TBT collapses to ~0.
-  const totalMainThreadMs = clampNonNegative(audit(report, "mainthread-work-breakdown")?.numericValue, 0);
-  if (totalMainThreadMs > 0) {
+  // Distribute JS-only main-thread work across JS resources by sizeKB.
+  // Use only scriptEvaluation + scriptParseCompile categories so layout,
+  // paint, GC and other non-JS work don't inflate execTimeMs.
+  const breakdownItems = audit(report, "mainthread-work-breakdown")?.details?.items ?? [];
+  const jsMainThreadMs = breakdownItems
+    .filter((it) => it.group === "scriptEvaluation" || it.group === "scriptParseCompile")
+    .reduce((s, it) => s + clampNonNegative(it.duration), 0);
+  if (jsMainThreadMs > 0) {
     const jsRes = resources.filter((r) => r.type === "js");
     const totalJsKB = jsRes.reduce((s, r) => s + (r.sizeKB ?? 0) * (r.count ?? 1), 0);
     const declaredLongMs = jsRes.reduce((s, r) => s + (r.execTimeMs ?? 0), 0);
-    const remaining = Math.max(0, totalMainThreadMs - declaredLongMs);
+    const remaining = Math.max(0, jsMainThreadMs - declaredLongMs);
     if (remaining > 0 && totalJsKB > 0) {
       for (const r of jsRes) {
         const share = ((r.sizeKB ?? 0) * (r.count ?? 1)) / totalJsKB;

@@ -181,22 +181,41 @@ export function computeMetrics(resources, pageMeta, profile, calibration) {
   }
 
   // ── 5. TBT ─────────────────────────────────────────────────────
-  // Imported execTimeMs / longTaskMs are observed under whatever CPU throttle
-  // Lighthouse used at calibration time (4× for mobile-default, 1× for
-  // desktop). For other profiles we re-scale by cpuMul / calibrationCpuMul
-  // instead of multiplying through (which would double-count the throttle).
-  // (calibrationCpu and execScale are declared at the top of this function)
+  // Real Lighthouse TBT counts only tasks between FCP and TTI. Use the
+  // Lighthouse-measured FCP as the window boundary — long-task startTimes
+  // come from the same simulation run and are on the same timeline.
+  const fcpCutoff = calibration?.realMetrics?.fcp ?? fcp;
   let tbt = 0;
   for (const r of list) {
     if (r.type !== "js") continue;
-    const longCount = r.longTaskCount ?? 0;
-    const longAvg = (r.avgLongTaskMs ?? 0) * execScale;
     const exec = (r.execTimeMs ?? 0) * execScale;
-    const perLong = Math.max(0, longAvg - 50);
-    tbt += longCount * perLong;
-    const declaredLong = longCount * longAvg;
-    const residual = Math.max(0, exec - declaredLong);
-    tbt += residual * 0.08; // observed sub-50ms clusters typically yield ~8% as TBT
+
+    if (r.longTaskTimings?.length > 0) {
+      // Per-task path: filter to post-FCP tasks only.
+      let totalTaskMs = 0;
+      let postFcpTaskMs = 0;
+      for (const t of r.longTaskTimings) {
+        totalTaskMs += t.durationMs;
+        if (t.startMs <= fcpCutoff) continue;
+        const dur = t.durationMs * execScale;
+        tbt += Math.max(0, dur - 50);
+        postFcpTaskMs += t.durationMs * execScale;
+      }
+      // Scale residual by post-FCP fraction so scripts that ran entirely
+      // before FCP don't contribute undeclared execTimeMs to TBT.
+      const postFcpFraction = totalTaskMs > 0 ? (postFcpTaskMs / execScale) / totalTaskMs : 0;
+      const residual = Math.max(0, exec - postFcpTaskMs) * postFcpFraction;
+      tbt += residual * 0.08;
+    } else {
+      // Fallback: aggregate heuristic for resources without per-task timing.
+      const longCount = r.longTaskCount ?? 0;
+      const longAvg = (r.avgLongTaskMs ?? 0) * execScale;
+      const perLong = Math.max(0, longAvg - 50);
+      tbt += longCount * perLong;
+      const declaredLong = longCount * longAvg;
+      const residual = Math.max(0, exec - declaredLong);
+      tbt += residual * 0.08;
+    }
   }
 
   // ── 6. CLS ─────────────────────────────────────────────────────
@@ -462,6 +481,18 @@ export function computeResourceWaterfall(resources, pageMeta, profile, calibrati
           : r.loading === "blocking" ? "blocking"
           : r.loading === "lazy" ? "lazy" : "deferred";
         const row = makeRowFromReal(r, phase, rtt);
+        // Lighthouse lumps server stall/TTFB + actual transfer into one downloadMs value
+        // (networkRequestTime → networkEndTime). Estimate actual transfer from file size;
+        // the remainder becomes ttfbMs (gray "Waiting" segment).
+        const rawDlMs = row.downloadMs;
+        const sizeKBEst = r.importedSizeKB ?? r.sizeKB ?? 0;
+        if (rawDlMs > 0 && sizeKBEst > 0 && profile.bandwidthKBs > 0) {
+          const estimatedTransferMs = Math.max(1, Math.round((sizeKBEst / profile.bandwidthKBs) * 1000));
+          if (estimatedTransferMs < rawDlMs) {
+            row.ttfbMs   = (row.ttfbMs ?? 0) + (rawDlMs - estimatedTransferMs);
+            row.downloadMs = estimatedTransferMs;
+          }
+        }
         // If the user changed file size, scale the download segment proportionally.
         // Start time stays anchored to the real measurement (priority / connection
         // reuse is unchanged); only the transfer duration grows or shrinks.

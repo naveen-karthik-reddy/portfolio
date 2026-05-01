@@ -119,8 +119,8 @@ export default function ResourceWaterfall({ rows, fcpMs, lcpMs, totalMs }) {
 
   // ── Refs ─────────────────────────────────────────────────────────
   const timelineRef = useRef(null);
-  // Stores { startX, startViewStart, timelineWidth } while a drag is in progress.
-  // timelineWidth is cached at mousedown to avoid getBoundingClientRect on every move.
+  const rowsRef     = useRef(null);
+  // Stores { startX, startY, startViewStart, startScrollTop, timelineWidth } while dragging.
   const dragRef = useRef(null);
   const rafRef  = useRef(null);
 
@@ -164,12 +164,17 @@ export default function ResourceWaterfall({ rows, fcpMs, lcpMs, totalMs }) {
   const handleMouseDown = useCallback((e) => {
     const el = timelineRef.current;
     if (!el) return;
-    if (panState.current.zoom <= 1) return;
     const rect = el.getBoundingClientRect();
-    if (e.clientX < rect.left + NAME_W) return;
+    const inTimeline   = e.clientX >= rect.left + NAME_W;
+    const canHorizDrag = inTimeline && panState.current.zoom > 1;
+    const canVertDrag  = !!rowsRef.current &&
+      rowsRef.current.scrollHeight > rowsRef.current.clientHeight;
+    if (!canHorizDrag && !canVertDrag) return;
     dragRef.current = {
       startX: e.clientX,
+      startY: e.clientY,
       startViewStart: panState.current.viewStart,
+      startScrollTop: rowsRef.current?.scrollTop ?? 0,
       timelineWidth: rect.width - NAME_W,
     };
     setIsDragging(true);
@@ -178,14 +183,18 @@ export default function ResourceWaterfall({ rows, fcpMs, lcpMs, totalMs }) {
 
   const handleMouseMove = useCallback((e) => {
     if (!dragRef.current) return;
-    const { startX, startViewStart, timelineWidth } = dragRef.current;
-    if (timelineWidth <= 0) return;
-    const { visibleMs: vis, totalMs: tot } = panState.current;
-    const deltaMs  = -(e.clientX - startX) / timelineWidth * vis;
-    const newStart = clamp(startViewStart + deltaMs, 0, tot - vis);
+    const { startX, startY, startViewStart, startScrollTop, timelineWidth } = dragRef.current;
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
     rafRef.current = requestAnimationFrame(() => {
-      setViewStart(newStart);
+      const { visibleMs: vis, totalMs: tot, zoom: z } = panState.current;
+      if (z > 1 && timelineWidth > 0) {
+        const deltaMs  = -(e.clientX - startX) / timelineWidth * vis;
+        const newStart = clamp(startViewStart + deltaMs, 0, tot - vis);
+        setViewStart(newStart);
+      }
+      if (rowsRef.current) {
+        rowsRef.current.scrollTop = startScrollTop - (e.clientY - startY);
+      }
       rafRef.current = null;
     });
   }, []);
@@ -200,13 +209,18 @@ export default function ResourceWaterfall({ rows, fcpMs, lcpMs, totalMs }) {
   const handleTouchStart = useCallback((e) => {
     const el = timelineRef.current;
     if (!el) return;
-    if (panState.current.zoom <= 1) return;
     const touch = e.touches[0];
     const rect = el.getBoundingClientRect();
-    if (touch.clientX < rect.left + NAME_W) return;
+    const inTimeline   = touch.clientX >= rect.left + NAME_W;
+    const canHorizDrag = inTimeline && panState.current.zoom > 1;
+    const canVertDrag  = !!rowsRef.current &&
+      rowsRef.current.scrollHeight > rowsRef.current.clientHeight;
+    if (!canHorizDrag && !canVertDrag) return;
     dragRef.current = {
       startX: touch.clientX,
+      startY: touch.clientY,
       startViewStart: panState.current.viewStart,
+      startScrollTop: rowsRef.current?.scrollTop ?? 0,
       timelineWidth: rect.width - NAME_W,
     };
     setIsDragging(true);
@@ -214,15 +228,19 @@ export default function ResourceWaterfall({ rows, fcpMs, lcpMs, totalMs }) {
 
   const handleTouchMove = useCallback((e) => {
     if (!dragRef.current) return;
-    const { startX, startViewStart, timelineWidth } = dragRef.current;
-    if (timelineWidth <= 0) return;
-    const { visibleMs: vis, totalMs: tot } = panState.current;
+    const { startX, startY, startViewStart, startScrollTop, timelineWidth } = dragRef.current;
+    const { visibleMs: vis, totalMs: tot, zoom: z } = panState.current;
     const touch = e.touches[0];
-    const deltaMs  = -(touch.clientX - startX) / timelineWidth * vis;
-    const newStart = clamp(startViewStart + deltaMs, 0, tot - vis);
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
     rafRef.current = requestAnimationFrame(() => {
-      setViewStart(newStart);
+      if (z > 1 && timelineWidth > 0) {
+        const deltaMs  = -(touch.clientX - startX) / timelineWidth * vis;
+        const newStart = clamp(startViewStart + deltaMs, 0, tot - vis);
+        setViewStart(newStart);
+      }
+      if (rowsRef.current) {
+        rowsRef.current.scrollTop = startScrollTop - (touch.clientY - startY);
+      }
       rafRef.current = null;
     });
     e.preventDefault();
@@ -396,7 +414,8 @@ export default function ResourceWaterfall({ rows, fcpMs, lcpMs, totalMs }) {
       </Box>
 
       {/* ── Resource rows ─────────────────────────────────────────── */}
-      <Box sx={{ maxHeight: 420, overflowY: "auto", bgcolor: bgMain }}>
+      <Box ref={rowsRef} sx={{ maxHeight: 420, overflowY: "auto", bgcolor: bgMain,
+        cursor: isDragging ? "grabbing" : rows.length * ROW_H > 420 ? "grab" : "default" }}>
         {rows.map((row, idx) => {
           const segments  = buildSegments(row, viewStart, visibleMs);
           const isLcp     = row.phase === "lcp";

@@ -143,6 +143,9 @@ src/projects/perf-planner/
   evalMs: number,          // V8 script evaluation time from Lighthouse bootup-time audit
   parseMs: number,         // V8 parse/compile time from Lighthouse bootup-time audit
 
+  // JS only — per-task timing from Lighthouse long-tasks audit (absent on non-Lighthouse resources)
+  longTaskTimings: [{ startMs: number, durationMs: number }] | undefined,
+
   // Lighthouse import snapshots (JS only) — used for proportional bar scaling
   importedExecTimeMs: number | undefined,  // execTimeMs at import time (after mainthread distribution)
   importedSizeKB: number | undefined,      // sizeKB at import time
@@ -318,7 +321,9 @@ After computing simulated fcp/lcp but **before** computing SI/TTI, if:
 
 **TBT computation:**
 - `execScale = profile.cpuMultiplier / calibration.cpuSlowdownMultiplier` (rescales between profiles)
-- Per JS resource: `longTaskCount × max(0, avgLongTaskMs × execScale − 50)` + residual heuristic (`max(0, exec - declaredLong) × 0.08`)
+- `fcpCutoff = calibration.realMetrics.fcp` if available, else simulated `fcp`
+- **Per-task path** (when `r.longTaskTimings` present): iterate each `{startMs, durationMs}`; skip tasks where `startMs ≤ fcpCutoff` (pre-FCP tasks don't count toward TBT); sum `max(0, durationMs × execScale − 50)` for post-FCP tasks. Residual `= max(0, exec − postFcpTaskMs) × postFcpFraction × 0.08` where `postFcpFraction = postFcpTaskMs / totalTaskMs`.
+- **Fallback path** (no per-task data): `longTaskCount × max(0, avgLongTaskMs × execScale − 50)` + `max(0, exec − declaredLong) × 0.08`
 
 **CLS computation:**
 - `cls = calibration.realMetrics.cls`; `0` if calibration is absent.
@@ -355,7 +360,8 @@ Real timing is always preferred — it captures HTTP/2 multiplexing, connection 
 **Real-timing mode:**
 - HTML row: built directly from `startTimeMs/endTimeMs/responseReceivedMs`
 - Sub-resources with timestamps: `makeRowFromReal(r, phase, rtt)` — carves `requestMs = min(max(1, rtt×0.1), overhead)` from overhead; `ttfbMs = overhead − requestMs`; `downloadMs = endMs − sendMs`
-- **Download adjustment** (when user changes `sizeKB`): `sizeRatio = sizeKB / importedSizeKB`; if `|sizeRatio − 1| > 0.005`, scales `downloadMs × sizeRatio` and recomputes `endMs`; start time stays anchored to real measurement
+- **TTFB decomposition**: after `makeRowFromReal`, the raw `downloadMs` (= `networkRequestTime → networkEndTime`) is split: `estimatedTransferMs = max(1, round((importedSizeKB ?? sizeKB) / bandwidthKBs × 1000))`; if `estimatedTransferMs < downloadMs`, the excess becomes `row.ttfbMs`. This exposes server stall/TTFB as the gray "Waiting" segment and makes the colored download bar proportional to actual file size.
+- **Download adjustment** (when user changes `sizeKB`): `sizeRatio = sizeKB / importedSizeKB`; if `|sizeRatio − 1| > 0.005`, scales `downloadMs × sizeRatio` and recomputes `endMs`; start time and TTFB stay anchored to real measurement
 - Sub-resources without timestamps: simulate at `htmlRefEnd` (TCP model)
 
 **Simulation mode:**
@@ -437,15 +443,16 @@ Lock key stored in `variation.locked` matches suggestion key exactly.
     - Real timing (LH13+): `rendererStartTime`, `networkRequestTime`, `networkEndTime` (ms already); LH≤12: `startTime`/`responseReceivedTime`/`endTime` (seconds ×1000)
 11. **HTML row synthesized** — aggregates all Document-type requests; uses earliest one's timing
 12. **LCP fallback** — if image LCP detected but URL not matched, flags the largest image
-13. **Mainthread-work distribution** — remaining mainthread work (beyond declared long tasks) distributed across JS resources proportional to `sizeKB`; this prevents simulated TBT collapsing to ~0
-14. **Import snapshots** — after all distribution:
+13. **Mainthread-work distribution** — only `scriptEvaluation + scriptParseCompile` categories from `mainthread-work-breakdown.details.items` are used (not the `numericValue` total, which includes layout/paint/GC). Remaining JS work beyond declared long tasks distributed across JS resources proportional to `sizeKB`.
+14. **`longTaskTimings` snapshot** — each JS resource gets `longTaskTimings: [{startMs, durationMs}]` from the raw `long-tasks` audit items (before distribution). Used in `computeMetrics` to filter to post-FCP tasks.
+15. **Import snapshots** — after all distribution:
     ```js
     for each JS resource:
       r.importedExecTimeMs = r.execTimeMs  // final value after distribution
       r.importedSizeKB     = r.sizeKB
     ```
-15. **SPA detection** — if own-origin deferred JS has `>200ms` total exec, `isSpaRendered = true`
-16. **resourceHash fingerprint** — `resources.map(r => type:round(sizeKB):loading:source:count).join(",")` stored in calibration
+16. **SPA detection** — if own-origin deferred JS has `>200ms` total exec, `isSpaRendered = true`
+17. **resourceHash fingerprint** — `resources.map(r => type:round(sizeKB):loading:source:count).join(",")` stored in calibration
 
 **CalibrationPayload returned:**
 ```js
