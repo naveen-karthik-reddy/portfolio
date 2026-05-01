@@ -16,8 +16,8 @@ const RESOURCE_TYPE_MAP = {
   Image:      "image",
   Media:      "video",
   Other:      "other",
-  XHR:        "other",
-  Fetch:      "other",
+  XHR:        "api",
+  Fetch:      "api",
 };
 
 const LCP_TYPE_MAP = {
@@ -273,7 +273,7 @@ function buildResources(report, finalUrl, longTasksByUrl, bootupByUrl, blockingU
   for (const it of items) {
     const type = RESOURCE_TYPE_MAP[it.resourceType] ?? "other";
     const sizeKB = clampNonNegative((it.transferSize ?? 0) / 1024);
-    if (sizeKB === 0 && type === "other") continue;
+    if (sizeKB === 0 && (type === "other" || type === "api")) continue;
     if (type === "html") continue; // synthesized below as a single _html row
 
     const longTaskInfo = longTasksByUrl[it.url] ?? null;

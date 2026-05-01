@@ -6,7 +6,7 @@ import {
 } from "@mui/material";
 import { DEFAULT_RESOURCE } from "../../lib/defaultSettings.js";
 
-const TYPES    = ["html", "js", "css", "font", "image", "video", "other"];
+const TYPES    = ["html", "js", "css", "font", "image", "video", "api", "other"];
 const SOURCES  = ["same-origin", "own-cdn", "third-party-cdn"];
 const LOADINGS = ["blocking", "defer", "async", "preload", "lazy", "module"];
 const FORMATS  = ["WebP", "AVIF", "JPEG", "PNG", "GIF"];

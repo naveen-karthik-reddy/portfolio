@@ -23,10 +23,11 @@ const TYPE_DL_COLOR = {
   font:  "#c084fc",
   image: "#22c55e",
   video: "#38bdf8",
+  api:   "#14b8a6",
   other: "#94a3b8",
 };
 
-const TYPE_SHORT = { html:"DOC", js:"JS", css:"CSS", font:"FONT", image:"IMG", video:"VID", other:"—" };
+const TYPE_SHORT = { html:"DOC", js:"JS", css:"CSS", font:"FONT", image:"IMG", video:"VID", api:"API", other:"—" };
 
 const PHASE_ORDER = ["stall","dns","tcp","ssl","request","ttfb","download","parse","eval"];
 

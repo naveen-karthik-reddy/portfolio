@@ -130,7 +130,7 @@ src/projects/perf-planner/
 {
   id: string,
   name: string,
-  type: "html" | "js" | "css" | "font" | "image" | "video" | "other",
+  type: "html" | "js" | "css" | "font" | "image" | "video" | "api" | "other",
   source: "same-origin" | "own-cdn" | "third-party-cdn",
   loading: "blocking" | "defer" | "async" | "preload" | "module" | "lazy",
   sizeKB: number,
@@ -571,7 +571,7 @@ const PHASE = {
 
 const TYPE_DL_COLOR = {
   html: "#3b82f6", js: "#ef4444", css: "#f59e0b",
-  font: "#c084fc", image: "#22c55e", video: "#38bdf8", other: "#94a3b8",
+  font: "#c084fc", image: "#22c55e", video: "#38bdf8", api: "#14b8a6", other: "#94a3b8",
 };
 ```
 

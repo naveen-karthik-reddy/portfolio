@@ -29,7 +29,7 @@ export const DEFAULT_SETTINGS = {
 export const DEFAULT_RESOURCE = {
   id: "",
   name: "Untitled Resource",
-  type: "js",            // js | css | font | image | video | other
+  type: "js",            // js | css | font | image | video | api | other
   source: "same-origin", // same-origin | own-cdn | third-party-cdn
   loading: "blocking",   // blocking | defer | async | preload | lazy | module
   sizeKB: 50,
