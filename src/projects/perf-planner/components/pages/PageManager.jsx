@@ -200,14 +200,19 @@ export default function PageManager({ onClose }) {
         <Typography variant="body2" color="text.secondary" sx={{ mb: 4, textAlign: "center", maxWidth: 420, lineHeight: 1.7 }}>
           Every page starts from a real Lighthouse run. Upload a JSON report — the simulator fits its curves to your real score so every what-if change becomes a meaningful prediction.
         </Typography>
-        <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap", justifyContent: "center" }}>
-          <Button variant="outlined" startIcon={<FileUpload />} onClick={() => importRef.current?.click()} sx={{ borderRadius: 2 }}>
-            Import Page
-          </Button>
-          <Button variant="contained" startIcon={<Science />} onClick={openCalibrationCreate} sx={{ borderRadius: 2 }}>
-            Calibrate from Lighthouse
-          </Button>
-        </Box>
+        <Button variant="contained" startIcon={<Science />} onClick={openCalibrationCreate} sx={{ borderRadius: 2, px: 3 }}>
+          Calibrate from Lighthouse
+        </Button>
+        <Typography variant="caption" color="text.secondary" sx={{ mt: 1.5 }}>
+          Resuming work?{" "}
+          <Box
+            component="span"
+            onClick={() => importRef.current?.click()}
+            sx={{ color: "primary.main", cursor: "pointer", textDecoration: "underline" }}
+          >
+            Import a saved session
+          </Box>
+        </Typography>
       </Box>
     );
   }
@@ -234,15 +239,18 @@ export default function PageManager({ onClose }) {
         <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
           Click a page to open it, or calibrate a new one from a Lighthouse run.
         </Typography>
-        <Box sx={{ display: "flex", gap: 1.5, justifyContent: "center", flexWrap: "wrap" }}>
-          <Button size="small" variant="outlined" startIcon={<FileUpload sx={{ fontSize: 15 }} />}
-            onClick={() => importRef.current?.click()} sx={{ fontSize: "0.78rem", borderRadius: 2 }}>
-            Import
-          </Button>
+        <Box sx={{ display: "flex", gap: 1.5, justifyContent: "center", flexWrap: "wrap", alignItems: "center" }}>
           <Button size="small" variant="contained" startIcon={<Science sx={{ fontSize: 15 }} />}
             onClick={openCalibrationCreate} sx={{ fontSize: "0.78rem", borderRadius: 2 }}>
-            Calibrate from Lighthouse
+            Calibrate new page
           </Button>
+          <Tooltip title="Restore a previously exported session" arrow>
+            <Button size="small" variant="text" startIcon={<FileUpload sx={{ fontSize: 14 }} />}
+              onClick={() => importRef.current?.click()}
+              sx={{ fontSize: "0.75rem", color: "text.secondary", borderRadius: 2 }}>
+              Import session
+            </Button>
+          </Tooltip>
         </Box>
       </Box>
 
