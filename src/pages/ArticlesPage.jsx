@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, Link, useSearchParams } from "react-router-dom";
+import { useParams, Link, useSearchParams, useNavigate } from "react-router-dom";
 import {
   Typography,
   Container,
@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 import {
   ArrowBack,
+  ArrowForward,
   ContentCopy,
   Check,
   ExpandMore,
@@ -21,6 +22,7 @@ import {
 import { useTheme } from "@mui/material/styles";
 import { motion } from "framer-motion";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 import { articlesData, getArticleBySlug } from "../data/articlesData";
 
@@ -365,6 +367,84 @@ function ArticlesList() {
   );
 }
 
+/* ==================== PREV / NEXT NAV ==================== */
+
+const perfSeries = articlesData
+  .filter((a) => a.types?.includes("performance"))
+  .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+function PrevNextNav({ article, grad }) {
+  const navigate = useNavigate();
+  const idx = perfSeries.findIndex((a) => a.id === article.id);
+  if (idx === -1) return null;
+
+  const prev = perfSeries[idx - 1] ?? null;
+  const next = perfSeries[idx + 1] ?? null;
+
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "space-between",
+        gap: 2,
+        mt: 6,
+        pt: 4,
+        borderTop: "1px solid",
+        borderColor: "divider",
+        flexWrap: "wrap",
+      }}
+    >
+      <Box sx={{ flex: 1 }}>
+        {prev && (
+          <Button
+            startIcon={<ArrowBack />}
+            onClick={() => navigate(`/articles/${prev.id}`)}
+            sx={{
+              textAlign: "left",
+              color: "text.secondary",
+              "&:hover": { color: "primary.main" },
+              maxWidth: 280,
+            }}
+          >
+            <Box>
+              <Typography variant="caption" display="block" sx={{ opacity: 0.6, mb: 0.25 }}>
+                Previous
+              </Typography>
+              <Typography variant="body2" sx={{ fontWeight: 600, lineHeight: 1.3 }}>
+                {prev.title}
+              </Typography>
+            </Box>
+          </Button>
+        )}
+      </Box>
+
+      <Box sx={{ flex: 1, display: "flex", justifyContent: "flex-end" }}>
+        {next && (
+          <Button
+            endIcon={<ArrowForward />}
+            onClick={() => navigate(`/articles/${next.id}`)}
+            sx={{
+              textAlign: "right",
+              color: "text.secondary",
+              "&:hover": { color: "primary.main" },
+              maxWidth: 280,
+            }}
+          >
+            <Box>
+              <Typography variant="caption" display="block" sx={{ opacity: 0.6, mb: 0.25 }}>
+                Next
+              </Typography>
+              <Typography variant="body2" sx={{ fontWeight: 600, lineHeight: 1.3 }}>
+                {next.title}
+              </Typography>
+            </Box>
+          </Button>
+        )}
+      </Box>
+    </Box>
+  );
+}
+
 /* ==================== ARTICLE VIEW ==================== */
 
 function ArticleView({ article }) {
@@ -375,6 +455,7 @@ function ArticleView({ article }) {
   const [content, setContent] = useState("");
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     const loader = markdownFiles[`../articles/${article.id}.md`];
     if (loader) loader().then((text) => setContent(text ?? ""));
   }, [article.id]);
@@ -610,6 +691,46 @@ function ArticleView({ article }) {
       );
     },
 
+    table({ children }) {
+      return (
+        <Box sx={{ overflowX: "auto", my: 3 }}>
+          <Box
+            component="table"
+            sx={{
+              width: "100%",
+              borderCollapse: "collapse",
+              fontSize: "0.9rem",
+              "& th, & td": {
+                border: "1px solid",
+                borderColor: "divider",
+                px: 2,
+                py: 1,
+                textAlign: "left",
+                verticalAlign: "top",
+              },
+              "& th": {
+                bgcolor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)",
+                fontWeight: 700,
+                color: "text.primary",
+              },
+              "& td": { color: "text.primary" },
+              "& tr:hover td": {
+                bgcolor: isDark ? "rgba(255,255,255,0.02)" : "rgba(0,0,0,0.02)",
+              },
+            }}
+          >
+            {children}
+          </Box>
+        </Box>
+      );
+    },
+
+    thead({ children }) { return <thead>{children}</thead>; },
+    tbody({ children }) { return <tbody>{children}</tbody>; },
+    tr({ children }) { return <tr>{children}</tr>; },
+    th({ children }) { return <th>{children}</th>; },
+    td({ children }) { return <td>{children}</td>; },
+
     img({ src, alt }) {
       /* Resolve filename-only refs (e.g. "foo.png") against the assets glob map */
       const resolved = assetImages[`../assets/${src}`] ?? src;
@@ -745,8 +866,11 @@ function ArticleView({ article }) {
 
         {/* Markdown content */}
         <Box sx={{ "& > *:first-of-type": { mt: 0 } }}>
-          <ReactMarkdown components={components}>{content}</ReactMarkdown>
+          <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>{content}</ReactMarkdown>
         </Box>
+
+        {/* Prev / Next navigation for performance series */}
+        <PrevNextNav article={article} grad={grad} />
       </motion.div>
     </>
   );

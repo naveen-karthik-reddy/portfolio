@@ -1,7 +1,7 @@
 export const articlesData = [
   /* ── Performance series ── */
   {
-    id: "service-workers-and-caching",
+    id: "12-service-workers-and-caching",
     title: "#12 — Service Workers & Caching Strategies",
     excerpt: "Service workers act as a programmable network proxy. Learn Cache-First, Network-First, and Stale-While-Revalidate strategies — and when each one makes sense.",
     date: "2026-04-19",
@@ -10,7 +10,7 @@ export const articlesData = [
     types: ["performance"],
   },
   {
-    id: "http2-and-http3",
+    id: "11-http2-and-http3",
     title: "#11 — HTTP/2 & HTTP/3 — What Changes for Performance",
     excerpt: "HTTP/1.1's bottlenecks drove concatenation and sprites. HTTP/2 multiplexing and HTTP/3 QUIC change the rules — here's what still matters.",
     date: "2026-04-17",
@@ -19,7 +19,7 @@ export const articlesData = [
     types: ["performance"],
   },
   {
-    id: "bundle-optimization",
+    id: "10-bundle-optimization",
     title: "#10 — Bundle Optimization — Tree Shaking & Code Splitting",
     excerpt: "JavaScript is the most expensive resource on the web. Tree shaking removes dead code; code splitting loads only what each page needs.",
     date: "2026-04-15",
@@ -28,7 +28,7 @@ export const articlesData = [
     types: ["performance"],
   },
   {
-    id: "resource-hints",
+    id: "09-resource-hints",
     title: "#9 — Resource Hints — Preload, Prefetch, Preconnect",
     excerpt: "Give the browser advance notice about what it will need. Used correctly, resource hints eliminate dead time in the network waterfall.",
     date: "2026-04-10",
@@ -37,7 +37,7 @@ export const articlesData = [
     types: ["performance"],
   },
   {
-    id: "lighthouse-and-rum",
+    id: "08-lighthouse-and-rum",
     title: "#8 — Lighthouse & Real User Monitoring",
     excerpt: "Lab data tells you what's broken. Field data tells you what real users experience. Here's how Lighthouse scoring works and when RUM fills the gaps.",
     date: "2026-04-05",
@@ -46,7 +46,7 @@ export const articlesData = [
     types: ["performance"],
   },
   {
-    id: "core-web-vitals",
+    id: "07-core-web-vitals",
     title: "#7 — Core Web Vitals Explained",
     excerpt: "LCP, CLS, and INP are Google's three signals for user experience quality. This is what each one measures, what breaks them, and how to fix them.",
     date: "2026-04-01",
@@ -55,7 +55,7 @@ export const articlesData = [
     types: ["performance"],
   },
   {
-    id: "reflow-repaint-layout-thrashing",
+    id: "06-reflow-repaint-layout-thrashing",
     title: "#6 — Reflow, Repaint & Layout Thrashing",
     excerpt: "Interleaving DOM reads and writes in a loop forces the browser to recalculate layout dozens of times per frame. Here's what it is and how to stop it.",
     date: "2026-03-25",
@@ -64,7 +64,7 @@ export const articlesData = [
     types: ["performance"],
   },
   {
-    id: "browser-networking-and-caching",
+    id: "05-browser-networking-and-caching",
     title: "#5 — Browser Networking & Caching",
     excerpt: "Every resource travels through DNS, TCP, TLS, and HTTP before it arrives. Understanding this journey — and HTTP caching — is core to reducing load times.",
     date: "2026-03-20",
@@ -73,7 +73,7 @@ export const articlesData = [
     types: ["performance"],
   },
   {
-    id: "intersection-observer-debounce-throttle",
+    id: "04-intersection-observer-debounce-throttle",
     title: "#4 — Intersection Observer, Debouncing & Throttling",
     excerpt: "Scroll events fire hundreds of times per second. Intersection Observer, debouncing, and throttling are the tools that keep your handlers from hammering the main thread.",
     date: "2026-03-15",
@@ -82,7 +82,7 @@ export const articlesData = [
     types: ["performance"],
   },
   {
-    id: "resource-loading-strategies",
+    id: "03-resource-loading-strategies",
     title: "#3 — Resource Loading Strategies",
     excerpt: "How you load fonts, CSS, scripts, and images is as important as what you load. This covers FOIT/FOUT, critical CSS, async JS, and lazy loading.",
     date: "2026-03-10",
@@ -91,7 +91,7 @@ export const articlesData = [
     types: ["performance"],
   },
   {
-    id: "critical-rendering-path",
+    id: "02-critical-rendering-path",
     title: "#2 — The Critical Rendering Path",
     excerpt: "The browser can't paint until CSS is parsed and blocking scripts are executed. Understanding the CRP is the first step to a fast first paint.",
     date: "2026-03-05",
@@ -100,7 +100,7 @@ export const articlesData = [
     types: ["performance"],
   },
   {
-    id: "browser-rendering-pipeline",
+    id: "01-browser-rendering-pipeline",
     title: "#1 — How the Browser Renders a Page",
     excerpt: "From HTML bytes to pixels: DOM, CSSOM, Render Tree, Layout, Paint, and Compositing — the six steps every browser frame goes through.",
     date: "2026-03-01",
