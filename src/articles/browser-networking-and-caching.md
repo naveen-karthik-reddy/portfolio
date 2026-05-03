@@ -1,4 +1,4 @@
-# Browser Networking & Caching
+# #5 — Browser Networking & Caching
 
 Every resource on a web page — HTML, CSS, JavaScript, images, fonts — travels over the network. Understanding what happens on that journey, and how to control it with HTTP caching, is essential for reducing load times.
 

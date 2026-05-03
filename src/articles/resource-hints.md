@@ -1,4 +1,4 @@
-# Resource Hints — Preload, Prefetch, Preconnect
+# #9 — Resource Hints — Preload, Prefetch, Preconnect
 
 The browser is good at discovering resources — but it discovers them by parsing HTML and CSS, which means it can't act on them until it gets there. Resource hints are a way to give the browser advance notice: "you'll need this soon, start now."
 

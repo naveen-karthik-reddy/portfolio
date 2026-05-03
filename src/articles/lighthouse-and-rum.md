@@ -1,4 +1,4 @@
-# Lighthouse & Real User Monitoring
+# #8 — Lighthouse & Real User Monitoring
 
 You can measure a page's performance in two fundamentally different ways: by simulating a load in a controlled environment, or by collecting data from real users visiting your site. Both approaches answer different questions. Neither is sufficient on its own.
 

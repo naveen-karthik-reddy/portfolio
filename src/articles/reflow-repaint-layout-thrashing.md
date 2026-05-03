@@ -1,4 +1,4 @@
-# Reflow, Repaint & Layout Thrashing
+# #6 — Reflow, Repaint & Layout Thrashing
 
 Some of the most impactful performance problems in browser JavaScript aren't caused by network latency or bundle size — they're caused by making the browser repeatedly recalculate layout in a tight loop. This is called **layout thrashing**, and it can turn a smooth 60fps experience into a stuttering mess even on fast hardware.
 

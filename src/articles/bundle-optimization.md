@@ -1,4 +1,4 @@
-# Bundle Optimization — Tree Shaking & Code Splitting
+# #10 — Bundle Optimization — Tree Shaking & Code Splitting
 
 JavaScript is the most expensive resource on the web — byte for byte, it costs more than images. An image has to be decoded once; JavaScript has to be parsed, compiled, and executed on every page load.
 

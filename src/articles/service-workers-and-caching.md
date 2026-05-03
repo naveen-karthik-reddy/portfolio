@@ -1,4 +1,4 @@
-# Service Workers & Caching Strategies
+# #12 — Service Workers & Caching Strategies
 
 Service workers are a JavaScript file that runs in a separate thread from the page and acts as a programmable network proxy. Every request made by pages under its scope passes through it. This makes service workers the right place to implement sophisticated caching strategies, offline support, and background sync.
 

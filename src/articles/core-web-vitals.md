@@ -1,4 +1,4 @@
-# Core Web Vitals Explained
+# #7 — Core Web Vitals Explained
 
 Google's Core Web Vitals are a set of three metrics that measure the user experience of a page — not in aggregate, but for specific, observable moments: when the main content appears, whether the layout shifts unexpectedly, and how fast the page responds to interaction.
 

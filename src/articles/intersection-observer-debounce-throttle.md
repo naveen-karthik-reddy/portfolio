@@ -1,4 +1,4 @@
-# Intersection Observer, Debouncing & Throttling
+# #4 — Intersection Observer, Debouncing & Throttling
 
 Scroll and resize events are fired dozens of times per second. If your handlers do any real work — DOM reads, API calls, visibility checks — the main thread gets hammered and the page stutters.
 

@@ -1,4 +1,4 @@
-# Resource Loading Strategies
+# #3 — Resource Loading Strategies
 
 Rendering the page quickly is only half the story. Loading all the assets the page depends on — fonts, stylesheets, scripts, images — efficiently is what separates a fast experience from a slow one.
 

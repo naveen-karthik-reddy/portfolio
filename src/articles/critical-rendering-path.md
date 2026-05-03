@@ -1,4 +1,4 @@
-# The Critical Rendering Path
+# #2 — The Critical Rendering Path
 
 Before a user sees anything on screen, the browser must complete a specific sequence of work: fetch the HTML, parse it, fetch and parse all blocking stylesheets, execute blocking scripts, build the render tree, run layout, and paint. This sequence is called the **Critical Rendering Path (CRP)**.
 

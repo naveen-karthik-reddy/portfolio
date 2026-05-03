@@ -1,4 +1,4 @@
-# How the Browser Renders a Page
+# #1 — How the Browser Renders a Page
 
 You type a URL and hit Enter. A few hundred milliseconds later, a fully styled, interactive page appears. What actually happened in between?
 
