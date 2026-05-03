@@ -7,6 +7,7 @@ export const articlesData = [
     date: "2026-05-01",
     readTime: "8 min read",
     tags: ["Finance", "React", "Portfolio", "NSE"],
+    types: ["product"],
   },
   {
     id: "web-performance-planner",
@@ -16,6 +17,7 @@ export const articlesData = [
     date: "2026-04-28",
     readTime: "10 min read",
     tags: ["Performance", "React", "Web Vitals", "Engineering"],
+    types: ["performance", "product"],
   },
   {
     id: "claude-figma-mcp-integration",
@@ -24,7 +26,8 @@ export const articlesData = [
       "Learn how to connect Figma MCP with Claude, extract design context, and generate production-ready UI code efficiently.",
     date: "2026-04-25",
     readTime: "8 min read",
-    tags: ["Figma", "Claude", "AI", "LLM"]
+    tags: ["Figma", "Claude", "AI", "LLM"],
+    types: ["llm-metrics"],
   },
   {
     id: "figma-llm-problem",
@@ -34,6 +37,7 @@ export const articlesData = [
     date: "2026-04-25",
     readTime: "12 min read",
     tags: ["Design", "AI", "Engineering"],
+    types: ["llm-metrics"],
   },
 ];
 

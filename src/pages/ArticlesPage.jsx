@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useSearchParams } from "react-router-dom";
 import {
   Typography,
   Container,
@@ -224,14 +224,36 @@ export default function ArticlesPage() {
   );
 }
 
+/* ==================== TYPE LABEL MAP ==================== */
+
+const TYPE_LABELS = {
+  performance: "Performance",
+  product: "Product",
+  "llm-metrics": "LLM / AI",
+};
+
 /* ==================== ARTICLES LIST ==================== */
 
 function ArticlesList() {
   const theme = useTheme();
   const grad = `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`;
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeType = searchParams.get("type") || null;
+
+  const setActiveType = (type) => {
+    if (type) setSearchParams({ type });
+    else setSearchParams({});
+  };
+
+  const allTypes = Object.keys(TYPE_LABELS);
+
   const sorted = [...articlesData].sort(
     (a, b) => new Date(b.date) - new Date(a.date)
   );
+
+  const filtered = activeType
+    ? sorted.filter((a) => a.types?.includes(activeType))
+    : sorted;
 
   return (
     <Box>
@@ -241,7 +263,7 @@ function ArticlesList() {
           sx={{
             fontWeight: 800,
             letterSpacing: "0.05em",
-            mb: 6,
+            mb: 4,
             background: grad,
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
@@ -249,16 +271,37 @@ function ArticlesList() {
         >
           Articles
         </Typography>
+
+        {/* Filter chips */}
+        <Box display="flex" gap={1} flexWrap="wrap" mb={5}>
+          <Chip
+            label="All"
+            onClick={() => setActiveType(null)}
+            variant={activeType === null ? "filled" : "outlined"}
+            color={activeType === null ? "primary" : "default"}
+            sx={{ fontWeight: 600, cursor: "pointer" }}
+          />
+          {allTypes.map((type) => (
+            <Chip
+              key={type}
+              label={TYPE_LABELS[type]}
+              onClick={() => setActiveType(activeType === type ? null : type)}
+              variant={activeType === type ? "filled" : "outlined"}
+              color={activeType === type ? "primary" : "default"}
+              sx={{ fontWeight: 600, cursor: "pointer" }}
+            />
+          ))}
+        </Box>
       </motion.div>
 
       <motion.div
+        key={activeType ?? "all"}
         variants={staggerContainer}
         initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: "-50px" }}
+        animate="visible"
         style={{ display: "flex", flexDirection: "column", gap: "24px" }}
       >
-        {sorted.map((article) => (
+        {filtered.map((article) => (
           <motion.div key={article.id} variants={fadeInUp}>
             <Paper
               component={Link}
@@ -309,6 +352,14 @@ function ArticlesList() {
             </Paper>
           </motion.div>
         ))}
+
+        {filtered.length === 0 && (
+          <motion.div variants={fadeInUp}>
+            <Typography color="text.secondary" sx={{ textAlign: "center", py: 6 }}>
+              No articles in this category yet.
+            </Typography>
+          </motion.div>
+        )}
       </motion.div>
     </Box>
   );
