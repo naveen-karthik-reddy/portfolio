@@ -28,6 +28,18 @@ import {
 
 const SECTION_IDS = ["summary", "experience", "skills", "education", "achievements"];
 
+const navLinkSx = (active) => ({
+  cursor: "pointer",
+  color: active ? "primary.main" : "text.secondary",
+  fontSize: "0.85rem",
+  fontWeight: 600,
+  letterSpacing: "0.05em",
+  px: 1,
+  textDecoration: "none",
+  transition: "color 0.2s",
+  "&:hover": { color: "primary.main" },
+});
+
 export default function TopNav({
   portfolioData,
   darkMode,
@@ -41,9 +53,9 @@ export default function TopNav({
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [themeAnchor, setThemeAnchor] = useState(null);
 
-  const isContentPage =
-    location.pathname.startsWith("/articles") ||
-    location.pathname.startsWith("/projects");
+  const isLanding = location.pathname === "/";
+  const isArticlesActive = location.pathname.startsWith("/articles");
+  const isProjectsActive = location.pathname.startsWith("/projects");
 
   const handleSection = (id) => {
     setDrawerOpen(false);
@@ -62,8 +74,16 @@ export default function TopNav({
       }}
     >
       <Toolbar sx={{ justifyContent: "space-between", minHeight: { xs: 56, sm: 64 } }}>
-        {/* Name — links home on content pages, scrolls to header on landing */}
-        {isContentPage ? (
+
+        {/* ── Name ── */}
+        {isLanding ? (
+          <Typography
+            onClick={() => scrollToSection("header")}
+            sx={{ fontWeight: 800, cursor: "pointer", color: "text.primary" }}
+          >
+            {portfolioData.name}
+          </Typography>
+        ) : (
           <Typography
             component={Link}
             to="/"
@@ -71,35 +91,67 @@ export default function TopNav({
           >
             {portfolioData.name}
           </Typography>
-        ) : (
-          <Typography
-            onClick={() => scrollToSection("header")}
-            sx={{ fontWeight: 800, cursor: "pointer", color: "text.primary" }}
-          >
-            {portfolioData.name}
-          </Typography>
         )}
 
-        {/* Hamburger — landing page only */}
-        {!isContentPage && (
-          <IconButton
-            onClick={() => setDrawerOpen(true)}
-            sx={{ color: "text.primary" }}
-            aria-label="Open menu"
-          >
-            <MenuIcon />
+        {/* ── Desktop right side ── */}
+        <Box sx={{ display: { xs: "none", md: "flex" }, alignItems: "center", gap: 0.5 }}>
+          {/* Section links — landing page only */}
+          {isLanding && SECTION_IDS.map((id) => (
+            <Typography
+              key={id}
+              onClick={() => scrollToSection(id)}
+              sx={navLinkSx(false)}
+            >
+              {id.toUpperCase()}
+            </Typography>
+          ))}
+
+          {/* Articles + Projects — all pages */}
+          <Typography component={Link} to="/articles" sx={navLinkSx(isArticlesActive)}>
+            ARTICLES
+          </Typography>
+          <Typography component={Link} to="/projects" sx={navLinkSx(isProjectsActive)}>
+            PROJECTS
+          </Typography>
+
+          {/* Social icons */}
+          <IconButton href={portfolioData.links.linkedin} target="_blank" size="small" sx={{ color: "text.secondary", ml: 1 }}>
+            <LinkedIn fontSize="small" />
           </IconButton>
-        )}
+          <IconButton href={portfolioData.links.github} target="_blank" size="small" sx={{ color: "text.secondary" }}>
+            <GitHub fontSize="small" />
+          </IconButton>
+          <IconButton href={`mailto:${portfolioData.email}`} size="small" sx={{ color: "text.secondary" }}>
+            <MailOutline fontSize="small" />
+          </IconButton>
+
+          {/* Theme + dark mode */}
+          <IconButton onClick={(e) => setThemeAnchor(e.currentTarget)} size="small" sx={{ color: "text.secondary" }}>
+            <Palette fontSize="small" />
+          </IconButton>
+          <IconButton onClick={() => setDarkMode((v) => !v)} size="small" sx={{ color: "text.secondary" }}>
+            {darkMode ? <Brightness7 fontSize="small" /> : <Brightness4 fontSize="small" />}
+          </IconButton>
+        </Box>
+
+        {/* ── Mobile: hamburger only ── */}
+        <IconButton
+          onClick={() => setDrawerOpen(true)}
+          sx={{ display: { xs: "flex", md: "none" }, color: "text.primary" }}
+          aria-label="Open menu"
+        >
+          <MenuIcon />
+        </IconButton>
       </Toolbar>
 
-      {/* ── Slide-in drawer ── */}
+      {/* ── Mobile drawer ── */}
       <Drawer
         anchor="right"
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
         PaperProps={{
           sx: {
-            width: 280,
+            width: 260,
             bgcolor: "background.default",
             borderLeft: "1px solid",
             borderColor: "divider",
@@ -108,7 +160,6 @@ export default function TopNav({
           },
         }}
       >
-        {/* Close */}
         <Box sx={{ display: "flex", justifyContent: "flex-end", p: 1.5 }}>
           <IconButton onClick={() => setDrawerOpen(false)} aria-label="Close menu">
             <Close />
@@ -117,45 +168,31 @@ export default function TopNav({
 
         <Divider />
 
-        {/* Section links */}
         <List disablePadding sx={{ flex: 1 }}>
-          {SECTION_IDS.map((id) => (
+          {/* Section links — landing page only */}
+          {isLanding && SECTION_IDS.map((id) => (
             <ListItem key={id} disablePadding>
               <ListItemButton onClick={() => handleSection(id)}>
                 <ListItemText
                   primary={id.toUpperCase()}
-                  primaryTypographyProps={{
-                    fontSize: "0.85rem",
-                    fontWeight: 600,
-                    letterSpacing: "0.08em",
-                    color: "text.secondary",
-                  }}
+                  primaryTypographyProps={{ fontSize: "0.85rem", fontWeight: 600, letterSpacing: "0.08em", color: "text.secondary" }}
                 />
               </ListItemButton>
             </ListItem>
           ))}
 
-          <Divider sx={{ my: 1 }} />
+          {isLanding && <Divider sx={{ my: 1 }} />}
 
-          {/* Page links */}
+          {/* Articles + Projects — always */}
           {[
-            { label: "PROJECTS", to: "/projects" },
-            { label: "ARTICLES", to: "/articles" },
-          ].map(({ label, to }) => (
+            { label: "ARTICLES", to: "/articles", active: isArticlesActive },
+            { label: "PROJECTS", to: "/projects", active: isProjectsActive },
+          ].map(({ label, to, active }) => (
             <ListItem key={to} disablePadding>
-              <ListItemButton
-                component={Link}
-                to={to}
-                onClick={() => setDrawerOpen(false)}
-              >
+              <ListItemButton component={Link} to={to} onClick={() => setDrawerOpen(false)}>
                 <ListItemText
                   primary={label}
-                  primaryTypographyProps={{
-                    fontSize: "0.85rem",
-                    fontWeight: 700,
-                    letterSpacing: "0.08em",
-                    color: "primary.main",
-                  }}
+                  primaryTypographyProps={{ fontSize: "0.85rem", fontWeight: 700, letterSpacing: "0.08em", color: active ? "primary.main" : "text.secondary" }}
                 />
               </ListItemButton>
             </ListItem>
@@ -166,44 +203,20 @@ export default function TopNav({
 
         {/* Social + theme controls */}
         <Box sx={{ p: 2, display: "flex", alignItems: "center", gap: 0.5 }}>
-          <IconButton
-            href={portfolioData.links.linkedin}
-            target="_blank"
-            size="small"
-            sx={{ color: "text.secondary" }}
-          >
+          <IconButton href={portfolioData.links.linkedin} target="_blank" size="small" sx={{ color: "text.secondary" }}>
             <LinkedIn fontSize="small" />
           </IconButton>
-          <IconButton
-            href={portfolioData.links.github}
-            target="_blank"
-            size="small"
-            sx={{ color: "text.secondary" }}
-          >
+          <IconButton href={portfolioData.links.github} target="_blank" size="small" sx={{ color: "text.secondary" }}>
             <GitHub fontSize="small" />
           </IconButton>
-          <IconButton
-            href={`mailto:${portfolioData.email}`}
-            size="small"
-            sx={{ color: "text.secondary" }}
-          >
+          <IconButton href={`mailto:${portfolioData.email}`} size="small" sx={{ color: "text.secondary" }}>
             <MailOutline fontSize="small" />
           </IconButton>
-
           <Box sx={{ flex: 1 }} />
-
-          <IconButton
-            onClick={(e) => setThemeAnchor(e.currentTarget)}
-            size="small"
-            sx={{ color: "text.secondary" }}
-          >
+          <IconButton onClick={(e) => setThemeAnchor(e.currentTarget)} size="small" sx={{ color: "text.secondary" }}>
             <Palette fontSize="small" />
           </IconButton>
-          <IconButton
-            onClick={() => setDarkMode((v) => !v)}
-            size="small"
-            sx={{ color: "text.secondary" }}
-          >
+          <IconButton onClick={() => setDarkMode((v) => !v)} size="small" sx={{ color: "text.secondary" }}>
             {darkMode ? <Brightness7 fontSize="small" /> : <Brightness4 fontSize="small" />}
           </IconButton>
         </Box>
@@ -219,28 +232,11 @@ export default function TopNav({
           <MenuItem
             key={key}
             selected={currentTheme === key}
-            onClick={() => {
-              setCurrentTheme(key);
-              setThemeAnchor(null);
-            }}
-            sx={{
-              "&.Mui-selected": {
-                bgcolor: "primary.main",
-                color: "primary.contrastText",
-              },
-            }}
+            onClick={() => { setCurrentTheme(key); setThemeAnchor(null); }}
+            sx={{ "&.Mui-selected": { bgcolor: "primary.main", color: "primary.contrastText" } }}
           >
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <Box
-                sx={{
-                  width: 14,
-                  height: 14,
-                  borderRadius: "50%",
-                  bgcolor: t.dark.primary,
-                  border: "1px solid",
-                  borderColor: "divider",
-                }}
-              />
+              <Box sx={{ width: 14, height: 14, borderRadius: "50%", bgcolor: t.dark.primary, border: "1px solid", borderColor: "divider" }} />
               {t.name}
             </Box>
           </MenuItem>
