@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   AppBar,
@@ -6,17 +6,27 @@ import {
   Typography,
   IconButton,
   Box,
+  Drawer,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  Divider,
   Menu,
   MenuItem,
 } from "@mui/material";
 import {
+  Menu as MenuIcon,
+  Close,
   Brightness4,
   Brightness7,
+  Palette,
   LinkedIn,
   GitHub,
   MailOutline,
-  Palette,
 } from "@mui/icons-material";
+
+const SECTION_IDS = ["summary", "experience", "skills", "education", "achievements"];
 
 export default function TopNav({
   portfolioData,
@@ -25,15 +35,20 @@ export default function TopNav({
   themes,
   currentTheme,
   setCurrentTheme,
-  themeAnchor,
-  setThemeAnchor,
   scrollToSection,
 }) {
   const location = useLocation();
-  const isArticlesActive =
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [themeAnchor, setThemeAnchor] = useState(null);
+
+  const isContentPage =
     location.pathname.startsWith("/articles") ||
-    location.pathname.startsWith("/article");
-  const isProjectsActive = location.pathname.startsWith("/projects");
+    location.pathname.startsWith("/projects");
+
+  const handleSection = (id) => {
+    setDrawerOpen(false);
+    scrollToSection(id);
+  };
 
   return (
     <AppBar
@@ -46,175 +61,191 @@ export default function TopNav({
         borderColor: "divider",
       }}
     >
-      <Toolbar sx={{ justifyContent: "space-between" }}>
-        <Typography
-          variant="h6"
-          onClick={() => scrollToSection("header")}
-          sx={{ fontWeight: 800, cursor: "pointer", color: "text.primary" }}
-        >
-          {portfolioData.name}
-        </Typography>
+      <Toolbar sx={{ justifyContent: "space-between", minHeight: { xs: 56, sm: 64 } }}>
+        {/* Name — links home on content pages, scrolls to header on landing */}
+        {isContentPage ? (
+          <Typography
+            component={Link}
+            to="/"
+            sx={{ fontWeight: 800, color: "text.primary", textDecoration: "none" }}
+          >
+            {portfolioData.name}
+          </Typography>
+        ) : (
+          <Typography
+            onClick={() => scrollToSection("header")}
+            sx={{ fontWeight: 800, cursor: "pointer", color: "text.primary" }}
+          >
+            {portfolioData.name}
+          </Typography>
+        )}
 
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-          {/* Desktop nav links (all sections + articles) */}
-          <Box sx={{ display: { xs: "none", md: "flex" }, gap: 1 }}>
-            {["summary", "experience", "skills", "education", "achievements"].map(
-              (id) => (
-                <Typography
-                  key={id}
-                  onClick={() => scrollToSection(id)}
-                  sx={{
-                    cursor: "pointer",
-                    color: "text.secondary",
+        {/* Hamburger — landing page only */}
+        {!isContentPage && (
+          <IconButton
+            onClick={() => setDrawerOpen(true)}
+            sx={{ color: "text.primary" }}
+            aria-label="Open menu"
+          >
+            <MenuIcon />
+          </IconButton>
+        )}
+      </Toolbar>
+
+      {/* ── Slide-in drawer ── */}
+      <Drawer
+        anchor="right"
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        PaperProps={{
+          sx: {
+            width: 280,
+            bgcolor: "background.default",
+            borderLeft: "1px solid",
+            borderColor: "divider",
+            display: "flex",
+            flexDirection: "column",
+          },
+        }}
+      >
+        {/* Close */}
+        <Box sx={{ display: "flex", justifyContent: "flex-end", p: 1.5 }}>
+          <IconButton onClick={() => setDrawerOpen(false)} aria-label="Close menu">
+            <Close />
+          </IconButton>
+        </Box>
+
+        <Divider />
+
+        {/* Section links */}
+        <List disablePadding sx={{ flex: 1 }}>
+          {SECTION_IDS.map((id) => (
+            <ListItem key={id} disablePadding>
+              <ListItemButton onClick={() => handleSection(id)}>
+                <ListItemText
+                  primary={id.toUpperCase()}
+                  primaryTypographyProps={{
                     fontSize: "0.85rem",
                     fontWeight: 600,
-                    letterSpacing: "0.05em",
-                    px: 1,
-                    transition: "color 0.2s",
-                    "&:hover": { color: "primary.main" },
+                    letterSpacing: "0.08em",
+                    color: "text.secondary",
                   }}
-                >
-                  {id.toUpperCase()}
-                </Typography>
-              )
-            )}
+                />
+              </ListItemButton>
+            </ListItem>
+          ))}
 
-            <Typography
-              component={Link}
-              to="/articles"
-              sx={{
-                textDecoration: "none",
-                color: isArticlesActive ? "primary.main" : "text.secondary",
-                fontSize: "0.85rem",
-                fontWeight: 600,
-                letterSpacing: "0.05em",
-                px: 1,
-                transition: "color 0.2s",
-                "&:hover": { color: "primary.main" },
-              }}
-            >
-              ARTICLES
-            </Typography>
+          <Divider sx={{ my: 1 }} />
 
-            <Typography
-              component={Link}
-              to="/projects"
-              sx={{
-                textDecoration: "none",
-                color: isProjectsActive ? "primary.main" : "text.secondary",
-                fontSize: "0.85rem",
-                fontWeight: 600,
-                letterSpacing: "0.05em",
-                px: 1,
-                transition: "color 0.2s",
-                "&:hover": { color: "primary.main" },
-              }}
-            >
-              PROJECTS
-            </Typography>
-          </Box>
+          {/* Page links */}
+          {[
+            { label: "PROJECTS", to: "/projects" },
+            { label: "ARTICLES", to: "/articles" },
+          ].map(({ label, to }) => (
+            <ListItem key={to} disablePadding>
+              <ListItemButton
+                component={Link}
+                to={to}
+                onClick={() => setDrawerOpen(false)}
+              >
+                <ListItemText
+                  primary={label}
+                  primaryTypographyProps={{
+                    fontSize: "0.85rem",
+                    fontWeight: 700,
+                    letterSpacing: "0.08em",
+                    color: "primary.main",
+                  }}
+                />
+              </ListItemButton>
+            </ListItem>
+          ))}
+        </List>
 
-          {/* Mobile: Articles + Projects links */}
-          <Typography
-            component={Link}
-            to="/articles"
-            sx={{
-              display: { xs: "flex", md: "none" },
-              textDecoration: "none",
-              color: isArticlesActive ? "primary.main" : "text.secondary",
-              fontSize: "0.85rem",
-              fontWeight: 600,
-              letterSpacing: "0.05em",
-              transition: "color 0.2s",
-              "&:hover": { color: "primary.main" },
-            }}
-          >
-            ARTICLES
-          </Typography>
+        <Divider />
 
-          <Typography
-            component={Link}
-            to="/projects"
-            sx={{
-              display: { xs: "flex", md: "none" },
-              textDecoration: "none",
-              color: isProjectsActive ? "primary.main" : "text.secondary",
-              fontSize: "0.85rem",
-              fontWeight: 600,
-              letterSpacing: "0.05em",
-              transition: "color 0.2s",
-              "&:hover": { color: "primary.main" },
-            }}
-          >
-            PROJECTS
-          </Typography>
-
-          {/* Social icons — desktop only */}
+        {/* Social + theme controls */}
+        <Box sx={{ p: 2, display: "flex", alignItems: "center", gap: 0.5 }}>
           <IconButton
             href={portfolioData.links.linkedin}
             target="_blank"
-            sx={{ display: { xs: "none", md: "flex" } }}
+            size="small"
+            sx={{ color: "text.secondary" }}
           >
-            <LinkedIn />
+            <LinkedIn fontSize="small" />
           </IconButton>
-
           <IconButton
             href={portfolioData.links.github}
             target="_blank"
-            sx={{ display: { xs: "none", md: "flex" } }}
+            size="small"
+            sx={{ color: "text.secondary" }}
           >
-            <GitHub />
+            <GitHub fontSize="small" />
           </IconButton>
-
           <IconButton
             href={`mailto:${portfolioData.email}`}
-            sx={{ display: { xs: "none", md: "flex" } }}
+            size="small"
+            sx={{ color: "text.secondary" }}
           >
-            <MailOutline />
+            <MailOutline fontSize="small" />
           </IconButton>
 
-          {/* Theme menu */}
-          <IconButton onClick={(e) => setThemeAnchor(e.currentTarget)}>
-            <Palette />
-          </IconButton>
+          <Box sx={{ flex: 1 }} />
 
-          <Menu
-            anchorEl={themeAnchor}
-            open={Boolean(themeAnchor)}
-            onClose={() => setThemeAnchor(null)}
+          <IconButton
+            onClick={(e) => setThemeAnchor(e.currentTarget)}
+            size="small"
+            sx={{ color: "text.secondary" }}
           >
-            {Object.entries(themes).map(([key, t]) => (
-              <MenuItem
-                key={key}
-                selected={currentTheme === key}
-                onClick={() => {
-                  setCurrentTheme(key);
-                  setThemeAnchor(null);
-                }}
-                sx={{ "&.Mui-selected": { bgcolor: "primary.main", color: "primary.contrastText" } }}
-              >
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <Box
-                    sx={{
-                      width: 14,
-                      height: 14,
-                      borderRadius: "50%",
-                      bgcolor: t.dark.primary,
-                      border: "1px solid",
-                      borderColor: "divider",
-                    }}
-                  />
-                  {t.name}
-                </Box>
-              </MenuItem>
-            ))}
-          </Menu>
-
-          <IconButton onClick={() => setDarkMode(!darkMode)}>
-            {darkMode ? <Brightness7 /> : <Brightness4 />}
+            <Palette fontSize="small" />
+          </IconButton>
+          <IconButton
+            onClick={() => setDarkMode((v) => !v)}
+            size="small"
+            sx={{ color: "text.secondary" }}
+          >
+            {darkMode ? <Brightness7 fontSize="small" /> : <Brightness4 fontSize="small" />}
           </IconButton>
         </Box>
-      </Toolbar>
+      </Drawer>
+
+      {/* Theme picker menu */}
+      <Menu
+        anchorEl={themeAnchor}
+        open={Boolean(themeAnchor)}
+        onClose={() => setThemeAnchor(null)}
+      >
+        {Object.entries(themes).map(([key, t]) => (
+          <MenuItem
+            key={key}
+            selected={currentTheme === key}
+            onClick={() => {
+              setCurrentTheme(key);
+              setThemeAnchor(null);
+            }}
+            sx={{
+              "&.Mui-selected": {
+                bgcolor: "primary.main",
+                color: "primary.contrastText",
+              },
+            }}
+          >
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <Box
+                sx={{
+                  width: 14,
+                  height: 14,
+                  borderRadius: "50%",
+                  bgcolor: t.dark.primary,
+                  border: "1px solid",
+                  borderColor: "divider",
+                }}
+              />
+              {t.name}
+            </Box>
+          </MenuItem>
+        ))}
+      </Menu>
     </AppBar>
   );
 }

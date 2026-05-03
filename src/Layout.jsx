@@ -124,7 +124,6 @@ export default function Layout() {
   const [darkMode, setDarkMode] = useState(
     localStorage.getItem("darkMode") === "true"
   );
-  const [themeAnchor, setThemeAnchor] = useState(null);
 
   /* ✅ Persist changes */
   useEffect(() => {
@@ -199,8 +198,6 @@ export default function Layout() {
           themes={themes}
           currentTheme={currentTheme}
           setCurrentTheme={setCurrentTheme}
-          themeAnchor={themeAnchor}
-          setThemeAnchor={setThemeAnchor}
           scrollToSection={scrollToSection}
         />
 
