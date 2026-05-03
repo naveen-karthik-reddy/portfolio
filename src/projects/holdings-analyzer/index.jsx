@@ -88,7 +88,8 @@ function UploadScreen({ onFile }) {
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
             mb: 1.5,
-            lineHeight: 1.05,
+            lineHeight: 1.25,
+            pb: "0.05em",
             fontSize: { xs: "2rem", sm: "2.75rem" },
           }}
         >
@@ -392,7 +393,7 @@ export default function HoldingsAnalyzer() {
         <Box>
           <Typography
             variant="h5"
-            sx={{ fontWeight: 900, background: grad, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", lineHeight: 1.2 }}
+            sx={{ fontWeight: 900, background: grad, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", lineHeight: 1.3, pb: "0.05em" }}
           >
             Holdings Analyzer
           </Typography>
