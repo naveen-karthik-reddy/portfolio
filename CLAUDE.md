@@ -2,6 +2,19 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Progress Log
+
+**At the start of every session, check whether `PROGRESS.md` exists in the project root.**
+
+If it exists:
+1. Read it fully.
+2. Explicitly tell the user what is complete, what is pending, and what decisions have been recorded.
+3. Ask clarifying questions if anything is ambiguous before proceeding.
+4. Continue from the first pending task — do not restart completed work.
+
+As tasks are completed, mark them `[x]` in `PROGRESS.md` and move them to the Completed section.
+When all tasks are done, delete `PROGRESS.md`.
+
 ## Commands
 
 ```bash
