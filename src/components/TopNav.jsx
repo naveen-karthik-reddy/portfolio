@@ -114,16 +114,18 @@ export default function TopNav({
             PROJECTS
           </Typography>
 
-          {/* Social icons */}
-          <IconButton href={portfolioData.links.linkedin} target="_blank" size="small" sx={{ color: "text.secondary", ml: 1 }}>
-            <LinkedIn fontSize="small" />
-          </IconButton>
-          <IconButton href={portfolioData.links.github} target="_blank" size="small" sx={{ color: "text.secondary" }}>
-            <GitHub fontSize="small" />
-          </IconButton>
-          <IconButton href={`mailto:${portfolioData.email}`} size="small" sx={{ color: "text.secondary" }}>
-            <MailOutline fontSize="small" />
-          </IconButton>
+          {/* Social icons — landing page only */}
+          {isLanding && <>
+            <IconButton href={portfolioData.links.linkedin} target="_blank" size="small" sx={{ color: "text.secondary", ml: 1 }}>
+              <LinkedIn fontSize="small" />
+            </IconButton>
+            <IconButton href={portfolioData.links.github} target="_blank" size="small" sx={{ color: "text.secondary" }}>
+              <GitHub fontSize="small" />
+            </IconButton>
+            <IconButton href={`mailto:${portfolioData.email}`} size="small" sx={{ color: "text.secondary" }}>
+              <MailOutline fontSize="small" />
+            </IconButton>
+          </>}
 
           {/* Theme + dark mode */}
           <IconButton onClick={(e) => setThemeAnchor(e.currentTarget)} size="small" sx={{ color: "text.secondary" }}>
@@ -201,17 +203,19 @@ export default function TopNav({
 
         <Divider />
 
-        {/* Social + theme controls */}
+        {/* Social (landing only) + theme controls */}
         <Box sx={{ p: 2, display: "flex", alignItems: "center", gap: 0.5 }}>
-          <IconButton href={portfolioData.links.linkedin} target="_blank" size="small" sx={{ color: "text.secondary" }}>
-            <LinkedIn fontSize="small" />
-          </IconButton>
-          <IconButton href={portfolioData.links.github} target="_blank" size="small" sx={{ color: "text.secondary" }}>
-            <GitHub fontSize="small" />
-          </IconButton>
-          <IconButton href={`mailto:${portfolioData.email}`} size="small" sx={{ color: "text.secondary" }}>
-            <MailOutline fontSize="small" />
-          </IconButton>
+          {isLanding && <>
+            <IconButton href={portfolioData.links.linkedin} target="_blank" size="small" sx={{ color: "text.secondary" }}>
+              <LinkedIn fontSize="small" />
+            </IconButton>
+            <IconButton href={portfolioData.links.github} target="_blank" size="small" sx={{ color: "text.secondary" }}>
+              <GitHub fontSize="small" />
+            </IconButton>
+            <IconButton href={`mailto:${portfolioData.email}`} size="small" sx={{ color: "text.secondary" }}>
+              <MailOutline fontSize="small" />
+            </IconButton>
+          </>}
           <Box sx={{ flex: 1 }} />
           <IconButton onClick={(e) => setThemeAnchor(e.currentTarget)} size="small" sx={{ color: "text.secondary" }}>
             <Palette fontSize="small" />
