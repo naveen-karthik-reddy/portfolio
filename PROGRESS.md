@@ -6,7 +6,7 @@
      Update completed tasks as you finish them.
      Delete this file once all tasks are marked complete. -->
 
-## Status: IN PROGRESS
+## Status: COMPLETE
 
 ---
 
@@ -51,10 +51,13 @@
 
 ## Pending
 
-- [ ] **Point 7 — Update REFERENCE.md for Performance Planner**
-  - File: `src/projects/perf-planner/REFERENCE.md`
-  - Reason: Point 4 changed `PageManager.jsx` — the entry-point UX (empty state + page list header)
-  - What to document: updated UX flow — Lighthouse calibration is now the primary entry point; JSON import is secondary (restore-session framing); export remains a per-page icon action
+- [x] **Point 7 — Update REFERENCE.md for Performance Planner**
+  - Updated §12 PageManager description to reflect UX hierarchy
+  - Added §20: Entry-Point UX Model — documents intended workflow, design decisions, and rules for future changes
+
+---
+
+*All tasks complete. This file can be deleted.*
 
 ---
 

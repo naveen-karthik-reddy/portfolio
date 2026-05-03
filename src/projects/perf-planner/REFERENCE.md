@@ -616,7 +616,9 @@ index.jsx
   ├── OptimizationRoadmap — receives pre-computed roadmapItems; dispatches RESOURCE_FIELD_CHANGED /
   │                         PAGE_META_CHANGED; patchFromSuggestionKey maps key→field/value
   ├── SettingsPanel — drawer; reads/dispatches settings
-  ├── PageManager — page cards; triggers calibration dialog; file import
+  ├── PageManager — page cards; triggers calibration dialog; file import (secondary)
+  │               empty state: single "Calibrate from Lighthouse" CTA + small "Import a saved session" text link
+  │               page list header: "Calibrate new page" (contained) + "Import session" (text, tooltip)
   └── CalibrationPanel — Lighthouse JSON upload; parseLighthouseReport → fitCurves → dispatch
                          PAGE_CREATED_FROM_LIGHTHOUSE or PAGE_RECALIBRATED
 
@@ -715,3 +717,33 @@ On `AppContext.jsx` init, if `settings.scoringWeights.tti != null` (old schema t
 | Change export/import format | `exportImport.js` → bump `EXPORT_VERSION` + update parse logic |
 | Change metric scoring formula | `calculator.js` → `metricScore()` |
 | Change curve fitting algorithm | `curveFit.js` → `fitMetric()` and/or `fitCurves()` |
+
+---
+
+## 20. Entry-Point UX Model
+
+The intended user workflow is linear:
+
+```
+1. Calibrate from Lighthouse  →  import a real LH JSON report
+2. Inspect baseline            →  the "Real" variation is pre-populated from the report
+3. Create variations           →  duplicate baseline, adjust resources / pageMeta
+4. Compare & export            →  use Comparison Mode; export the page as JSON for later
+5. Import (optional)           →  restore a previously exported session
+```
+
+### Design decisions encoded in PageManager.jsx
+
+**Lighthouse calibration is the only primary CTA.** Every page must start from a real Lighthouse run — the scoring curves are fitted to the report, so all what-if predictions are calibrated against reality. Making JSON import equally prominent confused users who thought they should start by uploading a JSON they didn't yet have.
+
+**JSON import is a restore action, not a start action.**
+- Empty state: `"Calibrate from Lighthouse"` button (contained, primary) + small text link `"Resuming work? Import a saved session"`
+- Page list header: `"Calibrate new page"` (contained) + `"Import session"` (text button, tooltip: `"Restore a previously exported session"`)
+
+**JSON export is a per-page action** — the `FileDownload` icon on each page card. It is intentionally placed at the end of the workflow (after calibrating and creating variations), not at the entry point.
+
+### Rules for future changes to PageManager
+
+- Do **not** restore the `variant="outlined"` Import button at equal weight to the Calibrate button.
+- If a new entry path is added (e.g. "Start from template"), it should be treated as a secondary path (text button or link), never `variant="contained"`.
+- The tooltip on `"Import session"` must continue to explain what import does — it prevents users from confusing it with Lighthouse calibration.
