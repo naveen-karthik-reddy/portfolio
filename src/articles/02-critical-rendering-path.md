@@ -1,6 +1,6 @@
-# #2 — The Critical Rendering Path
+# Performance #2 - The Critical Rendering Path
 
-Before a user sees anything on screen, the browser must complete a specific sequence of work: fetch the HTML, parse it, fetch and parse all blocking stylesheets, execute blocking scripts, build the render tree, run layout, and paint. This sequence is called the **Critical Rendering Path (CRP)**.
+Page load speed often comes down to one question: how much work does the browser have to finish before it can show the user anything? That sequence of work is the **Critical Rendering Path (CRP)** — fetch HTML, parse it, fetch and parse all blocking stylesheets, execute blocking scripts, build the render tree, run layout, paint. Everything on that list is a potential bottleneck.
 
 The shorter and lighter this path, the faster the first paint. Almost every technique used to improve perceived load speed — inlining CSS, deferring scripts, eliminating render-blocking resources — is aimed at shortening the CRP.
 
@@ -28,11 +28,23 @@ The reason: rendering a partially-styled page would produce visible flashes as s
 
 This means every kilobyte in your CSS is on the critical path. Unused selectors, large framework bundles, and slow stylesheet servers all delay first paint.
 
-**What you can do:**
+```html
+<!-- ❌ Full stylesheet on the critical path — delays first paint -->
+<link rel="stylesheet" href="styles.css">
 
-- Inline critical (above-the-fold) styles directly in `<head>`.
-- Load non-critical CSS asynchronously: `<link rel="stylesheet" media="print" onload="this.media='all'">`.
-- Minimise stylesheet size — remove unused rules, split by route.
+<!-- ✅ Inline only the styles needed for above-the-fold content -->
+<style>
+  /* critical styles here */
+  .hero { display: flex; padding: 2rem; background: #fff; }
+</style>
+
+<!-- ✅ Load the rest async — trick: media="print" loads without blocking,
+     then onload switches it to apply to all media -->
+<link rel="stylesheet" href="styles.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="styles.css"></noscript>
+```
+
+Other options: minimise stylesheet size, remove unused rules, split by route.
 
 ---
 
@@ -93,6 +105,23 @@ While the main parser is blocked by a script, the browser runs a secondary "prel
 
 The preload scanner cannot discover resources injected by JavaScript. Dynamically created `<link>` or `<script>` tags are invisible to it until they actually execute.
 
+```html
+<!-- ✅ Preload scanner finds this even if the main parser is blocked -->
+<head>
+  <link rel="preload" as="font" href="/fonts/Inter.woff2" crossorigin>
+  <script src="heavy-blocker.js"></script>
+</head>
+
+<!-- ❌ Injected by JS — invisible to the preload scanner,
+     starts fetching only after the script runs -->
+<script>
+  const link = document.createElement('link');
+  link.rel = 'preload';
+  link.href = '/fonts/Inter.woff2';
+  document.head.appendChild(link);
+</script>
+```
+
 ---
 
 ## Measuring the CRP
@@ -120,10 +149,4 @@ The **Lighthouse** audit "Eliminate render-blocking resources" identifies exactl
 
 ---
 
-## Key Takeaways
-
-- CSS and synchronous `<script>` tags are render-blocking by default.
-- `defer` is the right choice for most application scripts.
-- `async` suits independent third-party scripts that don't depend on DOM readiness.
-- Inlining critical CSS removes a full round-trip from the critical path.
-- The preload scanner fetches ahead, but cannot see dynamically injected resources.
+The CRP is a useful mental model because it makes the cost of every resource explicit — it's either on the critical path or it isn't. Once you start thinking in those terms, the usual Lighthouse recommendations stop feeling like a checklist and start making intuitive sense.

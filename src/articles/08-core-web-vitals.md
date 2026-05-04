@@ -1,8 +1,6 @@
-# #7 — Core Web Vitals Explained
+# Performance #8 - Core Web Vitals Explained
 
-Google's Core Web Vitals are a set of three metrics that measure the user experience of a page — not in aggregate, but for specific, observable moments: when the main content appears, whether the layout shifts unexpectedly, and how fast the page responds to interaction.
-
-Since 2021, Core Web Vitals have been a confirmed ranking signal. More importantly, they're good proxies for what users actually feel.
+Three numbers — LCP, CLS, INP. Google's Core Web Vitals are deliberately narrow: they don't try to capture everything about a page's performance, just the three moments that consistently correlate with whether users feel a page is fast and stable. Since 2021 they've been a confirmed ranking signal, but more practically, improving them tends to improve the experience in ways users actually notice.
 
 ---
 
@@ -39,11 +37,23 @@ Each Core Web Vital targets one of these dimensions.
 - Images served without width/height (causing layout recalculations)
 
 **How to improve LCP:**
-1. Ensure your LCP image is in the `<head>` as a preload: `<link rel="preload" as="image" href="/hero.webp">`
-2. Never put `loading="lazy"` on the LCP image
-3. Serve images in modern formats (WebP, AVIF) at appropriate sizes
-4. Reduce TTFB with a CDN and fast server response
-5. Eliminate render-blocking resources from the critical path
+
+```html
+<!-- ❌ LCP image discovered late — browser finds it only after parsing the full HTML -->
+<img src="/hero.webp" alt="Hero">
+
+<!-- ✅ Preloaded in <head> — starts downloading in parallel with HTML parse -->
+<link rel="preload" as="image" href="/hero.webp">
+
+<!-- ❌ Never lazy-load the LCP image — it pushes the metric out by the time
+     the browser decides the image is near the viewport -->
+<img src="/hero.webp" loading="lazy" alt="Hero">
+
+<!-- ✅ Eager loading (the default) is correct for above-the-fold images -->
+<img src="/hero.webp" loading="eager" alt="Hero" width="1200" height="600">
+```
+
+Other high-impact fixes: serve images in WebP/AVIF, reduce TTFB with a CDN, and eliminate render-blocking resources from the critical path.
 
 ---
 
@@ -66,11 +76,32 @@ Each Core Web Vital targets one of these dimensions.
 - Animations that change layout properties instead of using `transform`
 
 **How to improve CLS:**
-1. Always specify `width` and `height` on `<img>` and `<video>` elements
-2. Reserve space for ads/embeds with `min-height` on their containers
-3. Use `font-display: optional` for fonts where FOUT causes shifts (at the cost of potentially not using the font)
-4. Insert dynamic content below the fold, not above existing content
-5. Use `transform` for animations instead of properties that affect layout
+
+```html
+<!-- ❌ No dimensions — browser can't reserve space, content shifts when image loads -->
+<img src="product.jpg" alt="Product photo">
+
+<!-- ✅ Explicit dimensions let the browser hold the space from the start -->
+<img src="product.jpg" alt="Product photo" width="400" height="300">
+```
+
+```css
+/* ❌ Animating top/left causes layout — triggers shift on every frame */
+.toast {
+  transition: top 0.3s ease;
+  top: -60px;
+}
+.toast.visible { top: 20px; }
+
+/* ✅ transform doesn't affect layout — no CLS, and it's GPU-composited */
+.toast {
+  transition: transform 0.3s ease;
+  transform: translateY(-80px);
+}
+.toast.visible { transform: translateY(0); }
+```
+
+For ads and embeds, reserve space with a fixed `min-height` on the container. For font FOUT, use `font-display: optional` if the shift is severe, or size your fallback font to closely match the web font metrics.
 
 ---
 
@@ -92,11 +123,24 @@ INP replaced First Input Delay (FID) as a Core Web Vital in March 2024. FID only
 - Complex DOM updates triggered by interaction
 
 **How to improve INP:**
-1. Break long tasks into smaller chunks using `setTimeout` or `scheduler.yield()`
-2. Move non-critical work off the main thread using Web Workers
-3. Avoid synchronous operations in event handlers
-4. Optimise component re-render cost (React: `memo`, `useMemo`, `useCallback` where warranted)
-5. Use `content-visibility: auto` to skip rendering off-screen sections
+
+```js
+// ❌ Heavy work runs synchronously in the handler — blocks paint
+button.addEventListener('click', () => {
+  const results = filterAndSortLargeDataset(allProducts); // 200ms of work
+  renderProductList(results);
+});
+
+// ✅ Yield before the heavy work so the browser can acknowledge the click first
+button.addEventListener('click', async () => {
+  // yield → browser paints the button's :active state, feels responsive
+  await scheduler.yield();
+  const results = filterAndSortLargeDataset(allProducts);
+  renderProductList(results);
+});
+```
+
+For React apps, INP problems often trace back to re-rendering too much on interaction. Profile with the React DevTools Profiler to find components that re-render unnecessarily, then apply `memo`, `useMemo`, or `useCallback` where it actually helps.
 
 ---
 

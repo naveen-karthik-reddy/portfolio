@@ -1,8 +1,8 @@
-# #1 — How the Browser Renders a Page
+# Performance #1 - How the Browser Renders a Page
 
 You type a URL and hit Enter. A few hundred milliseconds later, a fully styled, interactive page appears. What actually happened in between?
 
-Understanding the rendering pipeline is foundational to web performance. Every optimisation you make — from deferring scripts to inlining critical CSS — exists because of how browsers execute these steps. Here's the full picture.
+Most performance advice — defer your scripts, inline critical CSS, stick to `transform` for animations — only makes sense once you understand the pipeline it's targeting. Here are the six steps the browser runs on every frame, in order.
 
 ---
 
@@ -17,6 +17,19 @@ The browser performs six distinct steps to go from raw HTML bytes to pixels on s
 The browser's HTML parser reads the document byte by byte and builds the **Document Object Model (DOM)** — a tree of nodes representing every element, attribute, and text content on the page.
 
 Parsing is **incremental**: the browser doesn't wait for the full document before it starts building the DOM. It works through the stream and emits nodes as it goes. This is why placing `<script>` tags at the bottom of `<body>` matters — a blocking script encountered mid-parse halts the entire process.
+
+```html
+<!-- ❌ Blocks parsing — browser stops here, fetches and runs the script,
+     then resumes building the DOM -->
+<head>
+  <script src="app.js"></script>
+</head>
+
+<!-- ✅ Fetched in parallel, executed after HTML is parsed -->
+<head>
+  <script src="app.js" defer></script>
+</head>
+```
 
 The DOM is not the rendered output. It's a structured representation of the document's content. Styles live elsewhere.
 
@@ -48,6 +61,21 @@ Layout takes the render tree and the viewport dimensions and produces a **box mo
 
 Layout is expensive. Changing anything that affects geometry — width, height, padding, margin, font size, or document structure — triggers a re-layout of everything downstream. This is why layout thrashing is a serious performance concern.
 
+```js
+// ❌ Each offsetHeight read forces a synchronous layout
+//    because the previous write invalidated it
+items.forEach((el) => {
+  const h = el.offsetHeight;   // forces layout
+  el.style.height = h * 2 + 'px'; // invalidates layout
+});
+
+// ✅ Batch all reads, then all writes — layout recalculates once
+const heights = items.map((el) => el.offsetHeight);
+items.forEach((el, i) => {
+  el.style.height = heights[i] * 2 + 'px';
+});
+```
+
 ---
 
 ## Step 5: Paint
@@ -62,7 +90,15 @@ Modern browsers separate paint into **layers**. Elements that are promoted to th
 
 The final step takes all the painted layers and **composites** them into the final image you see on screen, respecting z-index and stacking order. This step runs on the **compositor thread**, separate from the main thread.
 
-This separation is important. CSS animations on `transform` and `opacity` run entirely on the compositor thread and bypass the main thread entirely — which is why they're smooth even when JavaScript is busy.
+This separation is what makes `transform` and `opacity` animations special — they live entirely on the compositor thread and bypass the main thread. A JavaScript-heavy page can be freezing the main thread while a CSS `transform` animation still runs at 60fps.
+
+```css
+/* ❌ triggers layout → paint → composite on every frame */
+.bad  { transition: left 300ms ease; }
+
+/* ✅ compositor-only — skips layout and paint entirely */
+.good { transition: transform 300ms ease; }
+```
 
 ---
 
@@ -84,10 +120,4 @@ When a frame misses its deadline, the user sees a dropped frame — or "jank". T
 
 ---
 
-## Key Takeaways
-
-- The browser builds two separate trees (DOM and CSSOM) and merges them into the Render Tree before it can paint anything.
-- CSS is render-blocking; JavaScript blocks HTML parsing.
-- Layout and paint run on the main thread. Compositing runs on its own thread.
-- `transform` and `opacity` animations avoid layout and paint entirely, running only on the compositor.
-- Every optimisation in web performance targets one or more of these six steps.
+Once this pipeline clicks, the reasoning behind most performance advice becomes obvious. Deferring scripts protects step 1. Inlining critical CSS shortens step 2. Sticking to `transform` for animations keeps steps 4 and 5 out of the equation entirely. The pipeline is the model — everything else is just applying it.

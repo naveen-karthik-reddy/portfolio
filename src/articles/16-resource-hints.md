@@ -1,6 +1,6 @@
-# #9 — Resource Hints — Preload, Prefetch, Preconnect
+# Performance #16 - Resource Hints — Preload, Prefetch, Preconnect
 
-The browser is good at discovering resources — but it discovers them by parsing HTML and CSS, which means it can't act on them until it gets there. Resource hints are a way to give the browser advance notice: "you'll need this soon, start now."
+The browser discovers resources by parsing HTML and CSS — which means it can't act on them until it gets there. By then, you've already paid the latency cost. Resource hints let you break that dependency: tell the browser what's coming so it can act before the parser even sees it.
 
 Used correctly, they eliminate dead time in the network waterfall. Used carelessly, they waste bandwidth and can even hurt performance.
 
@@ -46,17 +46,20 @@ The `crossorigin` attribute is required when the resource will be fetched with C
 
 ## preload: Fetch Critical Assets Now
 
-`preload` tells the browser to fetch a specific resource at high priority, regardless of when the parser discovers it.
+`preload` tells the browser to fetch a specific resource at high priority, regardless of when the parser discovers it. This is where resource hints get genuinely powerful — and genuinely dangerous if misused.
 
 ```html
-<!-- Preload LCP hero image -->
+<!-- ✅ Preload LCP hero image — especially important when it's a CSS background -->
 <link rel="preload" as="image" href="/hero.webp">
 
-<!-- Preload critical font -->
+<!-- ✅ Preload critical font — crossorigin required even for same-origin fonts -->
 <link rel="preload" as="font" href="/fonts/inter.woff2" type="font/woff2" crossorigin>
 
-<!-- Preload a script that is needed immediately -->
+<!-- ✅ Preload a script that is needed immediately but discovered late -->
 <link rel="preload" as="script" href="/critical.js">
+
+<!-- ❌ Preloading a below-fold image — wastes a high-priority request slot -->
+<link rel="preload" as="image" href="/footer-banner.webp">
 ```
 
 The `as` attribute is mandatory — it tells the browser what type of resource to expect, which controls the fetch priority and ensures the response goes into the right cache.
@@ -123,3 +126,5 @@ Without this, each module in the import graph is discovered and fetched sequenti
 **Using `preload` instead of `prefetch` for next-page resources:** Preloaded resources are fetched at high priority on the *current* page, competing with the resources you actually need now.
 
 **Adding hints without measuring:** Resource hints are hints — their actual benefit depends on the network waterfall of your specific page. Always verify with Lighthouse or WebPageTest that they're shortening time-to-first-byte or time-to-LCP, not just adding requests.
+
+The right set of resource hints is small and deliberate — a few targeted `preconnect` and `preload` tags based on real waterfall analysis will do more than a dozen hints added by instinct.

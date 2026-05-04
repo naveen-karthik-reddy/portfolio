@@ -1,6 +1,6 @@
-# #8 — Lighthouse & Real User Monitoring
+# Performance #9 - Lighthouse & Real User Monitoring
 
-You can measure a page's performance in two fundamentally different ways: by simulating a load in a controlled environment, or by collecting data from real users visiting your site. Both approaches answer different questions. Neither is sufficient on its own.
+A Lighthouse score of 95 is satisfying. It's also possible to have a 95 on Lighthouse while your actual users — on budget Android phones, throttled home connections, with four browser extensions running — are seeing poor CLS and sluggish interactions. Lab tools and field data answer different questions, and you need both to close that gap.
 
 ---
 
@@ -106,4 +106,4 @@ The right workflow:
 2. **Use PageSpeed Insights** (or CrUX) to validate that your improvements are moving field metrics for real users.
 3. **Use RUM** for ongoing monitoring. Set up alerts when CWV field scores degrade after a deploy.
 
-A Lighthouse score of 95 means nothing if your real users — on slower devices, using different ISPs, running extensions — are still experiencing poor CLS or high INP. Always close the loop with field data.
+Lighthouse score improvements that don't move field metrics aren't wasted — they often reflect real changes that just haven't accumulated enough data yet. But if weeks pass with no improvement in CrUX, you're likely optimizing something your real users don't hit. Field data is the ground truth.

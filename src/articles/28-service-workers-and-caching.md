@@ -1,6 +1,6 @@
-# #12 — Service Workers & Caching Strategies
+# Performance #28 - Service Workers & Caching Strategies
 
-Service workers are a JavaScript file that runs in a separate thread from the page and acts as a programmable network proxy. Every request made by pages under its scope passes through it. This makes service workers the right place to implement sophisticated caching strategies, offline support, and background sync.
+A service worker is a JavaScript file that runs in a separate thread from the page and acts as a programmable network proxy. Every request made by pages under its scope passes through it — which means you control exactly what gets cached, how it gets served, and what happens when the network is unavailable. That's a lot of power, and it comes with real complexity.
 
 ---
 
@@ -9,16 +9,18 @@ Service workers are a JavaScript file that runs in a separate thread from the pa
 A service worker is registered by a page, but it lives independently of it:
 
 ```js
-// main.js — register the service worker
+// main.js — register the service worker from the page
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js');
+  navigator.serviceWorker.register('/sw.js').then((reg) => {
+    console.log('SW registered, scope:', reg.scope);
+  });
 }
 ```
 
 ```js
-// sw.js — the service worker itself
+// sw.js — the service worker itself runs in its own thread
 self.addEventListener('fetch', (event) => {
-  // intercept every network request
+  // every network request from pages in this scope flows through here
 });
 ```
 
@@ -32,31 +34,36 @@ self.addEventListener('fetch', (event) => {
 
 ## The Service Worker Lifecycle
 
-Understanding the lifecycle is essential for deploying updates without breaking cached resources.
+Deploying updates without breaking cached resources requires understanding the lifecycle. Skip it and you'll spend an afternoon debugging why users are stuck on a stale version of your app.
 
 **1. Install**
 
-Triggered when the browser downloads a new or updated `sw.js`. The `install` event is typically used to pre-cache critical assets:
+Triggered when the browser downloads a new or updated `sw.js`. Use the `install` event to pre-cache the critical shell assets your app needs to render:
 
 ```js
+const CACHE_NAME = 'app-shell-v1';
+const PRECACHE_ASSETS = ['/index.html', '/styles.css', '/app.js'];
+
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open('v1').then((cache) =>
-      cache.addAll(['/index.html', '/styles.css', '/app.js'])
-    )
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_ASSETS))
   );
 });
 ```
 
 **2. Activate**
 
-After installation, the new service worker waits until all tabs using the old worker are closed. On activation, old caches are cleaned up:
+After installation, the new service worker waits until all tabs using the old worker are closed. On activation, clean up old caches so storage doesn't accumulate:
 
 ```js
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== 'v1').map((k) => caches.delete(k)))
+      Promise.all(
+        keys
+          .filter((k) => k !== CACHE_NAME) // delete anything that isn't the current version
+          .map((k) => caches.delete(k))
+      )
     )
   );
 });
@@ -76,14 +83,21 @@ Different resources need different caching strategies. The choice depends on how
 
 ### Cache-First
 
-Check the cache first; fetch from the network only if not cached. Returns stale content if available.
+Check the cache first; fetch from the network only if not cached.
 
 ```js
 self.addEventListener('fetch', (event) => {
   event.respondWith(
-    caches.match(event.request).then((cached) =>
-      cached ?? fetch(event.request)
-    )
+    caches.match(event.request).then((cached) => {
+      if (cached) return cached; // serve from cache immediately
+
+      // not in cache — fetch, store for next time, then return
+      return fetch(event.request).then((response) => {
+        const clone = response.clone(); // clone before consuming
+        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+        return response;
+      });
+    })
   );
 });
 ```
@@ -97,7 +111,14 @@ Try the network; fall back to cache if the network fails.
 ```js
 self.addEventListener('fetch', (event) => {
   event.respondWith(
-    fetch(event.request).catch(() => caches.match(event.request))
+    fetch(event.request)
+      .then((response) => {
+        // update the cache with the fresh response for offline fallback
+        const clone = response.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+        return response;
+      })
+      .catch(() => caches.match(event.request)) // network failed — serve stale
   );
 });
 ```
@@ -113,10 +134,14 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.open('dynamic').then(async (cache) => {
       const cached = await cache.match(event.request);
+
+      // always kick off a network request to refresh the cache
       const fetchPromise = fetch(event.request).then((response) => {
-        cache.put(event.request, response.clone());
+        cache.put(event.request, response.clone()); // update for next visit
         return response;
       });
+
+      // serve cached immediately if available, otherwise wait for network
       return cached ?? fetchPromise;
     })
   );
@@ -129,7 +154,7 @@ self.addEventListener('fetch', (event) => {
 
 Return the cached response immediately and also start a network request. When the network responds, update the UI if the response differs.
 
-This pattern requires coordination with the page (the page listens for updates from the service worker), making it more complex to implement. It's best suited for real-time data where you want instant display but always-fresh content.
+This pattern requires coordination with the page (the page listens for updates from the service worker via `postMessage`), making it more complex to implement. It's best suited for real-time data where you want instant display but always-fresh content.
 
 ---
 
@@ -156,3 +181,5 @@ They add complexity and are not always the right tool. For simple static sites s
 **HTTPS only:** Service workers require HTTPS in production. This is non-negotiable — a service worker with the ability to intercept all requests on an insecure connection would be a serious security risk.
 
 **Don't cache HTML with a long-lived cache-first strategy.** If a user's browser caches your shell HTML forever and you push an update, they'll get stale HTML. Use network-first or stale-while-revalidate for HTML.
+
+The biggest maintenance trap is forgetting to version your cache names when you change your precache manifest. Bump the version string in `CACHE_NAME` with every deploy that changes the assets list, and your activate handler will clean up the old entries automatically.

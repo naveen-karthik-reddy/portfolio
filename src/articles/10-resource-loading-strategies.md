@@ -1,8 +1,6 @@
-# #3 — Resource Loading Strategies
+# Performance #10 - Resource Loading Strategies
 
-Rendering the page quickly is only half the story. Loading all the assets the page depends on — fonts, stylesheets, scripts, images — efficiently is what separates a fast experience from a slow one.
-
-This article covers four key resource categories and the practical loading strategies for each.
+Loading assets efficiently is where a lot of page speed is won or lost. Your app logic might be well-optimized, but if fonts block text, a 300KB stylesheet is loaded upfront for a page that needs 15KB, and every script tag fires at parse time — you're leaving significant performance on the table. This article covers fonts, CSS, JavaScript, and lazy loading, with the practical patterns for each.
 
 ---
 
@@ -91,9 +89,30 @@ Modern browsers download and execute the `module` script (which is deferred by d
 
 Third-party scripts (chat widgets, analytics, A/B testing) are a common performance liability. Strategies:
 
-- **Load after interaction:** inject the script only when the user first interacts with the page (click, scroll, keydown).
-- **Load on idle:** use `requestIdleCallback` to defer non-critical scripts until the main thread is free.
-- **Facade patterns:** render a static image of an embedded widget (YouTube video, chat button) until the user clicks it, then swap in the real script.
+```js
+// ❌ Script injected on DOMContentLoaded — runs during the critical loading window
+document.addEventListener('DOMContentLoaded', () => {
+  loadChatWidget();
+});
+
+// ✅ Inject after first user interaction — the widget isn't needed until then
+let widgetLoaded = false;
+function loadOnFirstInteraction() {
+  if (widgetLoaded) return;
+  widgetLoaded = true;
+  loadChatWidget();
+}
+['click', 'scroll', 'keydown'].forEach(event =>
+  window.addEventListener(event, loadOnFirstInteraction, { once: true })
+);
+
+// ✅ Or defer to idle time for non-interactive scripts like analytics
+requestIdleCallback(() => {
+  loadAnalyticsScript();
+});
+```
+
+For embedded widgets (YouTube videos, maps), use a **facade pattern** — show a static preview image, then swap in the real embed only when the user clicks.
 
 ---
 
@@ -106,10 +125,13 @@ Loading everything upfront is wasteful. Lazy loading defers resources until they
 The native `loading="lazy"` attribute tells the browser to defer offscreen images until they're near the viewport:
 
 ```html
-<img src="photo.jpg" loading="lazy" alt="..." width="800" height="600">
-```
+<!-- ❌ No dimensions — content shifts when image loads, no space reserved -->
+<img src="product.jpg" loading="lazy" alt="Product">
 
-Always include explicit `width` and `height` — this lets the browser reserve space before the image loads, preventing layout shift.
+<!-- ✅ Explicit dimensions let the browser reserve space; lazy keeps it out of
+     the critical path while still preventing layout shift -->
+<img src="product.jpg" loading="lazy" alt="Product" width="800" height="600">
+```
 
 Do **not** lazy load above-the-fold images — especially the LCP image. That delays the metric that matters most.
 
@@ -117,7 +139,7 @@ Do **not** lazy load above-the-fold images — especially the LCP image. That de
 
 Dynamic imports allow splitting component code into separate chunks:
 
-```js
+```jsx
 // React
 const HeavyChart = React.lazy(() => import('./HeavyChart'));
 
@@ -133,7 +155,7 @@ The chunk for `HeavyChart` is only downloaded when the component is first render
 
 Route-based code splitting is the highest-value lazy loading technique. Each route gets its own chunk, and users only download code for the pages they visit:
 
-```js
+```jsx
 // React Router v7
 const ArticlesPage = lazy(() => import('./pages/ArticlesPage'));
 
@@ -158,4 +180,4 @@ A well-optimised loading strategy looks like this:
 4. **Images:** `loading="lazy"` on all below-fold images with explicit dimensions; LCP image eagerly loaded
 5. **Routes/Components:** code-split at the route level, heavy components lazy-loaded with Suspense
 
-Each layer reduces the amount of work on the critical path — everything the user needs before first paint arrives as fast as possible, and everything else follows on demand.
+Each layer reduces work on the critical path. The pattern is consistent: get the minimum required for first paint to the browser as fast as possible, and pull everything else in on demand. Apply it systematically and you'll often see LCP drop by seconds without touching a single line of app logic.

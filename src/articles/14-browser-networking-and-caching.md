@@ -1,6 +1,6 @@
-# #5 — Browser Networking & Caching
+# Performance #14 - Browser Networking & Caching
 
-Every resource on a web page — HTML, CSS, JavaScript, images, fonts — travels over the network. Understanding what happens on that journey, and how to control it with HTTP caching, is essential for reducing load times.
+Before a single byte of your page content arrives, the browser has already spent real time on DNS, TCP, and TLS. On a cold load to a new origin, that overhead can easily add 200ms before the server even sends a response. Knowing what each stage costs — and which headers eliminate repeat costs entirely — is what separates slow sites from fast ones.
 
 ---
 
@@ -16,10 +16,12 @@ Before the browser can connect to `api.example.com`, it needs to translate that 
 
 The browser checks its **local cache** first, then the OS cache, then the configured DNS resolver (your ISP or a public resolver like `8.8.8.8`). A cold DNS lookup typically adds **20–120ms** to the first request to a new origin.
 
-**Optimisation:** Use `dns-prefetch` to resolve hostnames for third-party origins early:
+Optimise by using `dns-prefetch` to resolve hostnames for third-party origins early:
 
 ```html
+<!-- Start resolving before the browser discovers the resource -->
 <link rel="dns-prefetch" href="//fonts.googleapis.com">
+<link rel="dns-prefetch" href="//cdn.example.com">
 ```
 
 ---
@@ -28,7 +30,7 @@ The browser checks its **local cache** first, then the OS cache, then the config
 
 TCP is a reliable, ordered transport protocol. Before data can flow, the browser and server must establish a connection with a three-way handshake:
 
-```
+```text
 Client → SYN        →  Server
 Client ← SYN-ACK    ←  Server
 Client → ACK        →  Server
@@ -36,10 +38,15 @@ Client → ACK        →  Server
 
 One full round trip (RTT) is consumed just to open the connection. On a 50ms RTT network, that's 50ms before a single byte of content is sent.
 
-**Optimisation:** Use `preconnect` to perform the TCP (and TLS) handshake early, before the request is made:
+Use `preconnect` to perform the TCP (and TLS) handshake early, before the request is made:
 
 ```html
+<!-- ❌ Connection established only when the resource is discovered -->
+<link rel="dns-prefetch" href="https://fonts.googleapis.com">
+
+<!-- ✅ Full TCP+TLS handshake completed early — resource fetch starts immediately -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 ```
 
 ---
@@ -50,25 +57,43 @@ For HTTPS connections (all production traffic should be HTTPS), TLS adds another
 
 TLS 1.3 reduces this to a single round trip (1-RTT), and supports zero round-trip resumption (0-RTT) for repeated connections. Ensure your server supports TLS 1.3 — it's a free performance improvement.
 
+```http
+# Verify TLS version in response headers (or DevTools → Security panel)
+SSL-Session:
+    Protocol  : TLSv1.3
+    Cipher    : TLS_AES_256_GCM_SHA384
+```
+
 ---
 
 ## Stage 4: HTTP Request / Response
 
 With the connection established, the browser sends the HTTP request:
 
-```
+```http
 GET /api/data HTTP/1.1
 Host: api.example.com
 Accept: application/json
+Cache-Control: no-cache
 ```
 
-The server processes the request and responds with headers followed by the body. **Time to First Byte (TTFB)** measures the gap between the request being sent and the first byte of the response arriving — it captures server processing time plus one network RTT.
+The server processes the request and responds with headers followed by the body:
+
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 1420
+Cache-Control: no-cache
+ETag: "a3f8d2b1"
+```
+
+**Time to First Byte (TTFB)** measures the gap between the request being sent and the first byte of the response arriving — it captures server processing time plus one network RTT.
 
 A high TTFB points to slow server-side processing or insufficient CDN coverage.
 
 ---
 
-## HTTP Caching: Control-Control and ETag
+## HTTP Caching: Cache-Control and ETag
 
 Once a resource is downloaded, caching determines whether the browser needs to re-download it on the next visit.
 
@@ -76,8 +101,19 @@ Once a resource is downloaded, caching determines whether the browser needs to r
 
 `Cache-Control` is the primary caching header. Set by the server, it controls how and how long a resource is cached.
 
-```
-Cache-Control: max-age=31536000, immutable
+```http
+# Versioned static asset (JS/CSS with content hash in filename)
+# Cache forever — the filename changes when content changes
+Cache-Control: public, max-age=31536000, immutable
+
+# HTML — must always be fresh, but revalidation is cheap
+Cache-Control: no-cache
+
+# Sensitive user data — browser only, never CDN
+Cache-Control: private, no-store
+
+# API response — CDN can cache, but revalidate after 60s
+Cache-Control: public, max-age=60, stale-while-revalidate=300
 ```
 
 | Directive | Meaning |
@@ -89,23 +125,19 @@ Cache-Control: max-age=31536000, immutable
 | `public` | Any cache (CDN, proxy) may store it |
 | `private` | Only the browser cache (not CDN) |
 
-**Best practice for versioned assets** (JS/CSS with content hashes in filenames):
-```
-Cache-Control: public, max-age=31536000, immutable
-```
-
-**Best practice for HTML** (must always be fresh):
-```
-Cache-Control: no-cache
-```
-
 ### ETag and Conditional Requests
 
 When `max-age` expires, the browser doesn't necessarily re-download the resource. It sends a **conditional request** using the `ETag` (a fingerprint of the resource content):
 
-```
+```http
+# Browser's conditional request after cache expiry
 GET /styles.css HTTP/1.1
 If-None-Match: "abc123"
+
+# Server response if content hasn't changed — no body sent
+HTTP/1.1 304 Not Modified
+ETag: "abc123"
+Cache-Control: no-cache
 ```
 
 If the resource hasn't changed, the server responds with `304 Not Modified` — no body, just confirmation. The browser uses its cached copy. This eliminates the download cost even when the cache has technically expired.
@@ -133,7 +165,7 @@ A **Content Delivery Network (CDN)** places servers at dozens of locations world
 
 ## The Full Request Timeline
 
-```
+```text
 DNS lookup       ~50ms (or 0ms if cached)
 TCP handshake    ~50ms (1 RTT)
 TLS handshake    ~50ms (1 RTT, TLS 1.3)
@@ -147,10 +179,4 @@ Caching eliminates all of this for repeat visits. A cache hit costs nothing beyo
 
 ---
 
-## Key Takeaways
-
-- DNS, TCP, and TLS each consume at least one network round trip before content arrives. `preconnect` and `dns-prefetch` move these costs earlier.
-- `Cache-Control: max-age=31536000, immutable` is the right setting for versioned static assets.
-- `Cache-Control: no-cache` with ETags gives HTML the right balance — always fresh, but revalidation is cheap.
-- CDNs reduce latency by serving content from servers geographically close to the user.
-- TLS 1.3 reduces the TLS handshake to one round trip — ensure your server supports it.
+The networking stack is mostly invisible until it isn't — and when it shows up, it shows up as a slow TTFB or a 200ms delay before anything loads. Getting `Cache-Control` right on your static assets is the highest-leverage caching decision you can make: one deploy, and every returning user skips the network entirely for JS, CSS, and fonts. The `no-cache` + ETag pattern for HTML rounds that out — your users always get fresh markup without paying for a full re-download.

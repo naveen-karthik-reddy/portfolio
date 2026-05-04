@@ -1,184 +1,89 @@
-Multiple times, we see a recurring pattern:
+I've seen this pattern repeat enough times that it's worth writing down. A designer hands over a Figma file. An engineer feeds it into Claude via MCP. `figma.get_screenshot()` looks perfect. `figma.get_design_context()` and `figma.get_metadata()` return clean structured data. The generated HTML and CSS comes back inaccurate, inconsistent, or completely wrong.
 
-- Designers hand over a Figma file.
-- Engineers feed it into Claude (or any LLM) using MCP.
-- `figma.get_screenshot()` looks perfect.
-- `figma.get_design_context()` and `figma.get_metadata()` return structured data.
-- The generated HTML/CSS is inaccurate, inconsistent, or completely wrong.
-
-At first glance, this looks like an LLM problem.
-
-In reality, it is usually a **design structure problem**.
+At first glance that looks like an LLM problem. In reality it's almost always a **design structure problem**.
 
 ---
 
 # The Core Problem: Visual Truth vs Structural Truth
 
-There are two “truths” in a Figma file:
+There are two "truths" in a Figma file.
 
-### 1. Visual Truth  
-What `figma.get_screenshot()` shows.
+**Visual truth** is what `figma.get_screenshot()` shows — perfect spacing, clean alignment, proper visual grouping, pixel-perfect UI.
 
-- Perfect spacing
-- Clean alignment
-- Proper visual grouping
-- Pixel-perfect UI
+**Structural truth** is what `figma.get_design_context()` and `figma.get_metadata()` expose — frame hierarchy, auto-layout configuration, constraints, padding, absolute positioning, group nesting, component structure.
 
-### 2. Structural Truth  
-What `figma.get_design_context()` and `figma.get_metadata()` expose.
-
-- Frame hierarchy
-- Auto-layout configuration
-- Constraints
-- Padding
-- Absolute positioning
-- Group nesting
-- Component structure
-
-When the Figma file has proper semantic structure — clean auto-layout, meaningful naming, logical hierarchy — metadata becomes extremely powerful. Combined with the screenshot, it produces accurate and stable UI code.
-
-But when semantics are weak — messy nesting, generic names, heavy absolute positioning — structural data becomes noise. In such cases, the screenshot alone often yields better results.
+When a Figma file has proper semantic structure — clean auto-layout, meaningful naming, logical hierarchy — the metadata becomes extremely powerful. Combined with the screenshot, it produces accurate and stable UI code. But when semantics are weak — messy nesting, generic names, heavy absolute positioning — that structural data becomes noise. In those cases, the screenshot alone often yields better results than the full design tree.
 
 ---
 
 # Frames ≠ HTML Elements
 
-In Figma:
+In Figma, everything is a Frame. Components wrap Frames. Auto-layout wraps Frames. Variants wrap Components.
 
-- Everything is a Frame
-- Components wrap Frames
-- Auto-layout wraps Frames
-- Variants wrap Components
-
-But in real UI:
-
-- `<section>`
-- `<button>`
-- `<img>`
-- `<header>`
-
-There is no 1:1 mapping.
+But in real UI you have `<section>`, `<button>`, `<img>`, `<header>`. There is no 1:1 mapping.
 
 When the model sees:
 
-```
+```text
 Frame → Frame → Frame → Frame
 ```
 
-It cannot reliably determine:
-- Which frame is layout?
-- Which frame is semantic?
-- Which frame is decorative?
+It cannot reliably determine which frame is layout, which is semantic, and which is purely decorative. That ambiguity leads to extra divs, wrong nesting, lost hierarchy, and over-complicated markup.
 
-This ambiguity leads to:
-- Extra divs
-- Wrong nesting
-- Lost hierarchy
-- Over-complicated markup
 ---
 
 # Over-Nesting from Design Convenience
 
-Designers often:
+Designers often wrap elements in extra frames for spacing, add invisible layers, use groups for alignment, and duplicate components instead of using variants. Visually harmless — structurally disastrous.
 
-- Wrap elements in extra frames for spacing
-- Add invisible layers
-- Use groups for alignment
-- Duplicate components instead of variants
+A structure like this:
 
-Visually harmless.
-
-Structurally disastrous.
-
-Example:
-
-```
+```text
 Frame
  ├─ Frame
  │   ├─ Frame
  │   │   ├─ Text
 ```
 
-LLM sees depth → assumes hierarchy.
-
-But the hierarchy is artificial.
-
-
+Looks like meaningful hierarchy to the model. But the nesting is artificial — it exists because someone added a padding wrapper or an alignment container that was never meant to become a DOM element.
 
 ---
+
 # Structural Drift Between Visual and Logical Hierarchy
 
-Designers optimize for:
+Designers optimize for pixel perfection, layout flexibility, and component reusability. Developers need semantic grouping, accessibility hierarchy, and logical DOM order.
 
-- Pixel perfection
-- Layout flexibility
-- Component reusability
-
-Developers need:
-
-- Semantic grouping
-- Accessibility hierarchy
-- Logical DOM order
-
-When visual grouping differs from logical grouping:
-
-The LLM must guess.
-
-Guessing leads to hallucination.
+When visual grouping differs from logical grouping, the LLM has to guess. And guessing is where hallucination comes from.
 
 ---
 
 # Decorative Layers Polluting Context
 
-Common issues:
-
-- Background rectangles
-- Overlay masks
-- Vector shapes
-- Absolute-positioned elements
-
-They appear in metadata as full structural nodes.
-
-But visually they are decorative.
-
-Without filtering:
-
-The model may:
-- Convert them into HTML nodes
-- Misinterpret them as content elements
-- Inflate DOM structure
+Background rectangles, overlay masks, vector shapes, and absolute-positioned decorative elements all appear in metadata as full structural nodes. Without filtering, the model may convert them into HTML nodes, misinterpret them as content elements, or inflate the DOM structure — because it has no way to distinguish "this is a background rectangle" from "this is a content container."
 
 ---
 
 # Naming is Everything
 
-LLMs rely heavily on tokens.
+LLMs rely heavily on token meaning. If your Figma tree says:
 
-If your Figma tree says:
-
-```
+```text
 Frame
  ├─ Frame
  ├─ Frame
  ├─ Text
 ```
 
-You get generic output.
+You get generic output. If it says:
 
-If it says:
-
-```
+```text
 ProductCard
  ├─ ProductImage
  ├─ ProductTitle
  ├─ AddToCartButton
 ```
 
-You get structured output.
-
-Naming acts as semantic metadata.
-
-Poor naming destroys interpretability.
+You get structured, accurate output. Naming acts as semantic metadata. Poor naming doesn't just make the file harder to read — it actively destroys the model's ability to reason about intent.
 
 ---
 
@@ -186,86 +91,31 @@ Poor naming destroys interpretability.
 
 ## 1. Enforce Semantic Naming
 
-Avoid:
-```
-Frame 12
-Group 45
-Rectangle 8
-```
-
-Prefer:
-```
-Navbar
-HeroSection
-ProductGrid
-CTAButton
-```
-
----
+Avoid generic auto-generated names like `Frame 12`, `Group 45`, `Rectangle 8`. Use intent-driven names like `Navbar`, `HeroSection`, `ProductGrid`, `CTAButton`. The name is the contract between the designer and the model.
 
 ## 2. Reduce Artificial Nesting
 
-Before handing to MCP:
-
-- Flatten unnecessary frames
-- Remove empty containers
-- Eliminate layout-only wrappers where possible
-
----
+Before handing a file to MCP: flatten unnecessary frames, remove empty containers, and eliminate layout-only wrappers where possible. Every extra layer of nesting is an opportunity for the model to infer false hierarchy.
 
 ## 3. Separate Decorative Layers
 
-Clearly isolate:
-- Background layers
-- Visual effects
-- Shadows
-- Masks
-
-So they can be filtered before passing to LLM.
-
----
+Clearly isolate background layers, visual effects, shadows, and masks so they can be filtered before passing context to the LLM. If decorative elements live alongside content elements with identical structural weight, the model can't distinguish them.
 
 ## 4. Standardize Component Contracts
 
-Define:
-
-- Button
-- Card
-- Modal
-- Input
-
-With consistent naming and internal structure.
-
-Do not let every page reinvent structure.
+Define a canonical structure for Button, Card, Modal, and Input components with consistent naming and internal hierarchy. Don't let every page reinvent the structure of a card. Consistent component shape is what lets the model generalize from one instance to another.
 
 ---
 
-
 # What You Cannot Fix
 
-We cannot remove:
-
-- Frames
-- Components
-- Auto Layout
-- Variants
-
-They are core to Figma.
-
-The goal is not elimination.
-
-The goal is **normalization and clarity**.
+Frames, Components, Auto Layout, and Variants are core to Figma — they can't be removed and shouldn't be. The goal isn't elimination; it's normalization and clarity. You're not trying to make Figma simpler. You're trying to make its structure legible to a machine.
 
 ---
 
 # Figma + LLM Is a Workflow Shift
 
-It is controlling what the model sees.
-
-Instead of blindly passing the entire design tree,  
-we intentionally curate context.
-
-This changes reliability.
+Using Figma with an LLM well isn't about better prompting. It's about controlling what the model sees. Instead of blindly passing the entire design tree, you intentionally curate context. That shift in approach is what changes reliability.
 
 ---
 
@@ -273,170 +123,46 @@ This changes reliability.
 
 ## 1. Conscious Token Reduction
 
-Most pipelines:
+Most pipelines send full trees including hidden layers, decorative SVGs, images, and unused components. This increases ambiguity and cost.
 
-- Send full trees  
-- Include hidden layers  
-- Include decorative SVGs  
-- Include images  
-- Include unused components  
-
-This increases ambiguity and cost.
-
-Instead:
-
-- Remove hidden layers  
-- Exclude decorative elements  
-- Strip unnecessary wrappers  
-- Pass only meaningful structural nodes  
-
-### Outcome
-
-- Fewer tokens  
-- Lower cost  
-- Faster responses  
-- Improved reasoning clarity  
-- Reduced hallucination  
-
-Token reduction improves reasoning — not just budget.
-
----
+Instead: remove hidden layers, exclude decorative elements, strip unnecessary wrappers, and pass only meaningful structural nodes. Fewer tokens means lower cost, faster responses, improved reasoning clarity, and reduced hallucination. Token reduction improves reasoning — not just budget.
 
 ## 2. Treat Component Names as Contracts
 
-Old approach:
+The old approach: screenshot → "Generate this UI." The better approach: structured design → named components → explicit intent.
 
-> Screenshot → “Generate this UI.”
-
-Improved approach:
-
-> Structured design → Named components → Explicit intent.
-
-If components are clearly named:
-
-- `LoginButton`
-- `ProductCard`
-- `HeroSection`
-- `CheckoutForm`
-
-The model reasons from intent instead of pixels.
-
-Figma becomes a semantic contract.
-
----
+When components are clearly named — `LoginButton`, `ProductCard`, `HeroSection`, `CheckoutForm` — the model reasons from intent instead of pixels. Figma becomes a semantic contract.
 
 ## 3. Multi-Page Awareness
 
-Figma already encodes:
-
-- Page names  
-- Frame names  
-- Component names  
-
-Example:
-
-- Button: `GoToCheckout`  
-- Page: `CheckoutPage`
-
-Now interaction can be explicit:
+Figma already encodes page names, frame names, and component names. If a button is named `GoToCheckout` and the target page is named `CheckoutPage`, navigation intent becomes explicit without any screenshot inference:
 
 > On click of `GoToCheckout`, navigate to `CheckoutPage`.
 
-No screenshot inference required.
-
----
+That's the kind of instruction the model can execute reliably.
 
 ## 4. Intra-Page Interaction Clarity
 
-Consistent naming enables clear mapping:
-
-- `OpenModalButton`
-- `SignupModal`
-- `SidebarToggle`
-- `SidebarPanel`
-
-Instruction becomes deterministic:
+Consistent naming makes interaction mapping deterministic. If you have `OpenModalButton` and `SignupModal`, the instruction
 
 > On click of `OpenModalButton`, show `SignupModal`.
 
-Ambiguity disappears.
-
----
+is unambiguous. If both were named `Frame 23` and `Frame 47`, the model has to guess — and it will sometimes guess wrong.
 
 ## 5. Responsive Alignment
 
-Instead of sending one screenshot:
-
-- Provide mobile and desktop structures  
-- Ensure component names match across breakpoints  
-
-If `ProductCard` exists in both:
-
-The model understands:
-
-- Same component  
-- Different layout rules  
-
-This enables structural responsive reasoning.
-
----
+Instead of sending a single screenshot, provide mobile and desktop structures with matching component names across breakpoints. If `ProductCard` exists at both sizes, the model understands it's the same component with different layout rules — enabling structural responsive reasoning rather than treating them as two unrelated elements.
 
 ## 6. Intentional MCP Usage
 
-Stop passively accepting raw MCP output.
-
-Instead:
-
-- Decide what to extract  
-- Decide what to exclude  
-- Normalize before passing to the LLM  
-- Leverage component names deliberately  
-
-Control the abstraction layer.
+Stop passively accepting raw MCP output. Decide what to extract, decide what to exclude, normalize before passing to the LLM, and leverage component names deliberately. Control the abstraction layer.
 
 ---
 
 # The Mental Model Shift
 
-Before:
+The old way: screenshot → "Build this."
 
-> Screenshot → “Build this.”
+The better way: structured design → clean metadata → explicit contracts → controlled context.
 
-Now:
-
-> Structured design → Clean metadata → Explicit contracts → Controlled context.
-
-This encourages:
-
-- Strong naming discipline  
-- Cleaner design systems  
-- Better interaction modeling  
-- Reduced token usage  
-- Higher generation reliability  
-
----
-
-# Final Takeaways
-
-- Visually perfect designs can be structurally misleading.  
-- Figma metadata is not equivalent to rendered intent.  
-- Screenshots and design trees represent different realities.  
-- Naming and structural discipline matter more than pixel precision.  
-- Normalization before LLM ingestion is critical.  
-- Uncontrolled MCP usage increases context size and reduces output quality.  
-
-This is not wasted effort.
-
-It is a shift from:
-
-> AI guessing from pixels  
-
-to  
-
-> AI reasoning from structure.
-
-If you want reliable AI-generated UI code:
-
-Design not just for humans.
-
-Design for machines.
+This approach rewards strong naming discipline, cleaner design systems, better interaction modeling, reduced token usage, and higher generation reliability. The point isn't to do more work upfront — it's to do the right work upfront, so the model stops guessing and starts reasoning from structure. A well-structured Figma file isn't just easier for developers to read; it's the difference between an LLM that generates accurate UI code and one that hallucinates half the component tree.

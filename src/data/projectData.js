@@ -6,7 +6,7 @@ export const projectData = [
     excerpt: "Upload your Zerodha holdings CSV and get an instant portfolio dashboard — allocation breakdown, top gainers & losers, and a full sortable holdings table.",
     tags: ["React", "Recharts", "MUI", "CSV"],
     points: [
-      "Parses a Zerodha KITE holdings CSV entirely in the browser — no server uploads — then fires live NSE requests to fetch dividend yields, valuation ratios, beta, analyst consensus, and 52-week ranges for every holding automatically",
+      "Parses a Zerodha KITE holdings CSV entirely in the browser — no server uploads — then fires requests to fetch dividend yields, valuation ratios, beta, analyst consensus, and 52-week ranges for every holding automatically",
       "Six analysis tabs (Overview, Holdings, Dividends, Fundamentals, Risk, Analyst) with color-coded thresholds and sortable tables; every cell is editable inline and updates P&L aggregates and charts in real time",
       "Risk tab flags high-risk positions by comparing beta and debt-to-equity against configurable thresholds, with a 52-week range progress bar that instantly surfaces holdings drifting toward annual lows",
       "Four compounding calculators (SIP, Lumpsum, Goal, CAGR) with synchronized slider and text inputs; Recharts stacked-area charts separate invested principal from market-generated returns over the full horizon",

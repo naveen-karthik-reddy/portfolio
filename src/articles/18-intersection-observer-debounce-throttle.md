@@ -1,4 +1,4 @@
-# #4 — Intersection Observer, Debouncing & Throttling
+# Performance #18 - Intersection Observer, Debouncing & Throttling
 
 Scroll and resize events are fired dozens of times per second. If your handlers do any real work — DOM reads, API calls, visibility checks — the main thread gets hammered and the page stutters.
 
@@ -11,9 +11,10 @@ This article covers three tools that solve event-frequency problems at different
 The naive approach to lazy loading or scroll-triggered animations looks like this:
 
 ```js
+// ❌ Fires hundreds of times per scroll, forces layout on every call
 window.addEventListener('scroll', () => {
   const el = document.querySelector('.sticky-header');
-  const rect = el.getBoundingClientRect(); // forces layout
+  const rect = el.getBoundingClientRect(); // forces synchronous layout
   if (rect.top <= 0) el.classList.add('pinned');
 });
 ```
@@ -29,12 +30,13 @@ The three patterns below solve this at different levels.
 The Intersection Observer API lets you react to elements entering or leaving the viewport (or another element) — **without polling, without scroll listeners, without forced layouts**.
 
 ```js
+// ✅ Browser handles visibility detection off the main thread
 const observer = new IntersectionObserver(
   (entries) => {
     entries.forEach((entry) => {
       if (entry.isIntersecting) {
         entry.target.classList.add('visible');
-        observer.unobserve(entry.target); // stop watching once seen
+        observer.unobserve(entry.target); // stop watching once seen — don't leave observers dangling
       }
     });
   },
@@ -72,11 +74,12 @@ function debounce(fn, delay) {
   let timer;
   return (...args) => {
     clearTimeout(timer);
+    // Reset the clock on every call — only the last one gets through
     timer = setTimeout(() => fn(...args), delay);
   };
 }
 
-// Search input — only fetch after user stops typing for 300ms
+// ✅ Search input — only fetch after user stops typing for 300ms
 const handleSearch = debounce((value) => {
   fetchResults(value);
 }, 300);
@@ -106,12 +109,12 @@ function throttle(fn, interval) {
     const now = Date.now();
     if (now - last >= interval) {
       last = now;
-      fn(...args);
+      fn(...args); // execute, then ignore calls until interval elapses
     }
   };
 }
 
-// Update scroll progress bar at most every 16ms (≈60fps)
+// ✅ Update scroll progress bar at most every 16ms (≈60fps)
 const updateProgress = throttle(() => {
   const scrolled = window.scrollY / (document.body.scrollHeight - window.innerHeight);
   progressBar.style.width = `${scrolled * 100}%`;
@@ -154,25 +157,27 @@ For scroll-triggered animations, the best approach often combines all three:
 3. **Throttle** on anything that must track scroll position directly (progress bars, parallax)
 
 ```js
-// Lazy load images — Intersection Observer (no scroll listener at all)
+// ✅ Lazy load images — Intersection Observer handles this with no scroll listener at all
 const imgObserver = new IntersectionObserver((entries) => {
   entries.forEach(({ isIntersecting, target }) => {
     if (isIntersecting) {
-      target.src = target.dataset.src;
+      target.src = target.dataset.src; // swap in real src only when needed
       imgObserver.unobserve(target);
     }
   });
-}, { rootMargin: '200px' });
+}, { rootMargin: '200px' }); // start loading 200px before the image enters view
 
 document.querySelectorAll('img[data-src]').forEach((img) => imgObserver.observe(img));
 
-// Scroll progress bar — throttled, since it must track position continuously
+// ✅ Scroll progress bar — must track position continuously, so throttle it
 const updateBar = throttle(() => {
   const pct = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
   bar.style.width = `${pct}%`;
 }, 16);
 
+// passive: true tells the browser the handler won't call preventDefault()
+// — allows scroll to proceed without waiting for JS to finish
 window.addEventListener('scroll', updateBar, { passive: true });
 ```
 
-Note the `{ passive: true }` option on the scroll listener — it tells the browser the handler won't call `preventDefault()`, allowing scroll to proceed without waiting for JavaScript.
+Between these three patterns, you can cover essentially every high-frequency event scenario without touching the main thread unnecessarily. Intersection Observer for visibility, debounce for settling, throttle for pacing — pick the right tool for what you're actually trying to do.

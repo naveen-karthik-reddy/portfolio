@@ -1,4 +1,4 @@
-# #6 — Reflow, Repaint & Layout Thrashing
+# Performance #3 - Reflow, Repaint & Layout Thrashing
 
 Some of the most impactful performance problems in browser JavaScript aren't caused by network latency or bundle size — they're caused by making the browser repeatedly recalculate layout in a tight loop. This is called **layout thrashing**, and it can turn a smooth 60fps experience into a stuttering mess even on fast hardware.
 
@@ -47,7 +47,7 @@ items.forEach((item) => {
 
 Each iteration: write invalidates the layout, then the read forces the browser to recalculate it immediately. 100 elements = 100 full layout recalculations.
 
-**The fix:** batch reads and writes separately.
+Batch reads and writes separately instead:
 
 ```js
 // ✅ Read all first, then write all
@@ -136,10 +136,4 @@ Rendering 10,000 DOM nodes causes massive layout costs. Virtual list libraries (
 
 ---
 
-## Key Takeaways
-
-- Reflow recalculates geometry and is expensive. Repaint redraws visuals and is cheaper. `transform`/`opacity` avoid both.
-- Layout thrashing occurs when DOM reads and writes are interleaved in a loop, forcing repeated synchronous layouts.
-- The fix: batch all reads before all writes.
-- Long tasks block user input for their entire duration. Layout thrashing is a common cause.
-- CSS animations on `transform` and `opacity` run on the compositor thread — use them over JavaScript-driven layout animations.
+Layout thrashing is insidious because it doesn't show up as slow JavaScript — it shows up as the browser doing extra work that you accidentally caused. Once you get in the habit of separating reads from writes and reaching for `transform` over geometry properties, a whole class of jank problems simply stops appearing.

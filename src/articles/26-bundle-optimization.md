@@ -1,6 +1,6 @@
-# #10 — Bundle Optimization — Tree Shaking & Code Splitting
+# Performance #26 - Bundle Optimization — Tree Shaking & Code Splitting
 
-JavaScript is the most expensive resource on the web — byte for byte, it costs more than images. An image has to be decoded once; JavaScript has to be parsed, compiled, and executed on every page load.
+JavaScript is the most expensive resource on the web — byte for byte, it costs more than images. An image has to be decoded once; JavaScript has to be parsed, compiled, and executed on every page load. Shipping less of it, and deferring what you do ship, is one of the highest-leverage things you can do for load performance.
 
 Bundle optimisation is the set of techniques that reduce how much JavaScript ships to the browser, and how much of it is parsed on any given page.
 
@@ -42,8 +42,20 @@ After tree shaking, `multiply` is not included in the bundle.
 - Minification must be enabled (tree shaking alone doesn't remove dead code — the minifier completes the job)
 
 **Common failure modes:**
-- Importing an entire library: `import _ from 'lodash'` pulls in all of lodash. Use `import { debounce } from 'lodash-es'` or `import debounce from 'lodash/debounce'`.
-- Libraries that don't ship ES modules. Many older npm packages use CommonJS, which can't be tree-shaken.
+
+❌ Importing an entire library pulls everything in:
+```js
+import _ from 'lodash'; // ships all ~70KB of lodash
+```
+
+✅ Import only what you need:
+```js
+import { debounce } from 'lodash-es';    // tree-shakeable ESM build
+// or
+import debounce from 'lodash/debounce'; // direct path import
+```
+
+Libraries that don't ship ES modules (many older npm packages use CommonJS) can't be tree-shaken at all — check `bundlephobia.com` to see if a package has an ESM build.
 
 ---
 
@@ -56,7 +68,7 @@ Even with tree shaking, your entire application's JavaScript doesn't need to loa
 The highest-value form of code splitting. Each route is a separate chunk:
 
 ```js
-// React + React Router
+// React + React Router — each lazy() becomes its own network request
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Settings  = lazy(() => import('./pages/Settings'));
 
@@ -71,6 +83,7 @@ A user visiting `/dashboard` only downloads the Dashboard chunk. The Settings ch
 Large components — rich text editors, chart libraries, code syntax highlighters — can be split out and loaded only when rendered:
 
 ```js
+// Monaco is ~2MB — no reason to ship it to users who never open the code editor
 const MonacoEditor = lazy(() => import('@monaco-editor/react'));
 
 function CodeEditor({ code }) {
@@ -87,7 +100,7 @@ function CodeEditor({ code }) {
 `import()` is the underlying mechanism. It returns a Promise that resolves to the module:
 
 ```js
-// Load only when user clicks "Export"
+// Load only when user clicks "Export" — most users never will
 button.addEventListener('click', async () => {
   const { exportToPDF } = await import('./lib/pdf-export');
   exportToPDF(data);
@@ -100,20 +113,23 @@ This is ideal for features that are infrequently used — the code is only downl
 
 ## Shared Chunks
 
-When multiple routes use the same library, the bundler can extract it into a **shared chunk** that's loaded once and cached:
+When multiple routes use the same library, the bundler can extract it into a **shared chunk** that's loaded once and cached. Without this, React gets bundled into every route chunk separately.
 
 ```js
 // vite.config.js
-build: {
-  rollupOptions: {
-    output: {
-      manualChunks: {
-        vendor: ['react', 'react-dom'],
-        charts: ['recharts'],
+export default {
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // loaded once, cached across all route navigations
+          vendor: ['react', 'react-dom'],
+          charts: ['recharts'],
+        },
       },
     },
   },
-},
+};
 ```
 
 React and Recharts are loaded once, cached by the browser, and reused across all routes that need them.
@@ -122,11 +138,24 @@ React and Recharts are loaded once, cached by the browser, and reused across all
 
 ## Analysing Your Bundle
 
-You can't optimise what you can't see. Bundle analysers visualise what's in each chunk and how large it is:
+You can't optimise what you can't see. Bundle analysers visualise what's in each chunk and how large it is.
 
-- **Vite:** `rollup-plugin-visualizer` — add `visualizer()` to the plugins array; it generates an HTML treemap after build.
-- **Webpack:** `webpack-bundle-analyzer` or the built-in `--profile` flag.
-- **General:** `bundlephobia.com` — paste a package name to see its minified + gzipped size and its dependency tree.
+For Vite, add `rollup-plugin-visualizer` to your config:
+
+```js
+// vite.config.js
+import { visualizer } from 'rollup-plugin-visualizer';
+
+export default {
+  plugins: [
+    visualizer({ open: true, gzipSize: true }), // opens treemap in browser after build
+  ],
+};
+```
+
+Run `npm run build` and it generates an interactive HTML treemap showing every module's size contribution.
+
+For webpack, use `webpack-bundle-analyzer` or pass `--profile` to the CLI. For a quick check on any package without building, `bundlephobia.com` shows minified + gzipped size and the full dependency tree.
 
 Common findings:
 - A large utility library imported in full when only one function is needed
@@ -144,3 +173,5 @@ Common findings:
 **Module preloading:** `<link rel="modulepreload">` in the HTML for critical chunks to avoid the waterfall of sequential module fetches.
 
 **Third-party audits:** Run `npm ls` or use Bundlephobia to audit every dependency. Remove unused packages. Replace heavy libraries with lighter alternatives (e.g. `date-fns` over `moment`, `zustand` over `redux` for simple state).
+
+The two techniques that move the needle most are route-based code splitting and fixing barrel imports that defeat tree shaking. Start there before reaching for more exotic optimisations.

@@ -1,12 +1,14 @@
 # Figma MCP Integration Guide
 
-The **Figma MCP server** provides a set of tools that enable LLMs to translate and interpret designs from Figma. Once connected, your MCP client can access specific design nodes programmatically.
+The Figma MCP server gives Claude Code a direct line into your Figma files — not just a screenshot, but the actual design tree: frame hierarchy, auto-layout config, spacing, typography, component relationships. Once it's connected, you can point Claude at any node and ask it to implement the design, and it starts from structured data rather than pixel-guessing from an image.
+
+This guide covers setup, the three main tools the server exposes, and what to expect from each one.
 
 ---
 
-## 🚀 Figma MCP Setup
+## Figma MCP Setup
 
-### 1️⃣ Add the Remote Figma MCP Server
+### 1. Add the Remote Figma MCP Server
 
 Run the following command in your terminal to add the remote Figma MCP server to Claude Code:
 
@@ -16,7 +18,7 @@ claude mcp add --transport http figma https://mcp.figma.com/mcp
 
 ---
 
-### 2️⃣ Authenticate Figma MCP
+### 2. Authenticate Figma MCP
 
 1. Open Claude Code.
 2. Type:
@@ -32,7 +34,7 @@ claude mcp add --transport http figma https://mcp.figma.com/mcp
 
 ---
 
-### 3️⃣ Verify Connection
+### 3. Verify Connection
 
 Run:
 
@@ -40,11 +42,11 @@ Run:
 /mcp
 ```
 
-The Figma server should now show a **green status** or a **"connected"** message.
+The Figma server should now show a green status or a "connected" message.
 
 ---
 
-## 🔧 Optimize Token Utilization
+## Optimize Token Utilization
 
 To improve token efficiency across all MCP servers, add the following line to your `.bashrc`:
 
@@ -62,20 +64,20 @@ source ~/.bashrc
 
 # Figma MCP Tools
 
-## 📸 `figma.get_screenshot`
+## `figma.get_screenshot`
 
-**Purpose:**  
+**Purpose:**
 Takes a screenshot of the selected Figma node.
 
-**Use Case:**  
-Useful when the LLM needs a visual representation of a component or frame.
+**Use Case:**
+Useful when Claude needs a visual reference for a component or frame — particularly after calling `get_design_context`, to visually verify what the structural data describes.
 
 ---
 
-## 🧠 `figma.get_design_context`
+## `figma.get_design_context`
 
-**Purpose:**  
-Extracts structured design metadata from a Figma file or selected node so that an LLM can understand the design in a machine-consumable format.
+**Purpose:**
+Extracts structured design metadata from a Figma file or selected node so that Claude can understand the design in a machine-consumable format.
 
 ### Returns Structured Data Including:
 
@@ -91,16 +93,14 @@ Extracts structured design metadata from a Figma file or selected node so that a
 - Positioning
 - Tokens / styles applied
 
-
 ---
 
-## 🏷️ `figma.get_metadata`
+## `figma.get_metadata`
 
-**Purpose:**  
+**Purpose:**
 A lightweight introspection call that returns descriptive metadata about a Figma file or node — without returning the full layout tree.
 
-If `get_design_context` focuses on structural layout and styling,  
-`get_metadata` focuses on identity and high-level classification.
+If `get_design_context` focuses on structural layout and styling, `get_metadata` focuses on identity and high-level classification.
 
 ### Answers Questions Like:
 
@@ -111,31 +111,28 @@ If `get_design_context` focuses on structural layout and styling,
 - What styles are applied?
 - What are the component relationships?
 
-
 ---
 
-
-
-#  Figma MCP Design Extraction Example
+# Figma MCP Design Extraction Example
 
 ![Phone input component in Figma](https://github.com/user-attachments/assets/9db722e2-f61f-4922-b42d-02b4f4539d2f)
 
-## 🔹 get_screenshot (MCP)
+## get_screenshot (MCP)
 
-```
+```text
 figma - get_screenshot (MCP)(fileKey: "26FE6n6l1KYh6y5oKIrDs3", nodeId: "3539:1671", clientLanguages: "html,css,javascript,python", clientFrameworks: "django")
 ```
 
 Output:
-```
+```text
 [Image]
 ```
 
 ---
 
-## 🔹 get_design_context (MCP)
+## get_design_context (MCP)
 
-```
+```text
 figma - get_design_context (MCP)(fileKey: "26FE6n6l1KYh6y5oKIrDs3", nodeId: "3539:1671", clientLanguages: "html,css,javascript,python", clientFrameworks: "django")
 ```
 
@@ -169,22 +166,20 @@ export default function Frame() {
 
 ---
 
-SUPER CRITICAL: The generated React+Tailwind code MUST be converted to match the target project's technology stack and styling system.
+**Important:** The generated React + Tailwind code must be converted to match your target project's technology stack and styling system. Before using it:
 
-1. Analyze the target codebase to identify: technology stack, styling approach, component patterns, and design tokens 
-2. Convert React syntax to the target framework/library 
-3. Transform all Tailwind classes to the target styling system while preserving exact visual design 
-4. Follow the project's existing patterns and conventions DO NOT install any Tailwind as a dependency unless the user instructs you to do so.
+1. Analyze the target codebase to identify the tech stack, styling approach, component patterns, and design tokens.
+2. Convert React syntax to the target framework if needed.
+3. Transform all Tailwind classes to the project's styling system while preserving the exact visual design.
+4. Follow existing patterns and conventions — do not install Tailwind as a dependency unless you explicitly want it.
 
-- Node ids have been added to the code as data attributes, e.g. data-node-id="1:2".  
-- Images and SVGs will be stored as constants, e.g. const image = 'https://www.figma.com/api/mcp/asset/550e8400-e29b-41d4-a716-446655440000'. These constants will be used in the code as the source for the image, ex: <img src={image} />. Image assets are stored on a remote server for 7 days and can be fetched using the provided URLs until they expire.  
-- IMPORTANT: After you call this tool, you MUST call get_screenshot to get a screenshot of the node for context.
+A few things to know about the output: node IDs are added as `data-node-id` attributes (e.g., `data-node-id="1:2"`). Images and SVGs are stored as constants pointing to temporary Figma asset URLs that expire after 7 days. After calling `get_design_context`, always follow up with `get_screenshot` to visually verify the structure the model is working from.
 
 ---
 
-## 🔹 get_metadata (MCP)
+## get_metadata (MCP)
 
-```
+```text
 figma - get_metadata (MCP)(fileKey: "26FE6n6l1KYh6y5oKIrDs3", nodeId: "3539:1671", clientLanguages: "html,css,javascript,python", clientFrameworks: "django")
 ```
 
@@ -208,12 +203,11 @@ figma - get_metadata (MCP)(fileKey: "26FE6n6l1KYh6y5oKIrDs3", nodeId: "3539:1671
 
 ---
 
-- IMPORTANT: After you call this tool, you MUST call get_design_context if trying to implement the design, since this tool only returns metadata. If you do not call get_design_context, the agent will not be able to implement the design.
+`get_metadata` is a good first call when you want to understand what a node is before committing to a full `get_design_context` extraction. It's lightweight and tells you enough to decide whether you're looking at the right component. If you're trying to implement the design, always follow up with `get_design_context` — metadata alone doesn't give the model enough to generate accurate code.
 
+---
 
-
-# Claude Interpretation from figma mcp tool data
-
+# Claude Interpretation from Figma MCP Tool Data
 
 ![Claude + Figma MCP — Design Context output](claude-figma-mcp-integration1.png)
 

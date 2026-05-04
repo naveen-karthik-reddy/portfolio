@@ -23,6 +23,8 @@ import { useTheme } from "@mui/material/styles";
 import { motion } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { oneDark, oneLight } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 import { articlesData, getArticleBySlug } from "../data/articlesData";
 
@@ -128,8 +130,27 @@ function ReadingProgress({ grad }) {
 
 /* ==================== TABLE OF CONTENTS ==================== */
 
-function TableOfContents({ headings, grad }) {
+function TableOfContents({ headings, grad, sidebar = false }) {
   const [open, setOpen] = useState(true);
+  const [activeId, setActiveId] = useState(null);
+
+  useEffect(() => {
+    if (!sidebar || headings.length === 0) return;
+
+    const onScroll = () => {
+      const OFFSET = 120; // px from top — accounts for fixed navbar + some breathing room
+      let current = headings[0]?.id ?? null;
+      for (const { id } of headings) {
+        const el = document.getElementById(id);
+        if (el && el.getBoundingClientRect().top <= OFFSET) current = id;
+      }
+      setActiveId(current);
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll(); // run once on mount to set initial state
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [headings, sidebar]);
 
   if (headings.length === 0) return null;
 
@@ -137,6 +158,83 @@ function TableOfContents({ headings, grad }) {
     const el = document.getElementById(id);
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
   };
+
+  const makeLinks = (withActive) => (
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 0.25 }}>
+      {headings.map((h, i) => {
+        const isActive = withActive && activeId === h.id;
+        return (
+          <Box
+            key={i}
+            component="button"
+            onClick={() => scrollTo(h.id)}
+            sx={{
+              textAlign: "left",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              pl: (h.level - 1) * 2,
+              py: 0.5,
+              color: isActive ? "primary.main" : "text.secondary",
+              fontFamily: "inherit",
+              fontSize:
+                h.level === 1 ? "0.88rem" : h.level === 2 ? "0.83rem" : "0.78rem",
+              fontWeight: isActive || h.level === 1 ? 600 : 400,
+              lineHeight: 1.5,
+              borderRadius: 0.5,
+              transition: "color 0.2s, font-weight 0.2s",
+              "&:hover": { color: "primary.main" },
+            }}
+          >
+            {isActive && (
+              <Box
+                component="span"
+                sx={{
+                  display: "inline-block",
+                  width: 3,
+                  height: "0.85em",
+                  bgcolor: "primary.main",
+                  borderRadius: 1,
+                  mr: 0.75,
+                  verticalAlign: "middle",
+                  flexShrink: 0,
+                }}
+              />
+            )}
+            {h.text}
+          </Box>
+        );
+      })}
+    </Box>
+  );
+
+  if (sidebar) {
+    return (
+      <Paper
+        sx={{
+          p: 2.5,
+          border: "1px solid",
+          borderColor: "divider",
+          borderRadius: 2,
+        }}
+      >
+        <Typography
+          variant="subtitle2"
+          sx={{
+            fontWeight: 700,
+            letterSpacing: "0.12em",
+            mb: 1.5,
+            background: grad,
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+          }}
+        >
+          ON THIS PAGE
+        </Typography>
+        {makeLinks(true)}
+      </Paper>
+    );
+  }
 
   return (
     <Paper
@@ -180,34 +278,7 @@ function TableOfContents({ headings, grad }) {
       </Box>
 
       <Collapse in={open} timeout={300}>
-        <Box sx={{ mt: 2, display: "flex", flexDirection: "column", gap: 0.25 }}>
-          {headings.map((h, i) => (
-            <Box
-              key={i}
-              component="button"
-              onClick={() => scrollTo(h.id)}
-              sx={{
-                textAlign: "left",
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                pl: (h.level - 1) * 2,
-                py: 0.5,
-                color: "text.secondary",
-                fontFamily: "inherit",
-                fontSize:
-                  h.level === 1 ? "0.88rem" : h.level === 2 ? "0.83rem" : "0.78rem",
-                fontWeight: h.level === 1 ? 600 : 400,
-                lineHeight: 1.5,
-                borderRadius: 0.5,
-                transition: "color 0.2s",
-                "&:hover": { color: "primary.main" },
-              }}
-            >
-              {h.text}
-            </Box>
-          ))}
-        </Box>
+        <Box sx={{ mt: 2 }}>{makeLinks(false)}</Box>
       </Collapse>
     </Paper>
   );
@@ -219,16 +290,24 @@ export default function ArticlesPage() {
   const { slug } = useParams();
   const article = slug ? getArticleBySlug(slug) : null;
 
+  if (article) {
+    return (
+      <Container maxWidth="lg" sx={{ py: { xs: 5, sm: 8 }, px: { xs: 2, sm: 3 } }}>
+        <ArticleView article={article} />
+      </Container>
+    );
+  }
+
   return (
-    <Container maxWidth="md" sx={{ py: { xs: 5, sm: 8 }, px: { xs: 2, sm: 3 } }}>
-      {article ? <ArticleView article={article} /> : <ArticlesList />}
+    <Container maxWidth="lg" sx={{ py: { xs: 5, sm: 8 }, px: { xs: 2, sm: 3 } }}>
+      <ArticlesList />
     </Container>
   );
 }
 
-/* ==================== TYPE LABEL MAP ==================== */
+/* ==================== CATEGORY LABEL MAP ==================== */
 
-const TYPE_LABELS = {
+const CATEGORY_LABELS = {
   performance: "Performance",
   product: "Product",
   "llm-metrics": "LLM / AI",
@@ -240,21 +319,21 @@ function ArticlesList() {
   const theme = useTheme();
   const grad = `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`;
   const [searchParams, setSearchParams] = useSearchParams();
-  const activeType = searchParams.get("type") || null;
+  const activeCategory = searchParams.get("category") || null;
 
-  const setActiveType = (type) => {
-    if (type) setSearchParams({ type });
+  const setActiveCategory = (cat) => {
+    if (cat) setSearchParams({ category: cat });
     else setSearchParams({});
   };
 
-  const allTypes = Object.keys(TYPE_LABELS);
+  const allCategories = Object.keys(CATEGORY_LABELS);
 
   const sorted = [...articlesData].sort(
     (a, b) => new Date(b.date) - new Date(a.date)
   );
 
-  const filtered = activeType
-    ? sorted.filter((a) => a.types?.includes(activeType))
+  const filtered = activeCategory
+    ? sorted.filter((a) => a.categories?.includes(activeCategory))
     : sorted;
 
   return (
@@ -278,44 +357,51 @@ function ArticlesList() {
         <Box display="flex" gap={1} flexWrap="wrap" mb={5}>
           <Chip
             label="All"
-            onClick={() => setActiveType(null)}
-            variant={activeType === null ? "filled" : "outlined"}
-            color={activeType === null ? "primary" : "default"}
+            onClick={() => setActiveCategory(null)}
+            variant={activeCategory === null ? "filled" : "outlined"}
+            color={activeCategory === null ? "primary" : "default"}
             sx={{ fontWeight: 600, cursor: "pointer" }}
           />
-          {allTypes.map((type) => (
+          {allCategories.map((cat) => (
             <Chip
-              key={type}
-              label={TYPE_LABELS[type]}
-              onClick={() => setActiveType(activeType === type ? null : type)}
-              variant={activeType === type ? "filled" : "outlined"}
-              color={activeType === type ? "primary" : "default"}
+              key={cat}
+              label={CATEGORY_LABELS[cat]}
+              onClick={() => setActiveCategory(activeCategory === cat ? null : cat)}
+              variant={activeCategory === cat ? "filled" : "outlined"}
+              color={activeCategory === cat ? "primary" : "default"}
               sx={{ fontWeight: 600, cursor: "pointer" }}
             />
           ))}
         </Box>
       </motion.div>
 
-      <motion.div
-        key={activeType ?? "all"}
+      <Box
+        component={motion.div}
+        key={activeCategory ?? "all"}
         variants={staggerContainer}
         initial="hidden"
         animate="visible"
-        style={{ display: "flex", flexDirection: "column", gap: "24px" }}
+        sx={{
+          display: "grid",
+          gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", lg: "1fr 1fr 1fr" },
+          gap: 3,
+        }}
       >
         {filtered.map((article) => (
-          <motion.div key={article.id} variants={fadeInUp}>
+          <motion.div key={article.id} variants={fadeInUp} style={{ display: "flex" }}>
             <Paper
               component={Link}
               to={`/articles/${article.id}`}
               sx={{
                 p: 3,
-                display: "block",
+                display: "flex",
+                flexDirection: "column",
                 textDecoration: "none",
                 border: "1px solid",
                 borderColor: "divider",
                 borderRadius: 2,
                 transition: "all 0.3s",
+                width: "100%",
                 "&:hover": {
                   borderColor: "primary.main",
                   transform: "translateY(-3px)",
@@ -323,15 +409,19 @@ function ArticlesList() {
                 },
               }}
             >
-              <Typography variant="h6" fontWeight={700} color="text.primary">
+              <Typography variant="h6" fontWeight={700} color="text.primary" sx={{ mb: 1 }}>
                 {article.title}
               </Typography>
 
-              <Typography variant="body2" color="text.secondary" sx={{ my: 1 }}>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ mb: 1.5, flex: 1, lineHeight: 1.6 }}
+              >
                 {article.excerpt}
               </Typography>
 
-              <Box display="flex" gap={1} flexWrap="wrap" mb={1}>
+              <Box display="flex" gap={0.75} flexWrap="wrap" mb={1.5}>
                 {article.tags.map((tag) => (
                   <Chip
                     key={tag}
@@ -343,6 +433,7 @@ function ArticlesList() {
                       borderColor: "primary.main",
                       bgcolor: "transparent",
                       fontWeight: 600,
+                      fontSize: "0.7rem",
                     }}
                   />
                 ))}
@@ -356,13 +447,13 @@ function ArticlesList() {
         ))}
 
         {filtered.length === 0 && (
-          <motion.div variants={fadeInUp}>
+          <motion.div variants={fadeInUp} style={{ gridColumn: "1 / -1" }}>
             <Typography color="text.secondary" sx={{ textAlign: "center", py: 6 }}>
               No articles in this category yet.
             </Typography>
           </motion.div>
         )}
-      </motion.div>
+      </Box>
     </Box>
   );
 }
@@ -370,7 +461,7 @@ function ArticlesList() {
 /* ==================== PREV / NEXT NAV ==================== */
 
 const perfSeries = articlesData
-  .filter((a) => a.types?.includes("performance"))
+  .filter((a) => a.categories?.includes("performance"))
   .sort((a, b) => new Date(a.date) - new Date(b.date));
 
 function PrevNextNav({ article, grad }) {
@@ -559,7 +650,33 @@ function ArticleView({ article }) {
       );
     },
 
-    pre({ children }) {
+    pre({ node, children }) {
+      const codeNode = node?.children?.[0];
+      if (codeNode?.type === "element" && codeNode.tagName === "code") {
+        const classes = codeNode.properties?.className || [];
+        const langClass = classes.find((c) => c.startsWith("language-"));
+        const lang = langClass?.replace("language-", "");
+        const raw = codeNode.children?.[0]?.value ?? "";
+        if (lang && raw) {
+          return (
+            <SyntaxHighlighter
+              language={lang}
+              style={isDark ? oneDark : oneLight}
+              PreTag="div"
+              customStyle={{
+                borderRadius: 8,
+                marginTop: 24,
+                marginBottom: 24,
+                fontSize: "0.875rem",
+                lineHeight: 1.7,
+                border: `1px solid ${theme.palette.divider}`,
+              }}
+            >
+              {raw.replace(/\n$/, "")}
+            </SyntaxHighlighter>
+          );
+        }
+      }
       return (
         <Box
           component="pre"
@@ -570,11 +687,9 @@ function ArticleView({ article }) {
             overflow: "auto",
             my: 3,
             border: `1px solid ${theme.palette.divider}`,
-            fontFamily:
-              '"Fira Code", "Cascadia Code", "Consolas", monospace',
+            fontFamily: '"Fira Code", "Cascadia Code", "Consolas", monospace',
             fontSize: "0.875rem",
             lineHeight: 1.7,
-            /* reset inline-code styles for code inside pre */
             "& code": {
               backgroundColor: "transparent !important",
               padding: "0 !important",
@@ -757,121 +872,145 @@ function ArticleView({ article }) {
     <>
       <ReadingProgress grad={grad} />
 
-      <motion.div initial="hidden" animate="visible" variants={fadeInUp}>
-        {/* Top bar */}
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            mb: 4,
-          }}
-        >
-          <Button
-            component={Link}
-            to="/articles"
-            startIcon={<ArrowBack />}
-            sx={{ color: "text.secondary", "&:hover": { color: "primary.main" } }}
-          >
-            All Articles
-          </Button>
-
-          <Tooltip title={copied ? "Copied!" : "Copy link"} arrow>
-            <IconButton
-              onClick={handleCopy}
-              size="small"
+      <Box sx={{ display: "flex", gap: { xs: 0, lg: 5 }, alignItems: "flex-start" }}>
+        {/* Main content column */}
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <motion.div initial="hidden" animate="visible" variants={fadeInUp}>
+            {/* Top bar */}
+            <Box
               sx={{
-                border: "1px solid",
-                borderColor: copied ? "success.main" : "divider",
-                borderRadius: 1.5,
-                color: copied ? "success.main" : "text.secondary",
-                transition: "all 0.3s",
-                "&:hover": { borderColor: "primary.main", color: "primary.main" },
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 4,
               }}
             >
-              {copied ? (
-                <Check fontSize="small" />
-              ) : (
-                <ContentCopy fontSize="small" />
-              )}
-            </IconButton>
-          </Tooltip>
-        </Box>
+              <Button
+                component={Link}
+                to="/articles"
+                startIcon={<ArrowBack />}
+                sx={{ color: "text.secondary", "&:hover": { color: "primary.main" } }}
+              >
+                All Articles
+              </Button>
 
-        {/* Title */}
-        <Typography
-          variant="h3"
-          sx={{
-            fontWeight: 900,
-            mb: 2,
-            background: grad,
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            lineHeight: 1.2,
-          }}
-        >
-          {article.title}
-        </Typography>
+              <Tooltip title={copied ? "Copied!" : "Copy link"} arrow>
+                <IconButton
+                  onClick={handleCopy}
+                  size="small"
+                  sx={{
+                    border: "1px solid",
+                    borderColor: copied ? "success.main" : "divider",
+                    borderRadius: 1.5,
+                    color: copied ? "success.main" : "text.secondary",
+                    transition: "all 0.3s",
+                    "&:hover": { borderColor: "primary.main", color: "primary.main" },
+                  }}
+                >
+                  {copied ? (
+                    <Check fontSize="small" />
+                  ) : (
+                    <ContentCopy fontSize="small" />
+                  )}
+                </IconButton>
+              </Tooltip>
+            </Box>
 
-        {/* Excerpt */}
-        <Typography
-          variant="body1"
-          color="text.secondary"
-          sx={{ mb: 2.5, lineHeight: 1.7, fontSize: "1.05rem" }}
-        >
-          {article.excerpt}
-        </Typography>
-
-        {/* Meta */}
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: 1.5,
-            mb: 2.5,
-            flexWrap: "wrap",
-          }}
-        >
-          <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.85rem" }}>
-            {article.date}
-          </Typography>
-          <Typography variant="caption" color="text.secondary">·</Typography>
-          <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.85rem" }}>
-            {article.readTime}
-          </Typography>
-        </Box>
-
-        {/* Tags */}
-        <Box display="flex" gap={1} flexWrap="wrap" mb={4}>
-          {article.tags.map((tag) => (
-            <Chip
-              key={tag}
-              label={tag}
-              size="small"
+            {/* Title */}
+            <Typography
+              variant="h3"
               sx={{
-                color: "primary.main",
-                border: "1px solid",
-                borderColor: "primary.main",
-                bgcolor: "transparent",
-                fontWeight: 600,
+                fontWeight: 900,
+                mb: 2,
+                background: grad,
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                lineHeight: 1.2,
               }}
-            />
-          ))}
+            >
+              {article.title}
+            </Typography>
+
+            {/* Excerpt */}
+            <Typography
+              variant="body1"
+              color="text.secondary"
+              sx={{ mb: 2.5, lineHeight: 1.7, fontSize: "1.05rem" }}
+            >
+              {article.excerpt}
+            </Typography>
+
+            {/* Meta */}
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1.5,
+                mb: 2.5,
+                flexWrap: "wrap",
+              }}
+            >
+              <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.85rem" }}>
+                {article.date}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">·</Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.85rem" }}>
+                {article.readTime}
+              </Typography>
+            </Box>
+
+            {/* Tags */}
+            <Box display="flex" gap={1} flexWrap="wrap" mb={4}>
+              {article.tags.map((tag) => (
+                <Chip
+                  key={tag}
+                  label={tag}
+                  size="small"
+                  sx={{
+                    color: "primary.main",
+                    border: "1px solid",
+                    borderColor: "primary.main",
+                    bgcolor: "transparent",
+                    fontWeight: 600,
+                  }}
+                />
+              ))}
+            </Box>
+
+            <Divider sx={{ mb: 5 }} />
+
+            {/* TOC inline for mobile/tablet — hidden on desktop (sidebar takes over) */}
+            <Box sx={{ display: { xs: "block", lg: "none" } }}>
+              <TableOfContents headings={headings} grad={grad} />
+            </Box>
+
+            {/* Markdown content */}
+            <Box sx={{ "& > *:first-of-type": { mt: 0 } }}>
+              <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>{content}</ReactMarkdown>
+            </Box>
+
+            {/* Prev / Next navigation for performance series */}
+            <PrevNextNav article={article} grad={grad} />
+          </motion.div>
         </Box>
 
-        <Divider sx={{ mb: 5 }} />
-
-        {/* Table of contents */}
-        <TableOfContents headings={headings} grad={grad} />
-
-        {/* Markdown content */}
-        <Box sx={{ "& > *:first-of-type": { mt: 0 } }}>
-          <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>{content}</ReactMarkdown>
+        {/* Sticky TOC sidebar — desktop only */}
+        <Box
+          component="aside"
+          sx={{
+            width: 260,
+            flexShrink: 0,
+            position: "sticky",
+            top: 88,
+            maxHeight: "calc(100vh - 104px)",
+            overflowY: "auto",
+            display: { xs: "none", lg: "block" },
+            mt: 0,
+          }}
+        >
+          <TableOfContents headings={headings} grad={grad} sidebar />
         </Box>
-
-        {/* Prev / Next navigation for performance series */}
-        <PrevNextNav article={article} grad={grad} />
-      </motion.div>
+      </Box>
     </>
   );
 }

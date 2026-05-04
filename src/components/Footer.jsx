@@ -1,5 +1,4 @@
 import React from "react";
-import { Link } from "react-router-dom";
 import { Box, Typography, Divider, IconButton } from "@mui/material";
 import {
   Phone,
@@ -10,8 +9,6 @@ import {
 } from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
 import { motion } from "framer-motion";
-
-import { articlesData } from "../data/articlesData";
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
@@ -88,63 +85,6 @@ export default function Footer({ portfolioData }) {
                 </IconButton>
               </motion.div>
             ))}
-          </Box>
-
-          {/* Articles navigation */}
-          <Box sx={{ mt: 5, mb: 1 }}>
-            <Divider sx={{ mb: 4 }} />
-            <Typography
-              variant="overline"
-              sx={{
-                display: "block",
-                mb: 2,
-                letterSpacing: "0.15em",
-                color: "text.secondary",
-                fontWeight: 700,
-              }}
-            >
-              Articles
-            </Typography>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: 1,
-              }}
-            >
-              <Typography
-                component={Link}
-                to="/articles"
-                sx={{
-                  textDecoration: "none",
-                  color: "primary.main",
-                  fontSize: "0.85rem",
-                  fontWeight: 600,
-                  letterSpacing: "0.05em",
-                  transition: "opacity 0.2s",
-                  "&:hover": { opacity: 0.7 },
-                }}
-              >
-                All Articles →
-              </Typography>
-              {articlesData.map((a) => (
-                <Typography
-                  key={a.id}
-                  component={Link}
-                  to={`/articles/${a.id}`}
-                  sx={{
-                    textDecoration: "none",
-                    color: "text.secondary",
-                    fontSize: "0.82rem",
-                    transition: "color 0.2s",
-                    "&:hover": { color: "primary.main" },
-                  }}
-                >
-                  {a.title}
-                </Typography>
-              ))}
-            </Box>
           </Box>
 
           <Typography

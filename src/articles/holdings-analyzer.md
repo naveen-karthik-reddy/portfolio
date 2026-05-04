@@ -1,6 +1,6 @@
 # Holdings Analyzer
 
-Most portfolio trackers work the same way: you manually key in each stock, keep prices current by hand, and get a static snapshot that's stale the moment you leave. The Holdings Analyzer takes a different approach — you upload the CSV that Zerodha Console already generates for you, and a full portfolio dashboard appears instantly, pulling live fundamentals, dividend data, analyst ratings, and risk metrics automatically.
+Most portfolio trackers work the same way: you manually key in each stock, keep prices current by hand, and get a static snapshot that's stale the moment you leave. I built the Holdings Analyzer to skip all that — you upload the CSV that Zerodha Console already generates for you, and a full portfolio dashboard appears instantly. Live fundamentals, dividend data, analyst ratings, and risk metrics all pull automatically. No manual entry, no stale numbers.
 
 [Open the Holdings Analyzer →](/projects/holdings-analyzer)
 

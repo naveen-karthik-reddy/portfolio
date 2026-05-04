@@ -4,7 +4,7 @@ The usual loop for improving Lighthouse scores goes like this: you have an idea,
 
 That loop is slow, noisy, and demoralising. A 5-point improvement on a 500KB JS bundle is invisible inside Lighthouse's natural variance. You can't compare two ideas side by side. You can't tell your team "deferring this script saves 12 points" with any confidence.
 
-The Web Performance Planner solves this by moving the feedback loop entirely out of production. You import a real Lighthouse report — and the tool simulates Core Web Vitals scores in real time. Change a loading strategy, the score updates instantly. Defer a script, reduce TTFB, enable a CDN, mark an image as high priority — every change produces a deterministic, comparable result. No deployments. No waiting. No variance.
+The Web Performance Planner moves the feedback loop entirely out of production. You import a real Lighthouse report and the tool simulates Core Web Vitals scores in real time. Change a loading strategy, the score updates instantly. Defer a script, reduce TTFB, enable a CDN, mark an image as high priority — every change produces a deterministic, comparable result. No deployments. No waiting. No variance.
 
 [Open the Web Performance Planner →](/projects/perf-planner)
 
