@@ -309,8 +309,7 @@ function TableOfContents({ headings, grad, sidebar = false }) {
 /* ==================== PREV / NEXT NAV ==================== */
 
 const perfSeries = articlesData
-  .filter((a) => a.categories?.includes("performance"))
-  .sort((a, b) => new Date(a.date) - new Date(b.date));
+  .filter((a) => a.categories?.includes("performance"));
 
 function PrevNextNav({ article, grad }) {
   const navigate = useNavigate();
@@ -761,7 +760,6 @@ export default function ArticleView({ article }) {
         canonical={`/articles/${article.id}`}
         keywords={article.tags}
         type="article"
-        publishedTime={article.date}
         image={article.image}
       />
 
@@ -775,7 +773,6 @@ export default function ArticleView({ article }) {
               "@type": "Article",
               headline: article.title,
               description: article.excerpt,
-              datePublished: article.date,
               author: {
                 "@type": "Person",
                 name: "Naveen Karthik",
@@ -923,10 +920,6 @@ export default function ArticleView({ article }) {
                 flexWrap: "wrap",
               }}
             >
-              <Typography variant="caption" color="text.secondary" component="time" dateTime={article.date} sx={{ fontSize: "0.85rem" }}>
-                {article.date}
-              </Typography>
-              <Typography variant="caption" color="text.secondary">·</Typography>
               <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.85rem" }}>
                 {article.readTime}
               </Typography>

@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useMemo } from "react";
+import React, { lazy, Suspense, useMemo, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import {
   Typography,
@@ -6,8 +6,12 @@ import {
   Box,
   Paper,
   Chip,
+  TextField,
+  IconButton,
+  InputAdornment,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
+import { Search, Clear } from "@mui/icons-material";
 import { motion } from "framer-motion";
 
 import { articlesData, getArticleBySlug } from "../data/articlesData";
@@ -67,9 +71,12 @@ export default function ArticlesPage() {
 
 const CATEGORY_LABELS = {
   performance: "Performance",
+  react: "React",
+  javascript: "JavaScript",
+  fundamentals: "Fundamentals",
+  css: "CSS",
   product: "Product",
   "llm-metrics": "LLM / AI",
-  javascript: "JavaScript",
 };
 
 /* ==================== ARTICLES LIST ==================== */
@@ -80,6 +87,9 @@ function ArticlesList() {
   const [searchParams, setSearchParams] = useSearchParams();
   const activeCategory = searchParams.get("category") || null;
 
+  /* ── local state for search ── */
+  const [searchQuery, setSearchQuery] = useState("");
+
   const setActiveCategory = (cat) => {
     if (cat) setSearchParams({ category: cat });
     else setSearchParams({});
@@ -87,17 +97,35 @@ function ArticlesList() {
 
   const allCategories = Object.keys(CATEGORY_LABELS);
 
-  const sorted = useMemo(
-    () => [...articlesData].sort((a, b) => new Date(b.date) - new Date(a.date)),
-    []
-  );
+  /* ── filter + sort ── */
+  const filtered = useMemo(() => {
+    let result = [...articlesData];
 
-  const filtered = useMemo(
-    () => activeCategory
-      ? sorted.filter((a) => a.categories?.includes(activeCategory))
-      : sorted,
-    [sorted, activeCategory]
-  );
+    /* Category */
+    if (activeCategory) {
+      result = result.filter((a) => a.categories?.includes(activeCategory));
+    }
+
+    /* Search — match title, excerpt, and tags (case-insensitive) */
+    if (searchQuery.trim()) {
+      const q = searchQuery.trim().toLowerCase();
+      result = result.filter(
+        (a) =>
+          a.title.toLowerCase().includes(q) ||
+          a.excerpt.toLowerCase().includes(q) ||
+          a.tags.some((t) => t.toLowerCase().includes(q))
+      );
+
+      /* Rank: title matches first, then excerpt/tag-only matches */
+      result.sort((a, b) => {
+        const aTitle = a.title.toLowerCase().includes(q) ? 0 : 1;
+        const bTitle = b.title.toLowerCase().includes(q) ? 0 : 1;
+        return aTitle - bTitle;
+      });
+    }
+
+    return result;
+  }, [activeCategory, searchQuery]);
 
   return (
     <Box>
@@ -108,28 +136,66 @@ function ArticlesList() {
         keywords={["Performance", "React", "JavaScript", "Browser", "Web Vitals", "Frontend"]}
       />
       <motion.div initial="hidden" animate="visible" variants={fadeInUp}>
-        <Typography
-          variant="h5"
-          sx={{
-            fontWeight: 800,
-            letterSpacing: "0.05em",
-            mb: 4,
-            background: grad,
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-          }}
+        {/* Heading + count */}
+        <Box
+          display="flex"
+          alignItems="baseline"
+          gap={1.5}
+          flexWrap="wrap"
+          mb={1}
         >
-          Articles
-        </Typography>
+          <Typography
+            variant="h5"
+            sx={{
+              fontWeight: 800,
+              letterSpacing: "0.05em",
+              background: grad,
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+            }}
+          >
+            Articles
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {filtered.length} article{filtered.length !== 1 ? "s" : ""}
+          </Typography>
+        </Box>
+
+        {/* Search */}
+        <Box mb={3}>
+          <TextField
+            size="small"
+            placeholder="Search articles..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            sx={{ minWidth: 260 }}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Search fontSize="small" color="action" />
+                  </InputAdornment>
+                ),
+                endAdornment: searchQuery ? (
+                  <InputAdornment position="end">
+                    <IconButton size="small" onClick={() => setSearchQuery("")}>
+                      <Clear fontSize="small" />
+                    </IconButton>
+                  </InputAdornment>
+                ) : null,
+              },
+            }}
+          />
+        </Box>
 
         {/* Filter chips */}
-        <Box display="flex" gap={1} flexWrap="wrap" mb={5}>
+        <Box display="flex" gap={1} flexWrap="wrap" alignItems="center" mb={5}>
           <Chip
             label="All"
             onClick={() => setActiveCategory(null)}
             variant={activeCategory === null ? "filled" : "outlined"}
             color={activeCategory === null ? "primary" : "default"}
-            sx={{ fontWeight: 600, cursor: "pointer" }}
+            sx={{ fontWeight: 600, cursor: "pointer", "& .MuiChip-label": { pt: "1px" } }}
           />
           {allCategories.map((cat) => (
             <Chip
@@ -138,7 +204,7 @@ function ArticlesList() {
               onClick={() => setActiveCategory(activeCategory === cat ? null : cat)}
               variant={activeCategory === cat ? "filled" : "outlined"}
               color={activeCategory === cat ? "primary" : "default"}
-              sx={{ fontWeight: 600, cursor: "pointer" }}
+              sx={{ fontWeight: 600, cursor: "pointer", "& .MuiChip-label": { pt: "1px" } }}
             />
           ))}
         </Box>
@@ -146,7 +212,7 @@ function ArticlesList() {
 
       <Box
         component={motion.div}
-        key={activeCategory ?? "all"}
+        key={`${activeCategory ?? "all"}-${searchQuery}`}
         variants={staggerContainer}
         initial="hidden"
         animate="visible"
@@ -192,7 +258,7 @@ function ArticlesList() {
                 {article.excerpt}
               </Typography>
 
-              <Box display="flex" gap={0.75} flexWrap="wrap" mb={1.5}>
+              <Box display="flex" gap={0.75} flexWrap="wrap" alignItems="center" mb={1.5}>
                 {article.tags.map((tag) => (
                   <Chip
                     key={tag}
@@ -204,17 +270,16 @@ function ArticlesList() {
                       borderColor: "primary.main",
                       bgcolor: "transparent",
                       fontWeight: 600,
+                      "& .MuiChip-label": { pt: "1px" },
                       fontSize: "0.7rem",
                     }}
                   />
                 ))}
               </Box>
 
-              <Box component="time" dateTime={article.date} sx={{ display: "contents" }}>
-                <Typography variant="caption" color="text.secondary">
-                  {article.date} · {article.readTime}
-                </Typography>
-              </Box>
+              <Typography variant="caption" color="text.secondary">
+                {article.readTime}
+              </Typography>
             </Paper>
           </motion.div>
         ))}
@@ -222,7 +287,9 @@ function ArticlesList() {
         {filtered.length === 0 && (
           <motion.div variants={fadeInUp} style={{ gridColumn: "1 / -1" }}>
             <Typography color="text.secondary" sx={{ textAlign: "center", py: 6 }}>
-              No articles in this category yet.
+              {searchQuery
+                ? `No articles matching "${searchQuery}".`
+                : "No articles in this category yet."}
             </Typography>
           </motion.div>
         )}

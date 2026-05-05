@@ -8,8 +8,6 @@ export default function Seo({
   keywords,
   type = "website",
   image,
-  publishedTime,
-  modifiedTime,
   author = SITE_NAME,
 }) {
   const fullTitle = title.includes(SITE_NAME) ? title : `${title} | ${SITE_NAME}`;
@@ -44,11 +42,6 @@ export default function Seo({
       <meta name="twitter:title" content={fullTitle} />
       <meta name="twitter:description" content={description} />
       {image && <meta name="twitter:image" content={image.url} />}
-
-      {/* Article-level meta */}
-      {publishedTime && <meta property="article:published_time" content={publishedTime} />}
-      {modifiedTime && <meta property="article:modified_time" content={modifiedTime} />}
-      <meta property="article:author" content={author} />
     </>
   );
 }
