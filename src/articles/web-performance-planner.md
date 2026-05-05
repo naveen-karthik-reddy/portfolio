@@ -20,7 +20,7 @@ This also changes how you plan work. Before writing a single line of code, you c
 
 ## Start with a Lighthouse Report
 
-The most powerful way to use the planner is to anchor it to a real Lighthouse report rather than entering values manually. When you import a JSON report, the tool extracts every resource from your page — sizes, loading strategies, JavaScript execution times, font strategies, measured network timings — and then fits its simulation curves so the overall score matches your real score exactly. From that point, every what-if change is a calibrated prediction based on your actual page, not a generic estimate.
+The planner starts from a real Lighthouse report. When you import a JSON report, the tool extracts every resource from your page — sizes, loading strategies, JavaScript execution times, font strategies, measured network timings — and then fits its simulation curves so the overall score matches your real score exactly. From that point, every what-if change is a calibrated prediction based on your actual page, not a generic estimate.
 
 **To get your Lighthouse JSON:**
 Open Chrome DevTools, go to the Lighthouse tab, run an analysis, and when it finishes click the download icon and choose "Save as JSON". That file is what the planner needs.
@@ -30,7 +30,11 @@ Click "Calibrate from Lighthouse" on the welcome screen, upload the file, review
 
 You can recalibrate at any time without losing your variations. If you've re-run Lighthouse after shipping improvements, recalibrating updates the baseline to match your new real-world numbers.
 
-If you don't have a Lighthouse report yet, you can still build a page manually by adding resources one by one. Manual mode uses a TCP slow-start network model to estimate download times. It's less accurate than a calibrated baseline but useful for planning a page that doesn't exist yet.
+### How Calibration Works
+
+Under the hood, the planner extracts all five Core Web Vitals metrics from your Lighthouse JSON, then runs a two-pass curve-fitting algorithm. Pass 1 adjusts per-metric scoring curves via binary search until each simulated metric score matches the real one within 0.5 points. Pass 2 applies a uniform global nudge if the overall score still diverges by more than 1 point. The result is a scoring model that reproduces your real Lighthouse numbers exactly.
+
+A resource hash fingerprint is computed from the page's resources — `type:sizeKB:loading:source:count` for each — so the planner knows when the current resource set matches the calibrated state. When the hashes match, the dashboard shows your real FCP and LCP values directly. When you modify resources (and the hash diverges), it switches to simulated values.
 
 ---
 
@@ -48,29 +52,25 @@ The variation tabs at the top of the page each show a mobile score badge. You ca
 
 ---
 
-## The Dashboard: What You're Looking At
+## The Dashboard
 
 After selecting a variation, the right side of the screen shows the performance dashboard.
 
 At the top is a profile toggle for **Mobile** and **Desktop**. Both are always computed — the toggle just controls which one is displayed in detail. The mobile score is almost always lower and is the number that matters for Google's Page Experience ranking signal. It simulates a throttled slow-4G connection (150ms round-trip time, 200 KB/s bandwidth) with a 4× CPU slowdown applied to all JavaScript execution. Desktop simulates a cable connection (40ms RTT, 1,250 KB/s) with no CPU penalty.
 
-Below the toggle is the **score card** — a large gauge showing the overall 0–100 performance score, followed by five metric rows.
+Below the toggle is the **score card** — a large gauge showing the overall 0–100 performance score, followed by five metric rows. The overall score is a weighted combination:
 
----
+| Metric | Weight | What it measures |
+|--------|--------|------------------|
+| Total Blocking Time (TBT) | 30% | Main thread blocking during load |
+| Largest Contentful Paint (LCP) | 25% | When the largest visible element renders |
+| Cumulative Layout Shift (CLS) | 25% | Unexpected layout movement during load |
+| First Contentful Paint (FCP) | 10% | When anything first appears on screen |
+| Speed Index (SI) | 10% | How quickly content fills in progressively |
 
-## The Five Metrics
+Each metric row shows the value, a colour-coded sub-score bar, the contribution to the overall score, and a delta pill comparing against the baseline variation. The colour coding follows Lighthouse conventions: green (≥90), orange (≥50), red (<50).
 
-The overall score is a weighted combination of five Core Web Vitals metrics. Understanding what drives each one tells you where to focus.
-
-**Total Blocking Time — 30% of the score.** This is the most heavily weighted metric. TBT measures how long the browser's main thread was blocked between First Contentful Paint and Time to Interactive — specifically, it sums up all time exceeding 50ms from any single task. A 200ms JavaScript task contributes 150ms to TBT. A page with many such tasks will feel sluggish to interact with during load. The biggest driver of TBT is JavaScript: large bundles, synchronous execution, and third-party scripts that run on the main thread.
-
-**Largest Contentful Paint — 25% of the score.** LCP measures when the largest element visible in the viewport finishes rendering. For most pages this is a hero image or the main heading. LCP is primarily determined by when that element's resource finishes downloading — which depends on when it was discovered, how fast it downloaded, and whether it was prioritised. Preloading the LCP resource with `fetchpriority="high"` is one of the highest-impact single changes on a real page.
-
-**Cumulative Layout Shift — 25% of the score.** CLS measures unexpected movement of page elements during load. Images without explicit width and height attributes shift the layout when they load in. Fonts using `font-display: swap` can shift text when the web font replaces the fallback. Dynamic content injected above existing content causes shift. CLS below 0.1 is considered good; above 0.25 is poor.
-
-**First Contentful Paint — 10% of the score.** FCP measures when anything first appears on screen. The main enemy of FCP is render-blocking resources — any stylesheet or synchronous script in the `<head>` that the browser must finish downloading before it can paint. Inlining critical CSS and deferring non-critical JavaScript directly improves FCP.
-
-**Speed Index — 10% of the score.** SI measures how quickly the visible content fills in progressively. The simulator calculates it as a weighted blend of FCP and LCP timings. It tends to improve automatically when the other metrics improve.
+CLS is not simulated from resource properties — it always reflects the imported Lighthouse value. Resource changes like adding image dimensions or changing font-display don't currently affect the CLS score.
 
 ---
 
@@ -78,7 +78,7 @@ The overall score is a weighted combination of five Core Web Vitals metrics. Und
 
 Each score card contains a waterfall — a timeline showing every file your page loads as a horizontal bar. The bar spans the resource's full lifecycle, broken into the same timing phases Chrome DevTools shows: DNS lookup, initial connection, SSL handshake, request sent, waiting for the first byte (TTFB), and content download. Each phase has a distinct colour matching Chrome's conventions.
 
-The download bar uses a colour per resource type — red for JavaScript, amber for CSS, blue for HTML documents, purple for fonts, green for images, teal for API requests (XHR and Fetch calls) — so you can identify what's consuming time at a glance.
+The download bar uses a colour per resource type — red for JavaScript, amber for CSS, blue for HTML documents, purple for fonts, green for images, teal for API requests — so you can identify what's consuming time at a glance.
 
 One thing the waterfall makes explicit that standard Lighthouse summaries hide: for most resources on a well-optimised page, the bar is mostly grey "Waiting (TTFB)" with only a small coloured download segment at the end. A 1 KB script sitting next to a 150 KB library can have identical finish times — not because the small file is slow to download, but because both requests were queued on the same H2/H3 connection and the server responded to them in parallel. The tool decomposes the download time into server wait and actual transfer, so you can see at a glance whether your time is going into bytes-in-flight or into the server deciding to send them.
 
@@ -86,7 +86,7 @@ Two vertical markers show where FCP and LCP fall across your resource timeline. 
 
 You can scroll over the ruler to zoom into any time window, drag horizontally to pan, and drag vertically to scroll through long resource lists. This is useful for dense pages with many requests where bars compress together at the default scale.
 
-When you import from Lighthouse, the waterfall uses your actual measured timings — so the bars reflect what really happened in the browser, not a model approximation.
+When you import from Lighthouse, the waterfall uses your actual measured timings — so the bars reflect what really happened in the browser, not a model approximation. For JavaScript resources, the waterfall also shows parse/compile (cyan) and script evaluation (magenta) phases extending beyond the download bar, sourced from Lighthouse's bootup-time audit.
 
 ---
 
@@ -110,13 +110,15 @@ Once you have two or more variations, switch to Comparison Mode with the Compare
 
 The best value per metric is highlighted green across the columns. The worst is highlighted red. This makes trade-offs concrete in a way that looking at variations one at a time never does. You can see immediately whether deferring the analytics script saves more than compressing the hero image, whether combining both changes compounds or if one dominates, and what the ceiling is for the improvements you're considering.
 
+Comparison mode always uses the mobile profile.
+
 ---
 
 ## Page Meta Controls
 
 Above the resource list on the left side, two controls affect the whole page simulation.
 
-**TTFB** is your server's response time in milliseconds — how long from the browser sending a request to receiving the first byte of HTML. Everything else on the page waits for this to finish before it can start. Reducing TTFB is the single highest-leverage change for server-rendered pages. The roadmap will flag it if your TTFB is above 200ms.
+**TTFB** is your server's response time in milliseconds — how long from the browser sending a request to receiving the first byte of HTML. Everything else on the page waits for this to finish before it can start. The roadmap will flag it if your TTFB is above 200ms.
 
 **CDN** is a toggle that simulates having your static assets served from an edge node close to the user. Enabling it reduces the effective round-trip time for same-origin resources by about 60%. On a mobile connection where RTT is 150ms, that drops to around 60ms for cached assets — a meaningful difference when you have many resources.
 
@@ -130,7 +132,7 @@ Under **Network Profiles** you can adjust RTT, bandwidth, and CPU multiplier for
 
 Under **Scoring Weights** you can change how much each metric contributes to the overall score. Useful if you have a specific product reason to weight TBT or CLS differently — or to see what your score would look like under a hypothetical future Lighthouse version with different weights.
 
-Under **Scoring Curves** you can adjust the log-normal curve parameters for each metric. The default values match Lighthouse's published thresholds. Adjusting p10 and median values lets you calibrate against a custom performance budget — for example, if your team has committed to an LCP under 2.0s as the "good" threshold rather than Lighthouse's default 2.5s.
+Under **Scoring Curves** you can adjust the log-normal CDF parameters for each metric. The default values match Lighthouse's published thresholds. Adjusting p10 and median values lets you calibrate against a custom performance budget — for example, if your team has committed to an LCP under 2.0s as the "good" threshold rather than Lighthouse's default 2.5s.
 
 Under **Connection Model** you can configure HTTP/1.1 parallel connection limits, TCP initial congestion window size, and HTTP/3 QUIC gain factor. These rarely need changing, but they're useful if you're specifically investigating protocol-level tradeoffs.
 
@@ -141,6 +143,8 @@ Settings can be exported as JSON and shared with teammates so everyone on the te
 ## Sharing and Persistence
 
 Everything saves automatically to your browser's local storage as you work. There's no account, no server, no save button. Nothing leaves your machine.
+
+Under the hood, the tool uses IndexedDB for storage with a 500ms debounced auto-save on every variation change. Pages, variations, and settings persist across browser sessions.
 
 To share your work, open the Page Manager (top bar), click the export icon on any page card, and share the `.json` file. Anyone can import it and see the same pages, variations, calibration, and scores you do — ready to explore their own what-if changes from your baseline.
 
