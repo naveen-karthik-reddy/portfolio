@@ -63,7 +63,7 @@ Even with tree shaking, your entire application's JavaScript doesn't need to loa
 
 ### Route-Based Splitting
 
-The highest-value form of code splitting. Each route is a separate chunk:
+The highest-value form of code splitting. Each route is a separate chunk (using [React Suspense](/articles/what-is-react-suspense) to manage the loading state):
 
 ```js
 // React + React Router — each lazy() becomes its own network request

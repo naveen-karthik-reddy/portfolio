@@ -443,6 +443,147 @@ export const articlesData = [
     tags: ["Performance", "Caching", "Fundamentals"],
     categories: ["performance", "fundamentals"],
   },
+  /* ── More Explainers ── */
+  {
+    id: "what-is-dom",
+    title: "What is the DOM?",
+    excerpt:
+      "The DOM is the browser's live, in-memory tree representation of an HTML document. Here's how it's structured, why DOM operations are expensive, and how it relates to the render tree.",
+    date: "2026-05-05",
+    readTime: "4 min read",
+    tags: ["Browser", "Fundamentals"],
+    categories: ["fundamentals"],
+  },
+  {
+    id: "what-is-call-stack",
+    title: "What is the Call Stack?",
+    excerpt:
+      "The call stack is the data structure the JS engine uses to track function execution. It's a single-threaded LIFO stack — here's how it works and why a busy stack freezes the page.",
+    date: "2026-05-05",
+    readTime: "4 min read",
+    tags: ["JavaScript", "Event Loop", "Fundamentals"],
+    categories: ["javascript", "fundamentals"],
+  },
+  {
+    id: "what-is-requestanimationframe",
+    title: "What is requestAnimationFrame?",
+    excerpt:
+      "requestAnimationFrame syncs your JavaScript to the display refresh rate. Here's how it works, why it's the right tool for JS animations, and how it differs from setTimeout.",
+    date: "2026-05-05",
+    readTime: "4 min read",
+    tags: ["JavaScript", "Animation", "Browser", "Fundamentals"],
+    categories: ["javascript", "fundamentals"],
+  },
+  {
+    id: "what-is-fcp",
+    title: "What is First Contentful Paint (FCP)?",
+    excerpt:
+      "FCP measures the moment any content first appears on screen — the first visual feedback that the page is loading. Here's what delays it and how to improve it.",
+    date: "2026-05-05",
+    readTime: "4 min read",
+    tags: ["Performance", "Metrics", "Fundamentals"],
+    categories: ["performance", "fundamentals"],
+  },
+  {
+    id: "what-is-cdn",
+    title: "What is a CDN?",
+    excerpt:
+      "A CDN is a distributed network of servers that serve your content from locations close to each user. Here's how it reduces latency, what to put on it, and how it affects TTFB.",
+    date: "2026-05-05",
+    readTime: "4 min read",
+    tags: ["Network", "Performance", "Fundamentals"],
+    categories: ["performance", "fundamentals"],
+  },
+  {
+    id: "what-is-compositor-thread",
+    title: "What is the Compositor Thread?",
+    excerpt:
+      "The compositor thread assembles painted layers into the final screen image — independently of the main thread. It's why transform and opacity animations stay smooth under load.",
+    date: "2026-05-05",
+    readTime: "4 min read",
+    tags: ["Browser", "Performance", "CSS", "Fundamentals"],
+    categories: ["performance", "fundamentals"],
+  },
+  {
+    id: "what-is-debouncing",
+    title: "What is Debouncing?",
+    excerpt:
+      "Debouncing ensures a function runs only once after a burst of rapid calls stops. Here's how it works, trailing vs leading edge, and when to use it over throttling.",
+    date: "2026-05-05",
+    readTime: "4 min read",
+    tags: ["JavaScript", "Performance", "Fundamentals"],
+    categories: ["javascript", "fundamentals"],
+  },
+  {
+    id: "what-is-throttling",
+    title: "What is Throttling?",
+    excerpt:
+      "Throttling limits a function to run at most once per interval, guaranteeing regular execution during bursts. Here's how it differs from debouncing and when each one fits.",
+    date: "2026-05-05",
+    readTime: "4 min read",
+    tags: ["JavaScript", "Performance", "Fundamentals"],
+    categories: ["javascript", "fundamentals"],
+  },
+  {
+    id: "what-is-css-specificity",
+    title: "What is CSS Specificity?",
+    excerpt:
+      "Specificity is the four-column scoring system browsers use to decide which CSS rule wins. Inline > ID > class > element — here's how it works and why it matters.",
+    date: "2026-05-05",
+    readTime: "4 min read",
+    tags: ["CSS", "Browser", "Fundamentals"],
+    categories: ["css", "fundamentals"],
+  },
+  {
+    id: "what-is-jit-compilation",
+    title: "What is JIT Compilation?",
+    excerpt:
+      "JIT combines an interpreter (fast startup) with a compiler (fast execution) to make JavaScript run near native speed. Here's how V8's two-tier pipeline works.",
+    date: "2026-05-05",
+    readTime: "4 min read",
+    tags: ["JavaScript", "V8", "Fundamentals"],
+    categories: ["javascript", "fundamentals"],
+  },
+  {
+    id: "what-is-cache-control",
+    title: "What is Cache-Control?",
+    excerpt:
+      "Cache-Control is the HTTP header that controls browser and CDN caching. The right directives eliminate repeated downloads — here's what each one does and when to use it.",
+    date: "2026-05-05",
+    readTime: "4 min read",
+    tags: ["Network", "Caching", "Performance", "Fundamentals"],
+    categories: ["performance", "fundamentals"],
+  },
+  {
+    id: "what-is-react-suspense",
+    title: "What is React Suspense?",
+    excerpt:
+      "Suspense lets a component wait for something before rendering — a lazy-loaded chunk, a data fetch — and shows a fallback in the meantime. Here's how the boundary works.",
+    date: "2026-05-05",
+    readTime: "4 min read",
+    tags: ["React", "Fundamentals"],
+    categories: ["react", "fundamentals"],
+  },
+  {
+    id: "what-is-dns",
+    title: "What is DNS?",
+    excerpt:
+      "DNS translates domain names into IP addresses — and every network request starts with it. Here's how resolution works, what it costs in latency, and how to reduce that cost.",
+    date: "2026-05-05",
+    readTime: "4 min read",
+    tags: ["Network", "Performance", "Fundamentals"],
+    categories: ["performance", "fundamentals"],
+  },
+  {
+    id: "what-is-streaming-ssr",
+    title: "What is Streaming SSR?",
+    excerpt:
+      "Streaming SSR sends HTML in chunks as each component's data resolves, rather than waiting for the full page. The shell arrives instantly; the rest streams in progressively.",
+    date: "2026-05-05",
+    readTime: "4 min read",
+    tags: ["React", "SSR", "Performance", "Fundamentals"],
+    categories: ["react", "fundamentals"],
+  },
   /* ── JavaScript series ── */
   {
     id: "settimeout-setinterval",

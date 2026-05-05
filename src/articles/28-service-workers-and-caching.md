@@ -164,7 +164,7 @@ Service workers are worth the complexity when:
 - You have **frequently visited users** who benefit from near-instant cache-first loads
 - Your app has a reliable **deploy/cache-invalidation process** — versioned asset URLs, cache-busting on deploy
 
-They add complexity and are not always the right tool. For simple static sites served from a CDN with good `Cache-Control` headers, HTTP caching alone is often sufficient.
+They add complexity and are not always the right tool. For simple static sites served from a CDN with good [`Cache-Control`](/articles/what-is-cache-control) headers, HTTP caching alone is often sufficient.
 
 ---
 

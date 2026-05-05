@@ -93,7 +93,7 @@ Layout thrashing is a common cause of long tasks. A loop that performs 100 force
 
 ### 1. Use requestAnimationFrame for visual updates
 
-Wrap DOM writes in `requestAnimationFrame` to ensure they run at the start of a new frame, after the browser has finished any pending work:
+Wrap DOM writes in [`requestAnimationFrame`](/articles/what-is-requestanimationframe) to ensure they run at the start of a new frame, after the browser has finished any pending work:
 
 ```js
 requestAnimationFrame(() => {

@@ -8,7 +8,7 @@ V8 (Chrome, Node.js, Edge) uses a two-tier compilation pipeline:
 
 **Ignition** is V8's interpreter. It parses JavaScript into an AST, then compiles it to compact **bytecode** and executes that bytecode directly. Bytecode is faster to generate than machine code and uses less memory, making it ideal for code that runs once or infrequently.
 
-**TurboFan** is V8's optimizing JIT compiler. It watches which functions are called frequently ("hot" functions), profiles their types and shapes, and compiles them to highly optimized machine code based on those observations.
+**TurboFan** is V8's optimizing [JIT](/articles/what-is-jit-compilation) compiler. It watches which functions are called frequently ("hot" functions), profiles their types and shapes, and compiles them to highly optimized machine code based on those observations.
 
 ```text
 JS Source

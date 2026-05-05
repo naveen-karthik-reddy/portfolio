@@ -13,7 +13,7 @@ Used correctly, they eliminate dead time in the network waterfall. Used careless
 <link rel="dns-prefetch" href="//cdn.example.com">
 ```
 
-DNS resolution typically costs 20–120ms. For third-party origins you'll definitely use, this is a free improvement.
+[DNS](/articles/what-is-dns) resolution typically costs 20–120ms. For third-party origins you'll definitely use, this is a free improvement.
 
 **When to use it:**
 - Third-party domains for fonts, analytics, ads, CDNs

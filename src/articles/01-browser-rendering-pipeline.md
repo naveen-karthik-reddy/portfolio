@@ -12,7 +12,7 @@ The browser performs six distinct steps to go from raw HTML bytes to pixels on s
 
 ## Step 1: Parsing HTML → DOM
 
-The browser's HTML parser reads the document byte by byte and builds the **Document Object Model (DOM)** — a tree of nodes representing every element, attribute, and text content on the page.
+The browser's HTML parser reads the document byte by byte and builds the **[Document Object Model (DOM)](/articles/what-is-dom)** — a tree of nodes representing every element, attribute, and text content on the page.
 
 Parsing is **incremental**: the browser doesn't wait for the full document before it starts building the DOM. It works through the stream and emits nodes as it goes. This is why placing `<script>` tags at the bottom of `<body>` matters — a blocking script encountered mid-parse halts the entire process.
 
@@ -39,7 +39,7 @@ Separately, every stylesheet linked or embedded in the document is parsed into t
 
 CSS is **render-blocking**: the browser will not move past this step until all stylesheets have been downloaded and parsed. The reason is safety — rendering anything without complete style information would produce an unstyled flash of content that would immediately re-render, which is worse than waiting.
 
-The CSSOM is also where specificity, inheritance, and cascade are resolved. By the time this tree is built, every element has a fully computed set of styles.
+The CSSOM is also where [specificity, inheritance, and cascade](/articles/what-is-css-specificity) are resolved. By the time this tree is built, every element has a fully computed set of styles.
 
 ### Critical vs Non-Critical CSS
 
@@ -130,7 +130,7 @@ Modern browsers separate paint into **[compositing layers](/articles/what-are-co
 
 ## Step 6: Compositing
 
-The final step takes all the painted layers and **composites** them into the final image you see on screen, respecting z-index and stacking order. This step runs on the **compositor thread**, separate from the main thread.
+The final step takes all the painted layers and **composites** them into the final image you see on screen, respecting z-index and stacking order. This step runs on the **[compositor thread](/articles/what-is-compositor-thread)**, separate from the main thread.
 
 This separation is what makes `transform` and `opacity` animations special — they live entirely on the compositor thread and bypass the main thread. A JavaScript-heavy page can be freezing the main thread while a CSS `transform` animation still runs at 60fps.
 

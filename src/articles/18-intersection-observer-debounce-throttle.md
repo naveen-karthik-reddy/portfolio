@@ -61,7 +61,7 @@ Intersection Observer runs off the main thread and batches callbacks. It is alwa
 
 ---
 
-## Debouncing: Delay Until Things Settle
+## [Debouncing](/articles/what-is-debouncing): Delay Until Things Settle
 
 Debouncing delays a function call until a specified period of inactivity has passed. If the event fires again before the delay expires, the timer resets.
 
@@ -94,7 +94,7 @@ input.addEventListener('input', (e) => handleSearch(e.target.value));
 
 ---
 
-## Throttling: Enforce a Rate Limit
+## [Throttling](/articles/what-is-throttling): Enforce a Rate Limit
 
 Throttling guarantees a function fires at most once per interval, regardless of how often the event triggers. Unlike debouncing, it executes *during* the event burst — just not every single time.
 

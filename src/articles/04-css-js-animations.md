@@ -74,7 +74,7 @@ requestAnimationFrame(springAnimate);
 
 ## requestAnimationFrame
 
-When you need JS-driven animation, `requestAnimationFrame` (rAF) is the correct tool. The browser calls your callback exactly once per frame, before paint, synchronized to the display refresh rate.
+When you need JS-driven animation, [`requestAnimationFrame`](/articles/what-is-requestanimationframe) (rAF) is the correct tool. The browser calls your callback exactly once per frame, before paint, synchronized to the display refresh rate.
 
 ```js
 function animate(timestamp) {

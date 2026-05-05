@@ -98,7 +98,7 @@ Using array index as key causes every list item after a deletion or insertion to
 
 ## Code Splitting with React.lazy and Suspense
 
-`React.lazy` defers loading a component until it's first rendered. Combined with `Suspense`, this splits your bundle so routes and heavy components load on demand.
+`React.lazy` defers loading a component until it's first rendered. Combined with [`Suspense`](/articles/what-is-react-suspense), this splits your bundle so routes and heavy components load on demand.
 
 ```jsx
 const HeavyChart = React.lazy(() => import('./HeavyChart'));

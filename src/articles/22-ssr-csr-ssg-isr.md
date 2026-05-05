@@ -35,7 +35,7 @@ export default function Dashboard() {
 - Rich interactivity without page reloads
 
 **What you pay:**
-- Slow First Contentful Paint — nothing renders until JS executes
+- Slow [First Contentful Paint (FCP)](/articles/what-is-fcp) — nothing renders until JS executes
 - Bad LCP and TTI on slow devices or networks
 - Poor SEO without additional work (crawlers see the empty shell)
 - The full app JS bundle is required before anything is visible
@@ -80,7 +80,7 @@ Hydration is SSR's biggest performance trap. Until hydration completes, clicking
 
 ## Static Site Generation (SSG)
 
-HTML is generated once at **build time**, not per request. The resulting files are served from a CDN with no server computation.
+HTML is generated once at **build time**, not per request. The resulting files are served from a [CDN](/articles/what-is-cdn) with no server computation.
 
 ```jsx
 // Next.js Pages Router: runs once at build time
@@ -170,7 +170,7 @@ Most real applications mix strategies per route. Next.js, Remix, Astro, and Svel
 
 ## Streaming SSR
 
-React 18 introduced streaming SSR — the server sends HTML in chunks as each component resolves, rather than waiting for the full page. Combined with `<Suspense>`, this means the shell arrives at TTFB speed while slower parts stream in progressively.
+React 18 introduced [streaming SSR](/articles/what-is-streaming-ssr) — the server sends HTML in chunks as each component resolves, rather than waiting for the full page. Combined with `<Suspense>`, this means the shell arrives at TTFB speed while slower parts stream in progressively.
 
 ```jsx
 // The shell renders immediately; <Reviews> streams in when its data resolves

@@ -10,7 +10,7 @@ When a browser needs a resource it hasn't seen before, it goes through several s
 
 ## Stage 1: DNS Resolution
 
-Before the browser can connect to `api.example.com`, it needs to translate that hostname into an IP address. This is DNS resolution.
+Before the browser can connect to `api.example.com`, it needs to translate that hostname into an IP address. This is [DNS](/articles/what-is-dns) resolution.
 
 The browser checks its **local cache** first, then the OS cache, then the configured DNS resolver (your ISP or a public resolver like `8.8.8.8`). A cold DNS lookup typically adds **20–120ms** to the first request to a new origin.
 
@@ -95,7 +95,7 @@ A high TTFB points to slow server-side processing or insufficient CDN coverage.
 
 Once a resource is downloaded, caching determines whether the browser needs to re-download it on the next visit.
 
-### Cache-Control
+### [Cache-Control](/articles/what-is-cache-control)
 
 `Cache-Control` is the primary caching header. Set by the server, it controls how and how long a resource is cached.
 
@@ -144,7 +144,7 @@ If the resource hasn't changed, the server responds with `304 Not Modified` — 
 
 ## CDN and Edge Delivery
 
-A **Content Delivery Network (CDN)** places servers at dozens of locations worldwide ("Points of Presence" or PoPs). When a user requests a resource, they're served from the nearest PoP rather than the origin server.
+A **Content Delivery Network ([CDN](/articles/what-is-cdn))** places servers at dozens of locations worldwide ("Points of Presence" or PoPs). When a user requests a resource, they're served from the nearest PoP rather than the origin server.
 
 **Benefits:**
 - Reduces latency (fewer network hops, lower RTT)

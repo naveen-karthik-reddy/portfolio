@@ -6,7 +6,7 @@ Three numbers — LCP, CLS, INP. Google's Core Web Vitals are deliberately narro
 
 Google analysed its data on user behaviour and found that three moments define the loading and interaction experience most strongly:
 
-- **Loading** — does the main content appear fast?
+- **Loading** — does the main content appear fast? ([FCP](/articles/what-is-fcp) and LCP measure this)
 - **Visual stability** — does the page jump around as it loads?
 - **Interactivity** — does the page respond quickly to user input?
 
@@ -51,7 +51,7 @@ Each Core Web Vital targets one of these dimensions.
 <img src="/hero.webp" loading="eager" alt="Hero" width="1200" height="600">
 ```
 
-Other high-impact fixes: serve images in WebP/AVIF, reduce TTFB with a CDN, and eliminate render-blocking resources from the critical path.
+Other high-impact fixes: serve images in WebP/AVIF, reduce TTFB by serving from a [CDN](/articles/what-is-cdn), and eliminate render-blocking resources from the critical path.
 
 ---
 

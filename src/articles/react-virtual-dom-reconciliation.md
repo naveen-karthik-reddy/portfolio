@@ -6,7 +6,7 @@ If you haven't read [How the Browser Renders a Page](/articles/01-browser-render
 
 ## The Problem React Is Solving
 
-Every DOM change is expensive. Touching the DOM — adding a node, changing a class, updating text — can trigger layout recalculation, repaint, or both. In a complex UI where dozens of things update in response to a single user action, naively updating the DOM for each change would hammer the browser's layout engine.
+Every [DOM](/articles/what-is-dom) change is expensive. Touching the DOM — adding a node, changing a class, updating text — can trigger layout recalculation, repaint, or both. In a complex UI where dozens of things update in response to a single user action, naively updating the DOM for each change would hammer the browser's layout engine.
 
 React's answer is to batch DOM work: collect all the changes, figure out the minimum set of actual DOM mutations needed, then apply them in one go.
 

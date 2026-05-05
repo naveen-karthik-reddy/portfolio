@@ -147,7 +147,7 @@ const HeavyChart = React.lazy(() => import('./HeavyChart'));
 </Suspense>
 ```
 
-The chunk for `HeavyChart` is only downloaded when the component is first rendered. Combined with Intersection Observer, you can trigger the load only when the component is near the viewport.
+The chunk for `HeavyChart` is only downloaded when the component is first rendered. Combined with Intersection Observer, you can trigger the load only when the component is near the viewport. See [React Suspense](/articles/what-is-react-suspense) for how the fallback mechanism works.
 
 ### Routes
 

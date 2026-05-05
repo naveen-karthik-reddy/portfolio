@@ -4,7 +4,7 @@ JavaScript runs on a single thread. That one fact explains most performance prob
 
 ## The Call Stack
 
-The call stack is where synchronous JavaScript executes. When you call a function, it's pushed onto the stack. When it returns, it's popped off. The stack can only run one frame at a time.
+The [call stack](/articles/what-is-call-stack) is where synchronous JavaScript executes. When you call a function, it's pushed onto the stack. When it returns, it's popped off. The stack can only run one frame at a time.
 
 When the stack is busy, nothing else can run — not a click handler, not a paint, not a layout recalculation. A function that takes 500ms to complete will block the page for 500ms.
 
