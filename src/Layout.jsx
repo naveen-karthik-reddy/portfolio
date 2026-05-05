@@ -184,6 +184,8 @@ export default function Layout() {
     <ThemeProvider theme={theme}>
       <Box
         sx={{
+          display: "flex",
+          flexDirection: "column",
           minHeight: "100vh",
           background: darkMode
             ? "linear-gradient(180deg, #0a0a0f 0%, #12121a 100%)"
@@ -201,7 +203,9 @@ export default function Layout() {
           scrollToSection={scrollToSection}
         />
 
-        <Outlet />
+        <Box sx={{ flex: 1 }}>
+          <Outlet />
+        </Box>
 
         <Footer portfolioData={portfolioData} />
       </Box>
