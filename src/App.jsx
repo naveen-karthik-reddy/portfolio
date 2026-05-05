@@ -26,6 +26,7 @@ import { useTheme } from "@mui/material/styles";
 import { motion } from "framer-motion";
 
 import profileImage from "./assets/profilePick.jpeg";
+import Seo from "./components/Seo";
 
 /* DATA */
 import { achievementData } from "./data/achievementData";
@@ -130,6 +131,12 @@ export default function App() {
 
   return (
     <Container maxWidth="xl" sx={{ py: { xs: 5, sm: 8 }, px: { xs: 2, sm: 3, md: 6 } }}>
+      <Seo
+        title="Naveen Karthik | Frontend Developer"
+        description={portfolioData.summary.slice(0, 155)}
+        canonical="/"
+        keywords={["React", "TypeScript", "Next.js", "Frontend", "Full Stack", "Web Performance"]}
+      />
       {/* HEADER */}
       <motion.div initial="hidden" animate="visible" variants={fadeInUp}>
         <Box textAlign="center" sx={{ mb: { xs: 7, sm: 12 } }}>

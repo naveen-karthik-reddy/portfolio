@@ -125,7 +125,7 @@ self.addEventListener('fetch', (event) => {
 
 **Best for:** HTML pages, API responses where freshness matters but offline fallback is valuable. Users get up-to-date content when online and a fallback when offline.
 
-### Stale-While-Revalidate
+### [Stale-While-Revalidate](/articles/what-is-stale-while-revalidate)
 
 Return the cached response immediately, then fetch an update in the background for the next request.
 

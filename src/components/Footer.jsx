@@ -32,7 +32,7 @@ export default function Footer({ portfolioData }) {
   ];
 
   return (
-    <>
+    <div className="no-print">
       <Divider />
 
       <motion.div
@@ -96,6 +96,6 @@ export default function Footer({ portfolioData }) {
           </Typography>
         </Box>
       </motion.div>
-    </>
+    </div>
   );
 }

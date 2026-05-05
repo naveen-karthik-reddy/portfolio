@@ -87,7 +87,7 @@ Cache-Control: no-cache
 ETag: "a3f8d2b1"
 ```
 
-**Time to First Byte (TTFB)** measures the gap between the request being sent and the first byte of the response arriving — it captures server processing time plus one network RTT.
+**[Time to First Byte (TTFB)](/articles/what-is-ttfb)** measures the gap between the request being sent and the first byte of the response arriving — it captures server processing time plus one network RTT.
 
 A high TTFB points to slow server-side processing or insufficient CDN coverage.
 

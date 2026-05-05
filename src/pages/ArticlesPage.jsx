@@ -11,6 +11,7 @@ import {
   IconButton,
   Collapse,
   Tooltip,
+  GlobalStyles,
 } from "@mui/material";
 import {
   ArrowBack,
@@ -18,6 +19,7 @@ import {
   ContentCopy,
   Check,
   ExpandMore,
+  Download,
 } from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
 import { motion } from "framer-motion";
@@ -27,6 +29,8 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark, oneLight } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 import { articlesData, getArticleBySlug } from "../data/articlesData";
+import RunableCodeBlock from "../components/RunableCodeBlock";
+import Seo from "../components/Seo";
 
 /* Lazy loaders for markdown files — each article is fetched on demand */
 const markdownFiles = import.meta.glob("../articles/*.md", {
@@ -311,6 +315,7 @@ const CATEGORY_LABELS = {
   performance: "Performance",
   product: "Product",
   "llm-metrics": "LLM / AI",
+  javascript: "JavaScript",
 };
 
 /* ==================== ARTICLES LIST ==================== */
@@ -338,6 +343,12 @@ function ArticlesList() {
 
   return (
     <Box>
+      <Seo
+        title="Articles | Naveen Karthik"
+        description="Performance, React, JavaScript, and web engineering articles by Naveen Karthik — deep dives on browser internals, Core Web Vitals, and frontend architecture."
+        canonical="/articles"
+        keywords={["Performance", "React", "JavaScript", "Browser", "Web Vitals", "Frontend"]}
+      />
       <motion.div initial="hidden" animate="visible" variants={fadeInUp}>
         <Typography
           variant="h5"
@@ -390,8 +401,10 @@ function ArticlesList() {
         {filtered.map((article) => (
           <motion.div key={article.id} variants={fadeInUp} style={{ display: "flex" }}>
             <Paper
-              component={Link}
-              to={`/articles/${article.id}`}
+              component="a"
+              href={`/articles/${article.id}`}
+              target="_blank"
+              rel="noopener noreferrer"
               sx={{
                 p: 3,
                 display: "flex",
@@ -657,6 +670,9 @@ function ArticleView({ article }) {
         const langClass = classes.find((c) => c.startsWith("language-"));
         const lang = langClass?.replace("language-", "");
         const raw = codeNode.children?.[0]?.value ?? "";
+        if (lang === "js-exec" && raw) {
+          return <RunableCodeBlock code={raw.replace(/\n$/, "")} />;
+        }
         if (lang && raw) {
           return (
             <SyntaxHighlighter
@@ -772,7 +788,7 @@ function ArticleView({ article }) {
       };
       if (isInternal) {
         return (
-          <Box component={Link} to={href} sx={linkSx}>
+          <Box component="a" href={href} target="_blank" rel="noopener noreferrer" sx={linkSx}>
             {children}
           </Box>
         );
@@ -870,7 +886,25 @@ function ArticleView({ article }) {
 
   return (
     <>
-      <ReadingProgress grad={grad} />
+      <Seo
+        title={article.title}
+        description={article.excerpt}
+        canonical={`/articles/${article.id}`}
+        keywords={article.tags}
+        type="article"
+      />
+      <GlobalStyles styles={`
+        @media print {
+          .no-print { display: none !important; }
+          header { display: none !important; }
+          body { background: white !important; color: black !important; }
+          * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        }
+      `} />
+
+      <div className="no-print">
+        <ReadingProgress grad={grad} />
+      </div>
 
       <Box sx={{ display: "flex", gap: { xs: 0, lg: 5 }, alignItems: "flex-start" }}>
         {/* Main content column */}
@@ -878,6 +912,7 @@ function ArticleView({ article }) {
           <motion.div initial="hidden" animate="visible" variants={fadeInUp}>
             {/* Top bar */}
             <Box
+              className="no-print"
               sx={{
                 display: "flex",
                 justifyContent: "space-between",
@@ -894,26 +929,45 @@ function ArticleView({ article }) {
                 All Articles
               </Button>
 
-              <Tooltip title={copied ? "Copied!" : "Copy link"} arrow>
-                <IconButton
-                  onClick={handleCopy}
-                  size="small"
-                  sx={{
-                    border: "1px solid",
-                    borderColor: copied ? "success.main" : "divider",
-                    borderRadius: 1.5,
-                    color: copied ? "success.main" : "text.secondary",
-                    transition: "all 0.3s",
-                    "&:hover": { borderColor: "primary.main", color: "primary.main" },
-                  }}
-                >
-                  {copied ? (
-                    <Check fontSize="small" />
-                  ) : (
-                    <ContentCopy fontSize="small" />
-                  )}
-                </IconButton>
-              </Tooltip>
+              <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+                <Tooltip title="Download PDF" arrow>
+                  <IconButton
+                    onClick={() => window.print()}
+                    size="small"
+                    sx={{
+                      border: "1px solid",
+                      borderColor: "divider",
+                      borderRadius: 1.5,
+                      color: "text.secondary",
+                      transition: "all 0.3s",
+                      "&:hover": { borderColor: "primary.main", color: "primary.main" },
+                    }}
+                  >
+                    <Download fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+
+                <Tooltip title={copied ? "Copied!" : "Copy link"} arrow>
+                  <IconButton
+                    onClick={handleCopy}
+                    size="small"
+                    sx={{
+                      border: "1px solid",
+                      borderColor: copied ? "success.main" : "divider",
+                      borderRadius: 1.5,
+                      color: copied ? "success.main" : "text.secondary",
+                      transition: "all 0.3s",
+                      "&:hover": { borderColor: "primary.main", color: "primary.main" },
+                    }}
+                  >
+                    {copied ? (
+                      <Check fontSize="small" />
+                    ) : (
+                      <ContentCopy fontSize="small" />
+                    )}
+                  </IconButton>
+                </Tooltip>
+              </Box>
             </Box>
 
             {/* Title */}
@@ -980,7 +1034,7 @@ function ArticleView({ article }) {
             <Divider sx={{ mb: 5 }} />
 
             {/* TOC inline for mobile/tablet — hidden on desktop (sidebar takes over) */}
-            <Box sx={{ display: { xs: "block", lg: "none" } }}>
+            <Box className="no-print" sx={{ display: { xs: "block", lg: "none" } }}>
               <TableOfContents headings={headings} grad={grad} />
             </Box>
 
@@ -990,13 +1044,16 @@ function ArticleView({ article }) {
             </Box>
 
             {/* Prev / Next navigation for performance series */}
-            <PrevNextNav article={article} grad={grad} />
+            <div className="no-print">
+              <PrevNextNav article={article} grad={grad} />
+            </div>
           </motion.div>
         </Box>
 
         {/* Sticky TOC sidebar — desktop only */}
         <Box
           component="aside"
+          className="no-print"
           sx={{
             width: 260,
             flexShrink: 0,

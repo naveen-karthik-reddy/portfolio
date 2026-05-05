@@ -311,6 +311,149 @@ export const articlesData = [
     tags: ["Design", "AI", "Engineering"],
     categories: ["llm-metrics"],
   },
+  /* ── React series ── */
+  {
+    id: "react-virtual-dom-reconciliation",
+    title: "How React Works Inside the Browser Pipeline",
+    excerpt:
+      "Virtual DOM, reconciliation, state batching, and concurrent rendering — explained in terms of the six browser pipeline steps every frame goes through.",
+    date: "2026-05-05",
+    readTime: "10 min read",
+    tags: ["React", "Performance", "Browser", "JavaScript"],
+    categories: ["react", "performance"],
+  },
+  /* ── Glossary / Explainers ── */
+  {
+    id: "what-is-virtual-dom",
+    title: "What is the Virtual DOM?",
+    excerpt:
+      "The Virtual DOM is an in-memory JavaScript tree React uses to batch DOM updates. Here's what it is, why it exists, and how it differs from the real DOM.",
+    date: "2026-05-05",
+    readTime: "4 min read",
+    tags: ["React", "Browser", "Fundamentals"],
+    categories: ["react", "fundamentals"],
+  },
+  {
+    id: "what-is-cssom",
+    title: "What is the CSSOM?",
+    excerpt:
+      "The CSS Object Model is the browser's internal tree of all computed styles. It's render-blocking by design — here's why, and what that means for performance.",
+    date: "2026-05-05",
+    readTime: "4 min read",
+    tags: ["Browser", "CSS", "Fundamentals"],
+    categories: ["performance", "fundamentals"],
+  },
+  {
+    id: "what-is-reconciliation",
+    title: "What is Reconciliation?",
+    excerpt:
+      "Reconciliation is how React diffs two Virtual DOM trees to find the minimum set of real DOM mutations. Here are the two assumptions that make it run in O(n).",
+    date: "2026-05-05",
+    readTime: "4 min read",
+    tags: ["React", "Fundamentals"],
+    categories: ["react", "fundamentals"],
+  },
+  {
+    id: "what-is-main-thread",
+    title: "What is the Main Thread?",
+    excerpt:
+      "The browser's main thread runs JavaScript, layout, paint, and everything else — one task at a time. Here's what that means for performance and how to protect it.",
+    date: "2026-05-05",
+    readTime: "4 min read",
+    tags: ["Browser", "Performance", "Fundamentals"],
+    categories: ["performance", "fundamentals"],
+  },
+  {
+    id: "what-is-hydration",
+    title: "What is Hydration?",
+    excerpt:
+      "Hydration is how React attaches event handlers to server-rendered HTML. Here's what actually happens, why it can be slow, and how React 18 makes it interruptible.",
+    date: "2026-05-05",
+    readTime: "5 min read",
+    tags: ["React", "SSR", "Fundamentals"],
+    categories: ["react", "fundamentals"],
+  },
+  {
+    id: "what-is-microtask-queue",
+    title: "What is the Microtask Queue?",
+    excerpt:
+      "Microtasks run after every task, before the next frame. Understanding when Promises execute — and how they can starve the task queue — requires knowing this queue.",
+    date: "2026-05-05",
+    readTime: "5 min read",
+    tags: ["JavaScript", "Event Loop", "Fundamentals"],
+    categories: ["javascript", "fundamentals"],
+  },
+  {
+    id: "what-is-react-fiber",
+    title: "What is React Fiber?",
+    excerpt:
+      "Fiber is React's internal unit of work — a linked-list architecture that makes rendering interruptible, prioritisable, and resumable. It's the engine behind concurrent mode.",
+    date: "2026-05-05",
+    readTime: "5 min read",
+    tags: ["React", "Fundamentals"],
+    categories: ["react", "fundamentals"],
+  },
+  {
+    id: "what-are-long-tasks",
+    title: "What are Long Tasks?",
+    excerpt:
+      "Any main-thread task over 50ms is a long task. Here's why that threshold matters, how to find long tasks in DevTools, and how to break them up.",
+    date: "2026-05-05",
+    readTime: "5 min read",
+    tags: ["Performance", "Browser", "Fundamentals"],
+    categories: ["performance", "fundamentals"],
+  },
+  {
+    id: "what-is-ttfb",
+    title: "What is TTFB?",
+    excerpt:
+      "Time to First Byte measures everything between sending a request and receiving the first byte — DNS, TCP, TLS, and server processing. It's the gate every other metric waits behind.",
+    date: "2026-05-05",
+    readTime: "4 min read",
+    tags: ["Performance", "Browser", "Fundamentals"],
+    categories: ["performance", "fundamentals"],
+  },
+  {
+    id: "what-are-compositing-layers",
+    title: "What are Compositing Layers?",
+    excerpt:
+      "Compositing layers are GPU-backed bitmaps the browser composites separately. They're why transform and opacity animations can run at 60fps without touching the main thread.",
+    date: "2026-05-05",
+    readTime: "5 min read",
+    tags: ["Browser", "Performance", "CSS", "Fundamentals"],
+    categories: ["performance", "fundamentals"],
+  },
+  {
+    id: "what-is-preload-scanner",
+    title: "What is the Preload Scanner?",
+    excerpt:
+      "The preload scanner is a secondary HTML parser that dispatches resource fetches while the main parser is blocked — it's why resources below a blocking script still load early.",
+    date: "2026-05-05",
+    readTime: "4 min read",
+    tags: ["Browser", "Performance", "Fundamentals"],
+    categories: ["performance", "fundamentals"],
+  },
+  {
+    id: "what-is-stale-while-revalidate",
+    title: "What is Stale-While-Revalidate?",
+    excerpt:
+      "Serve a cached response instantly, revalidate in the background. The closest thing caching has to a free lunch — and when not to use it.",
+    date: "2026-05-05",
+    readTime: "5 min read",
+    tags: ["Performance", "Caching", "Fundamentals"],
+    categories: ["performance", "fundamentals"],
+  },
+  /* ── JavaScript series ── */
+  {
+    id: "settimeout-setinterval",
+    title: "JavaScript Timers: setTimeout and setInterval",
+    excerpt:
+      "Master browser timers from scratch — schedule callbacks, repeat them, cancel them, and understand why they interact with the event loop the way they do. Every example is editable and runnable in the browser.",
+    date: "2026-05-04",
+    readTime: "10 min read",
+    tags: ["JavaScript", "Timers", "Async", "Event Loop"],
+    categories: ["javascript"],
+  },
 ];
 
 // Generate a slug from a string (title)

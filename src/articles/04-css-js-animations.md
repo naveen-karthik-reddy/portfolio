@@ -14,7 +14,7 @@ The goal is to animate only properties that skip layout and paint entirely.
 
 ## Compositor-Only Properties
 
-Two CSS properties are handled entirely by the compositor thread, bypassing the main thread:
+Two CSS properties are handled entirely by the compositor thread, bypassing the main thread (see [compositing layers](/articles/what-are-compositing-layers)):
 
 - **`transform`** — covers translation (`translateX`, `translateY`), scale, rotate, and skew
 - **`opacity`** — fades elements in and out

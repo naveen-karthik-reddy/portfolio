@@ -48,7 +48,7 @@ CSR is appropriate for authenticated dashboards, tools, and apps where SEO doesn
 
 ## Server-Side Rendering (SSR)
 
-The server runs the application on each request, generates full HTML, and sends it. The browser displays content immediately from the HTML, then "hydrates" — attaches event listeners to the server-rendered markup.
+The server runs the application on each request, generates full HTML, and sends it. The browser displays content immediately from the HTML, then "[hydrates](/articles/what-is-hydration)" — attaches event listeners to the server-rendered markup.
 
 ```jsx
 // Next.js App Router: async Server Component runs on every request

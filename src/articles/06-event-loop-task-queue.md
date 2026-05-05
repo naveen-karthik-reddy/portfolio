@@ -38,7 +38,7 @@ This is where most developers get confused.
 
 **Macrotasks** (task queue): `setTimeout`, `setInterval`, `setImmediate`, I/O callbacks, UI events.
 
-**Microtasks** (microtask queue): `Promise.then/.catch/.finally`, `queueMicrotask`, `MutationObserver`.
+**[Microtasks](/articles/what-is-microtask-queue)** (microtask queue): `Promise.then/.catch/.finally`, `queueMicrotask`, `MutationObserver`.
 
 The critical difference: **after every macrotask, the browser drains the entire microtask queue before doing anything else** — including rendering. This means:
 
@@ -64,7 +64,7 @@ loop(); // page freezes — render never gets a turn
 
 ## Long Tasks
 
-A **long task** is any task that runs for more than 50ms on the main thread. During a long task, the browser cannot render a frame, respond to input, or run anything else.
+A [**long task**](/articles/what-are-long-tasks) is any task that runs for more than 50ms on the main thread. During a long task, the browser cannot render a frame, respond to input, or run anything else.
 
 Long tasks are the primary cause of poor INP (Interaction to Next Paint). The browser's task scheduler shows them highlighted in red in the Performance panel.
 

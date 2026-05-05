@@ -14,6 +14,7 @@ import { useTheme } from "@mui/material/styles";
 import { motion } from "framer-motion";
 
 import { projectData } from "../data/projectData";
+import Seo from "../components/Seo";
 
 /* Eagerly discover all project index files at build time */
 const projectModules = import.meta.glob("../projects/*/index.jsx");
@@ -60,6 +61,12 @@ function ProjectsList() {
 
   return (
     <Box>
+      <Seo
+        title="Projects | Naveen Karthik"
+        description="A portfolio of frontend and full-stack projects by Naveen Karthik — including React dashboards, performance tools, and web applications."
+        canonical="/projects"
+        keywords={["Projects", "React", "Frontend", "Portfolio", "Web Development"]}
+      />
       <motion.div initial="hidden" animate="visible" variants={fadeInUp}>
         <Typography
           variant="h5"
@@ -152,6 +159,12 @@ function ProjectView({ project }) {
 
   return (
     <motion.div initial="hidden" animate="visible" variants={fadeInUp}>
+      <Seo
+        title={`${project.name} | Naveen Karthik`}
+        description={project.excerpt}
+        canonical={`/projects/${project.id}`}
+        keywords={project.tags}
+      />
       <Box sx={{ mb: 3 }}>
         <Button
           component={Link}

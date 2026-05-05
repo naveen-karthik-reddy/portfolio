@@ -101,7 +101,7 @@ For most application code, `defer` is the right default. `type="module"` scripts
 
 ## Preload Scanner
 
-While the main parser is blocked by a script, the browser runs a secondary "preload scanner" that looks ahead in the HTML for resources to fetch. This is why placing scripts at the bottom of `<body>` still allows stylesheets and images to begin downloading early — the preload scanner already discovered them.
+While the main parser is blocked by a script, the browser runs a secondary "[preload scanner](/articles/what-is-preload-scanner)" that looks ahead in the HTML for resources to fetch. This is why placing scripts at the bottom of `<body>` still allows stylesheets and images to begin downloading early — the preload scanner already discovered them.
 
 The preload scanner cannot discover resources injected by JavaScript. Dynamically created `<link>` or `<script>` tags are invisible to it until they actually execute.
 

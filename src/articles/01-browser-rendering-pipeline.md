@@ -37,11 +37,55 @@ The DOM is not the rendered output. It's a structured representation of the docu
 
 ## Step 2: Parsing CSS → CSSOM
 
-Separately, every stylesheet linked or embedded in the document is parsed into the **CSS Object Model (CSSOM)** — a tree that maps selectors to computed style values.
+Separately, every stylesheet linked or embedded in the document is parsed into the **[CSS Object Model (CSSOM)](/articles/what-is-cssom)** — a tree that maps selectors to computed style values.
 
 CSS is **render-blocking**: the browser will not move past this step until all stylesheets have been downloaded and parsed. The reason is safety — rendering anything without complete style information would produce an unstyled flash of content that would immediately re-render, which is worse than waiting.
 
 The CSSOM is also where specificity, inheritance, and cascade are resolved. By the time this tree is built, every element has a fully computed set of styles.
+
+### Critical vs Non-Critical CSS
+
+Not all CSS is equally urgent. **Critical CSS** is the subset of styles needed to render above-the-fold content — the part the user sees immediately. Everything else is non-critical and can be loaded after the first paint.
+
+```html
+<!-- ❌ One big stylesheet — all of it blocks rendering,
+     even the styles for the footer the user hasn't seen yet -->
+<link rel="stylesheet" href="styles.css">
+
+<!-- ✅ Option 1: Inline critical styles — no network round trip at all -->
+<head>
+  <style>
+    /* Critical: nav, hero, above-the-fold layout */
+    nav { display: flex; height: 56px; background: #fff; }
+    .hero { padding: 4rem 2rem; font-size: 2rem; }
+  </style>
+
+  <!-- Non-critical: async load via media="print" trick -->
+  <link
+    rel="stylesheet"
+    href="non-critical.css"
+    media="print"
+    onload="this.media='all'"
+  >
+  <noscript><link rel="stylesheet" href="non-critical.css"></noscript>
+</head>
+
+<!-- ✅ Option 2: Separate critical.css loaded normally — still blocks,
+     but the file is tiny so the block is short.
+     Non-critical CSS loads async alongside it. -->
+<head>
+  <link rel="stylesheet" href="critical.css">
+  <link
+    rel="stylesheet"
+    href="non-critical.css"
+    media="print"
+    onload="this.media='all'"
+  >
+  <noscript><link rel="stylesheet" href="non-critical.css"></noscript>
+</head>
+```
+
+Inlining avoids a network round trip entirely — best when the critical CSS is small (under ~14KB). A separate `critical.css` file loaded normally is a valid alternative when you'd rather keep styles out of the HTML; it still blocks, but a focused file is downloaded and parsed far faster than one large bundle. Either way, the non-critical rest loads without blocking via the `media="print"` trick — the browser fetches it at low priority, then `onload` flips it to `all` so it applies once it arrives.
 
 ---
 
@@ -82,7 +126,7 @@ items.forEach((el, i) => {
 
 Layout tells the browser *where* things go. **Paint** fills them in — it converts each node's visual properties (colour, border, background, shadow, text) into draw calls.
 
-Modern browsers separate paint into **layers**. Elements that are promoted to their own compositor layer (via `transform`, `will-change`, `opacity`, or fixed positioning) are painted independently. This is how animations run without triggering full-page repaints.
+Modern browsers separate paint into **[compositing layers](/articles/what-are-compositing-layers)**. Elements that are promoted to their own compositor layer (via `transform`, `will-change`, `opacity`, or fixed positioning) are painted independently. This is how animations run without triggering full-page repaints.
 
 ---
 
@@ -104,7 +148,7 @@ This separation is what makes `transform` and `opacity` animations special — t
 
 ## The Main Thread vs the Compositor
 
-The **main thread** handles parsing, JavaScript execution, style calculation, layout, and paint. It is a single thread — everything queues behind everything else.
+The [**main thread**](/articles/what-is-main-thread) handles parsing, JavaScript execution, style calculation, layout, and paint. It is a single thread — everything queues behind everything else.
 
 The **compositor thread** handles compositing. It also handles scroll and touch input, which is why `position: fixed` elements and `overflow: scroll` containers need careful handling to stay off the main thread.
 
@@ -121,3 +165,7 @@ When a frame misses its deadline, the user sees a dropped frame — or "jank". T
 ---
 
 Once this pipeline clicks, the reasoning behind most performance advice becomes obvious. Deferring scripts protects step 1. Inlining critical CSS shortens step 2. Sticking to `transform` for animations keeps steps 4 and 5 out of the equation entirely. The pipeline is the model — everything else is just applying it.
+
+---
+
+*Using React? See [How React Works Inside the Browser Pipeline](/articles/react-virtual-dom-reconciliation) — where the Virtual DOM, reconciler, and concurrent rendering fit into these six steps.*
