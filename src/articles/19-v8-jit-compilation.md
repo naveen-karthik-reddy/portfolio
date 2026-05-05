@@ -1,5 +1,3 @@
-# Performance #19 - V8 & JIT Compilation — How JS Engines Optimize Your Code
-
 JavaScript runs fast on modern hardware not because it's inherently efficient, but because the engine works hard to make it so. V8 profiles your code as it runs and compiles the hot paths to machine code that rivals what a C compiler would produce — but only if your code cooperates. When it doesn't, you get silent deoptimizations that cost throughput without any obvious error.
 
 ---

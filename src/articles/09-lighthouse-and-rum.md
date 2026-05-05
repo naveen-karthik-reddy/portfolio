@@ -1,5 +1,3 @@
-# Performance #9 - Lighthouse & Real User Monitoring
-
 A Lighthouse score of 95 is satisfying. It's also possible to have a 95 on Lighthouse while your actual users — on budget Android phones, throttled home connections, with four browser extensions running — are seeing poor CLS and sluggish interactions. Lab tools and field data answer different questions, and you need both to close that gap.
 
 ---

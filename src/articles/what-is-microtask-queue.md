@@ -1,5 +1,3 @@
-# What is the Microtask Queue?
-
 The **microtask queue** is a high-priority queue in the browser's event loop that runs to completion after every task — before the browser renders a new frame or picks up the next task from the regular task queue.
 
 Understanding the difference between tasks and microtasks is what separates "it runs asynchronously" from knowing exactly *when* something runs.

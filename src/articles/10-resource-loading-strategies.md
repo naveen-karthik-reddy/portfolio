@@ -1,5 +1,3 @@
-# Performance #10 - Resource Loading Strategies
-
 Loading assets efficiently is where a lot of page speed is won or lost. Your app logic might be well-optimized, but if fonts block text, a 300KB stylesheet is loaded upfront for a page that needs 15KB, and every script tag fires at parse time — you're leaving significant performance on the table. This article covers fonts, CSS, JavaScript, and lazy loading, with the practical patterns for each.
 
 ---

@@ -130,12 +130,45 @@ export default function App() {
   );
 
   return (
-    <Container maxWidth="xl" sx={{ py: { xs: 5, sm: 8 }, px: { xs: 2, sm: 3, md: 6 } }}>
+    <Container component="main" maxWidth="xl" sx={{ py: { xs: 5, sm: 8 }, px: { xs: 2, sm: 3, md: 6 } }}>
       <Seo
         title="Naveen Karthik | Frontend Developer"
-        description={portfolioData.summary.slice(0, 155)}
+        description="Frontend-focused Full Stack Developer specializing in React, TypeScript, and Next.js. Building fast, data-intensive products at Tijori Finance. Based in Bangalore, India."
         canonical="/"
         keywords={["React", "TypeScript", "Next.js", "Frontend", "Full Stack", "Web Performance"]}
+      />
+
+      {/* JSON-LD structured data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify([
+            {
+              "@context": "https://schema.org",
+              "@type": "Person",
+              name: "Naveen Karthik",
+              givenName: "Naveen",
+              familyName: "Karthik",
+              url: "https://naveenkarthik.com",
+              jobTitle: "Software Development Engineer - Frontend",
+              worksFor: {
+                "@type": "Organization",
+                name: "Tijori Finance",
+              },
+              sameAs: [
+                "https://www.linkedin.com/in/naveen-karthik-reddy/",
+                "https://github.com/naveen-karthik-reddy/",
+              ],
+            },
+            {
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              name: "Naveen Karthik",
+              url: "https://naveenkarthik.com",
+              description: "Portfolio and technical articles by Naveen Karthik — deep dives on web performance, React, browser internals, and frontend architecture.",
+            },
+          ]),
+        }}
       />
       {/* HEADER */}
       <motion.div initial="hidden" animate="visible" variants={fadeInUp}>
@@ -163,7 +196,7 @@ export default function App() {
           </motion.div>
 
           <Typography
-            variant="h2"
+            variant="h1"
             sx={{
               fontWeight: 900,
               mb: 2,

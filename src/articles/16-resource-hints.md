@@ -1,5 +1,3 @@
-# Performance #16 - Resource Hints — Preload, Prefetch, Preconnect
-
 The browser discovers resources by parsing HTML and CSS — which means it can't act on them until it gets there. By then, you've already paid the latency cost. Resource hints let you break that dependency: tell the browser what's coming so it can act before the parser even sees it.
 
 Used correctly, they eliminate dead time in the network waterfall. Used carelessly, they waste bandwidth and can even hurt performance.

@@ -1,5 +1,3 @@
-# Performance #23 - React Performance Patterns
-
 React re-renders components when state or props change. In most apps, that's fast enough to be invisible. In apps with large component trees, frequent updates, or expensive render functions, re-renders accumulate and cause sluggish interactions. React gives you several tools to control when and how components re-render.
 
 ---

@@ -1,5 +1,3 @@
-# Performance #2 - The Critical Rendering Path
-
 Page load speed often comes down to one question: how much work does the browser have to finish before it can show the user anything? That sequence of work is the **Critical Rendering Path (CRP)** — fetch HTML, parse it, fetch and parse all blocking stylesheets, execute blocking scripts, build the render tree, run layout, paint. Everything on that list is a potential bottleneck.
 
 The shorter and lighter this path, the faster the first paint. Almost every technique used to improve perceived load speed — inlining CSS, deferring scripts, eliminating render-blocking resources — is aimed at shortening the CRP.

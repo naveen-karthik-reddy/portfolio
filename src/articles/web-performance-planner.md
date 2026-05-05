@@ -1,5 +1,3 @@
-# Web Performance Planner
-
 The usual loop for improving Lighthouse scores goes like this: you have an idea, you make a code change, you build, you deploy to staging, you run Lighthouse, you wait 30–60 seconds, you get a number. Then you realise the score fluctuated by 8 points from the previous run just due to network variance — so you run it again. And again. Then you're not sure if your change actually helped or if you're just seeing noise.
 
 That loop is slow, noisy, and demoralising. A 5-point improvement on a 500KB JS bundle is invisible inside Lighthouse's natural variance. You can't compare two ideas side by side. You can't tell your team "deferring this script saves 12 points" with any confidence.

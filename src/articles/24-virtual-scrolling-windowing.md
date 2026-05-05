@@ -1,5 +1,3 @@
-# Performance #24 - Virtual Scrolling & Windowing
-
 Rendering 10,000 list items creates 10,000 DOM nodes. Each node has layout, style, and memory cost. Scrolling through them triggers constant layout recalculation. Even if the items themselves are simple, the sheer volume makes the page sluggish. Windowing solves this by rendering only the items currently visible in the viewport.
 
 ---

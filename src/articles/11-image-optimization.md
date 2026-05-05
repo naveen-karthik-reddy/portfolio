@@ -1,5 +1,3 @@
-# Performance #11 - Image Optimization — WebP, AVIF, srcset & Lazy Loading
-
 Images are the single largest contributor to slow LCP on most sites. Not JavaScript, not fonts — images. A 2MB hero JPEG doesn't block the parser, but it hammers bandwidth, delays your LCP timestamp, and causes layout shift if you forgot to reserve the space. The fixes are well-established and mostly declarative — no build tooling required.
 
 ---

@@ -1,5 +1,3 @@
-# What is Stale-While-Revalidate?
-
 **Stale-while-revalidate** is a caching strategy where a cached (potentially outdated) response is served immediately, while a fresh copy is fetched in the background. The next request after the background fetch gets the updated version.
 
 The goal is to eliminate cache-miss latency entirely — the user never waits for a network request to complete, even when the cached version has expired.

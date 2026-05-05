@@ -1,5 +1,3 @@
-# Performance #7 - DevTools Performance Profiler
-
 Most performance optimization starts with a guess. Someone reads that images should be lazy-loaded, adds the attribute everywhere, and declares the site fast. Chrome DevTools' Performance panel replaces guessing with evidence — a frame-by-frame trace of every JS call, layout, paint, and network request, all on one synchronized timeline. If there's a bottleneck, it's in there. You just have to learn to read it.
 
 ---

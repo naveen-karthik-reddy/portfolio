@@ -1,5 +1,3 @@
-# Performance #29 - Adaptive Loading — Network & Device-Aware Experiences
-
 Performance optimization typically targets the average user on a decent connection. But a significant portion of web traffic comes from low-end Android devices on 3G networks, where "fast on my MacBook" can mean "unusable in practice". Adaptive loading adjusts what you serve based on the actual capabilities of the user's device and network — not assumptions about them.
 
 ---

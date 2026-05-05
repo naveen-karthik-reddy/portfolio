@@ -1,5 +1,3 @@
-# Performance #27 - Third-Party Scripts & the Facade Pattern
-
 You wrote a lean, fast application. Then you added a live chat widget, analytics, a cookie banner, social share buttons, and a marketing tag manager. Third-party scripts are often the single largest source of main-thread blocking time on production websites — and they're code you don't control.
 
 ---

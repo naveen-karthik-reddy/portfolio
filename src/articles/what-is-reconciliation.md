@@ -1,5 +1,3 @@
-# What is Reconciliation?
-
 **Reconciliation** is React's process of figuring out what changed between two renders and updating the real DOM to match — with as few mutations as possible.
 
 When state or props change, React re-runs your component to produce a new [Virtual DOM](/articles/what-is-virtual-dom) tree. Reconciliation is what happens next: React compares the new tree against the previous one, finds the differences, and generates a minimal list of DOM mutations to apply.

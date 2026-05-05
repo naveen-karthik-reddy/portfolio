@@ -1,5 +1,3 @@
-# Performance #26 - Bundle Optimization — Tree Shaking & Code Splitting
-
 JavaScript is the most expensive resource on the web — byte for byte, it costs more than images. An image has to be decoded once; JavaScript has to be parsed, compiled, and executed on every page load. Shipping less of it, and deferring what you do ship, is one of the highest-leverage things you can do for load performance.
 
 Bundle optimisation is the set of techniques that reduce how much JavaScript ships to the browser, and how much of it is parsed on any given page.

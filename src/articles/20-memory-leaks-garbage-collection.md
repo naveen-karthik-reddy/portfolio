@@ -1,5 +1,3 @@
-# Performance #20 - Memory Leaks & Garbage Collection
-
 JavaScript manages memory automatically — you allocate objects, the engine decides when to free them. Most of the time this works invisibly. When it doesn't, you get a memory leak: the heap grows steadily, GC pauses get longer, and the page eventually slows to a crawl or crashes the tab. Leaks in single-page applications are especially bad because the page never navigates away to reset state. A user on your SPA for an hour can accumulate what a server-rendered site would never hold.
 
 ---

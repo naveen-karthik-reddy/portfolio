@@ -1,5 +1,3 @@
-# Figma MCP Integration Guide
-
 The Figma MCP server gives Claude Code a direct line into your Figma files — not just a screenshot, but the actual design tree: frame hierarchy, auto-layout config, spacing, typography, component relationships. Once it's connected, you can point Claude at any node and ask it to implement the design, and it starts from structured data rather than pixel-guessing from an image.
 
 This guide covers setup, the three main tools the server exposes, and what to expect from each one.

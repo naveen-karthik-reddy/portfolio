@@ -1,5 +1,3 @@
-# Performance #15 - HTTP/2 & HTTP/3 — What Changes for Performance
-
 HTTP/1.1 dominated the web for two decades largely because it worked well enough, and the workarounds developers invented — concatenation, sprites, domain sharding — papered over its limitations. HTTP/2 and HTTP/3 solve those limitations at the protocol level, which makes some of those workarounds not just unnecessary but actively counterproductive.
 
 ---

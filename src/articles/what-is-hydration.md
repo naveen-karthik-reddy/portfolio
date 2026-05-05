@@ -1,5 +1,3 @@
-# What is Hydration?
-
 **Hydration** is the process of taking server-rendered HTML and making it interactive by attaching JavaScript event handlers to the existing DOM nodes — without re-rendering or replacing the markup.
 
 When a server sends a fully rendered HTML page, the browser can display it immediately. But the page is static — buttons don't respond, forms don't submit, state doesn't update. Hydration is what bridges that gap.

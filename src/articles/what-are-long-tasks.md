@@ -1,5 +1,3 @@
-# What are Long Tasks?
-
 A **long task** is any piece of work that runs on the browser's [main thread](/articles/what-is-main-thread) for more than **50 milliseconds** without yielding.
 
 The 50ms threshold isn't arbitrary. At 60fps, the browser has 16.67ms per frame. A task longer than 50ms means at least 3 frames were blocked. Research from Google shows that users start perceiving a response as laggy around 100ms after an interaction — 50ms leaves a buffer for the browser to handle the actual rendering work after the task ends.

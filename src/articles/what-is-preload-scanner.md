@@ -1,5 +1,3 @@
-# What is the Preload Scanner?
-
 The **preload scanner** is a secondary HTML parser that the browser runs in parallel with the main parser. Its only job is to look ahead in the HTML stream and discover resources — scripts, stylesheets, images, fonts — so their network requests can be dispatched as early as possible, even while the main parser is blocked.
 
 ---

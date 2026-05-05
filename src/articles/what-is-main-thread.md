@@ -1,5 +1,3 @@
-# What is the Main Thread?
-
 The **main thread** is the single thread in the browser responsible for almost everything that matters: parsing HTML, executing JavaScript, calculating styles, running layout, and painting pixels. It is a single thread — every task queues behind every other task, one at a time.
 
 ---

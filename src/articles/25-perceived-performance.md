@@ -1,5 +1,3 @@
-# Performance #25 - Perceived Performance — Skeletons, Optimistic UI & Progress
-
 A page can load in 2 seconds and feel slow. Another can take 4 seconds and feel fast. The difference is perceived performance — how fast the experience feels to the user, independent of what the metrics say. Perceived performance is about managing expectation and reducing uncertainty, not just reducing load time.
 
 ---

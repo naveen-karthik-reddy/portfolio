@@ -457,7 +457,7 @@ export default function ArticleView({ article }) {
       return (
         <Typography
           id={id}
-          variant="h4"
+          variant="h2"
           sx={{
             fontWeight: 800,
             mt: 5,
@@ -479,7 +479,7 @@ export default function ArticleView({ article }) {
       return (
         <Typography
           id={id}
-          variant="h5"
+          variant="h3"
           sx={{
             fontWeight: 700,
             mt: 4,
@@ -498,7 +498,7 @@ export default function ArticleView({ article }) {
       return (
         <Typography
           id={id}
-          variant="h6"
+          variant="h4"
           sx={{
             fontWeight: 600,
             mt: 3,
@@ -761,6 +761,61 @@ export default function ArticleView({ article }) {
         canonical={`/articles/${article.id}`}
         keywords={article.tags}
         type="article"
+        publishedTime={article.date}
+        image={article.image}
+      />
+
+      {/* JSON-LD structured data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify([
+            {
+              "@context": "https://schema.org",
+              "@type": "Article",
+              headline: article.title,
+              description: article.excerpt,
+              datePublished: article.date,
+              author: {
+                "@type": "Person",
+                name: "Naveen Karthik",
+                url: "https://naveenkarthik.com",
+              },
+              publisher: {
+                "@type": "Person",
+                name: "Naveen Karthik",
+              },
+              url: `https://naveenkarthik.com/articles/${article.id}`,
+              mainEntityOfPage: {
+                "@type": "WebPage",
+                "@id": `https://naveenkarthik.com/articles/${article.id}`,
+              },
+            },
+            {
+              "@context": "https://schema.org",
+              "@type": "BreadcrumbList",
+              itemListElement: [
+                {
+                  "@type": "ListItem",
+                  position: 1,
+                  name: "Home",
+                  item: "https://naveenkarthik.com",
+                },
+                {
+                  "@type": "ListItem",
+                  position: 2,
+                  name: "Articles",
+                  item: "https://naveenkarthik.com/articles",
+                },
+                {
+                  "@type": "ListItem",
+                  position: 3,
+                  name: article.title,
+                },
+              ],
+            },
+          ]),
+        }}
       />
       <GlobalStyles styles={`
         @media print {
@@ -776,7 +831,7 @@ export default function ArticleView({ article }) {
       </div>
 
       <Box sx={{ display: "flex", gap: { xs: 0, lg: 5 }, alignItems: "flex-start" }}>
-        <Box sx={{ flex: 1, minWidth: 0 }}>
+        <Box component="main" sx={{ flex: 1, minWidth: 0 }}>
           <motion.div initial="hidden" animate="visible" variants={fadeInUp}>
             <Box
               className="no-print"
@@ -838,7 +893,7 @@ export default function ArticleView({ article }) {
             </Box>
 
             <Typography
-              variant="h3"
+              variant="h1"
               sx={{
                 fontWeight: 900,
                 mb: 2,
@@ -868,7 +923,7 @@ export default function ArticleView({ article }) {
                 flexWrap: "wrap",
               }}
             >
-              <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.85rem" }}>
+              <Typography variant="caption" color="text.secondary" component="time" dateTime={article.date} sx={{ fontSize: "0.85rem" }}>
                 {article.date}
               </Typography>
               <Typography variant="caption" color="text.secondary">·</Typography>
@@ -900,7 +955,7 @@ export default function ArticleView({ article }) {
               <TableOfContents headings={headings} grad={grad} />
             </Box>
 
-            <Box sx={{ "& > *:first-of-type": { mt: 0 } }}>
+            <Box component="article" sx={{ "& > *:first-of-type": { mt: 0 } }}>
               <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>{content}</ReactMarkdown>
             </Box>
 

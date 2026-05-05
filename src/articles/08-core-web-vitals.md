@@ -1,5 +1,3 @@
-# Performance #8 - Core Web Vitals Explained
-
 Three numbers — LCP, CLS, INP. Google's Core Web Vitals are deliberately narrow: they don't try to capture everything about a page's performance, just the three moments that consistently correlate with whether users feel a page is fast and stable. Since 2021 they've been a confirmed ranking signal, but more practically, improving them tends to improve the experience in ways users actually notice.
 
 ---

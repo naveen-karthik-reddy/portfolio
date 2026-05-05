@@ -1,5 +1,3 @@
-# Performance #21 - Web Workers & OffscreenCanvas
-
 The main thread does everything: parse HTML, run JavaScript, handle input, calculate layout, paint. Every heavy computation you run there delays all of those other tasks. Web Workers move computation to a background thread, keeping the main thread free for the things only it can do.
 
 ---

@@ -1,5 +1,3 @@
-# How React Works Inside the Browser Pipeline
-
 When you use React, you're not bypassing the browser's rendering pipeline — you're working within it. React's entire design is shaped by the six steps the browser runs on every frame: parse, style, render tree, layout, paint, composite. Understanding where React sits inside that sequence explains why it works the way it does.
 
 If you haven't read [How the Browser Renders a Page](/articles/01-browser-rendering-pipeline) yet, that's the foundation this builds on.

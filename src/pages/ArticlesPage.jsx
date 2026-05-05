@@ -210,9 +210,11 @@ function ArticlesList() {
                 ))}
               </Box>
 
-              <Typography variant="caption" color="text.secondary">
-                {article.date} · {article.readTime}
-              </Typography>
+              <Box component="time" dateTime={article.date} sx={{ display: "contents" }}>
+                <Typography variant="caption" color="text.secondary">
+                  {article.date} · {article.readTime}
+                </Typography>
+              </Box>
             </Paper>
           </motion.div>
         ))}

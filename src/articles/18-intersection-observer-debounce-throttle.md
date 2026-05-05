@@ -1,5 +1,3 @@
-# Performance #18 - Intersection Observer, Debouncing & Throttling
-
 Scroll and resize events are fired dozens of times per second. If your handlers do any real work — DOM reads, API calls, visibility checks — the main thread gets hammered and the page stutters.
 
 This article covers three tools that solve event-frequency problems at different layers: Intersection Observer for visibility, debouncing for settling events, and throttling for rate-limiting them.

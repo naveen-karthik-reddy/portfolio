@@ -1,5 +1,3 @@
-# JavaScript Timers: setTimeout and setInterval
-
 Browsers give you two built-in functions to schedule code in the future: **setTimeout** runs a callback once after a delay, and **setInterval** runs it repeatedly. They look simple, but understanding how they actually work — and where they fit inside the event loop — changes how you write async code.
 
 Every example below is **editable and runnable**. Click **Edit** to modify the code, **▶ Run** to execute it, and **Stop** to halt any ongoing intervals.

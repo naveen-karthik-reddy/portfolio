@@ -1,5 +1,3 @@
-# Performance #22 - SSR vs CSR vs SSG vs ISR
-
 Pick the wrong rendering strategy and no amount of bundle optimization will save you. This is the highest-leverage architectural decision in web performance — where HTML is generated, when it's generated, and how much JavaScript the client has to execute before the page is usable.
 
 ---

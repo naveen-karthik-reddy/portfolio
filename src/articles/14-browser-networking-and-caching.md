@@ -1,5 +1,3 @@
-# Performance #14 - Browser Networking & Caching
-
 Before a single byte of your page content arrives, the browser has already spent real time on DNS, TCP, and TLS. On a cold load to a new origin, that overhead can easily add 200ms before the server even sends a response. Knowing what each stage costs — and which headers eliminate repeat costs entirely — is what separates slow sites from fast ones.
 
 ---

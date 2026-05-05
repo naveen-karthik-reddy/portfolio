@@ -1,5 +1,3 @@
-# Performance #1 - How the Browser Renders a Page
-
 You type a URL and hit Enter. A few hundred milliseconds later, a fully styled, interactive page appears. What actually happened in between?
 
 Most performance advice — defer your scripts, inline critical CSS, stick to `transform` for animations — only makes sense once you understand the pipeline it's targeting. Here are the six steps the browser runs on every frame, in order.

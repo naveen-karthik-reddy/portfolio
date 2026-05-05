@@ -1,5 +1,3 @@
-# Performance #28 - Service Workers & Caching Strategies
-
 A service worker is a JavaScript file that runs in a separate thread from the page and acts as a programmable network proxy. Every request made by pages under its scope passes through it — which means you control exactly what gets cached, how it gets served, and what happens when the network is unavailable. That's a lot of power, and it comes with real complexity.
 
 ---

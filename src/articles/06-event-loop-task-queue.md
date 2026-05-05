@@ -1,5 +1,3 @@
-# Performance #6 - The JavaScript Event Loop & Task Queue
-
 JavaScript runs on a single thread. That one fact explains most performance problems you'll ever debug — frozen pages, janky animations, click handlers that feel sluggish. The event loop is just the scheduling mechanism that decides *what* runs on that thread and *when*. Once you see it clearly, a lot of browser behavior that felt arbitrary starts making sense.
 
 ---

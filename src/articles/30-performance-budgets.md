@@ -1,5 +1,3 @@
-# Performance #30 - Performance Budgets & CI Enforcement
-
 A performance budget is a constraint on a metric — a number your team agrees not to exceed. Without a budget, performance degrades silently: each pull request adds a small cost that seems acceptable in isolation, and six months later the page is twice as slow as it was. Budgets make performance a requirement, not an afterthought.
 
 ---

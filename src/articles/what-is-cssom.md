@@ -1,5 +1,3 @@
-# What is the CSSOM?
-
 The **CSSOM** (CSS Object Model) is the browser's internal tree representation of all the CSS that applies to a page. It's the CSS equivalent of the DOM — where the DOM maps the HTML structure, the CSSOM maps all selectors to their computed style values.
 
 ---

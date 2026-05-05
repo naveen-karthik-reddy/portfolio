@@ -1,5 +1,3 @@
-# Performance #12 - Font Optimization
-
 Custom fonts are a performance landmine hiding behind good design. They can cause invisible text for seconds (FOIT), or pop in late and shift your layout (FOUT), or add two extra DNS lookups to your critical path just to load a typeface from Google's CDN. None of this is inevitable — each problem has a specific fix.
 
 ---

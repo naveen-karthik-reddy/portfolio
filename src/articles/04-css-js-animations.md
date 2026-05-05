@@ -1,5 +1,3 @@
-# Performance #4 - CSS & JS Animations — Compositor-Only Properties & rAF
-
 Animations are where performance becomes viscerally obvious. A janky scroll or a stuttering modal open is immediately noticed. Whether you write your animations in CSS or JavaScript determines which rendering pipeline steps they trigger — and whether they can run at 60fps without touching the main thread at all.
 
 ---

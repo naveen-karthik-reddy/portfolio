@@ -1,5 +1,3 @@
-# What is TTFB?
-
 **TTFB (Time to First Byte)** measures the time from when the browser sends an HTTP request to when it receives the first byte of the response. It captures everything that happens on the server's side of the wire before any content arrives.
 
 ---

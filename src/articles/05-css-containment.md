@@ -1,5 +1,3 @@
-# Performance #5 - CSS Containment & content-visibility
-
 The browser doesn't know which parts of your page have changed unless you tell it. By default, a style change anywhere can theoretically affect everything. CSS Containment is the mechanism to break that assumption — telling the browser that a subtree is isolated, so it can skip work it would otherwise do.
 
 ---

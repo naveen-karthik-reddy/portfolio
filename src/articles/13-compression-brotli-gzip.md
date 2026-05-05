@@ -1,5 +1,3 @@
-# Performance #13 - Compression — Brotli & Gzip
-
 If your server isn't compressing text responses, you're sending 60–75% more bytes than necessary on every uncached load. A 500KB JS bundle that compresses to 150KB saves 350KB of bandwidth — which on a 3G connection is the difference between a usable app and one that times out. This is one of the lowest-effort wins in web performance.
 
 ---

@@ -1,5 +1,3 @@
-# What is the Virtual DOM?
-
 The **Virtual DOM** (vDOM) is an in-memory JavaScript object tree that mirrors the structure of the real browser DOM. React keeps this copy up to date as your application state changes, then uses it to figure out the minimum set of real DOM mutations needed — before touching the actual page.
 
 ---

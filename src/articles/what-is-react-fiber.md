@@ -1,5 +1,3 @@
-# What is React Fiber?
-
 **React Fiber** is the internal architecture React has used since version 16. It's the reimplementation of React's core reconciliation algorithm — built specifically to make rendering interruptible, prioritisable, and resumable.
 
 Before Fiber, React's reconciler was recursive and synchronous. Once it started rendering a tree, it couldn't stop until it finished. On a large tree, that could block the [main thread](/articles/what-is-main-thread) for hundreds of milliseconds. Fiber was built to fix this.

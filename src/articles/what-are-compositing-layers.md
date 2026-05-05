@@ -1,5 +1,3 @@
-# What are Compositing Layers?
-
 A **compositing layer** is a portion of a web page that the browser paints as an independent bitmap and hands to the GPU to be composited (combined) into the final screen image — separately from the rest of the page.
 
 By default, the browser paints everything into a single layer. Compositing layers are the exception: the browser promotes specific elements to their own layer when it determines they'll change independently from everything else.

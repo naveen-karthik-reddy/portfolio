@@ -1,5 +1,3 @@
-# Performance #17 - Priority Hints & Fetch Priority
-
 The browser fetches dozens of resources during a page load and has to decide what order to request them. Its heuristics are good but not perfect — it doesn't know that your hero image matters more than a below-fold carousel image, or that one analytics script is less important than your app bundle. The `fetchpriority` attribute lets you correct those assumptions.
 
 ---
