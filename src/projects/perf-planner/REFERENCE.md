@@ -737,8 +737,15 @@ The intended user workflow is linear:
 **Lighthouse calibration is the only primary CTA.** Every page must start from a real Lighthouse run — the scoring curves are fitted to the report, so all what-if predictions are calibrated against reality. Making JSON import equally prominent confused users who thought they should start by uploading a JSON they didn't yet have.
 
 **JSON import is a restore action, not a start action.**
-- Empty state: `"Calibrate from Lighthouse"` button (contained, primary) + small text link `"Resuming work? Import a saved session"`
+- Empty state: `"Calibrate from Lighthouse"` button (contained, primary, `size="large"`) + small text link `"Already have a session? Import a saved session"`
 - Page list header: `"Calibrate new page"` (contained) + `"Import session"` (text button, tooltip: `"Restore a previously exported session"`)
+
+**Empty state includes feature cards.** Below the primary CTA, three feature cards explain the workflow:
+1. **Import Lighthouse JSON** — upload a real report to calibrate scoring curves
+2. **Simulate What-If Changes** — adjust resources, TTFB, CDN; see live score updates
+3. **Get Optimization Roadmap** — ranked suggestions with effort estimates and predicted gains
+
+Cards use a subtle hover lift effect and staggered `fadeInUp` CSS keyframe animation (no framer-motion dependency). Cards follow existing visual patterns: `border: 1`, `borderRadius: 2.5`, `alpha()` tinted backgrounds.
 
 **JSON export is a per-page action** — the `FileDownload` icon on each page card. It is intentionally placed at the end of the workflow (after calibrating and creating variations), not at the entry point.
 
@@ -747,3 +754,4 @@ The intended user workflow is linear:
 - Do **not** restore the `variant="outlined"` Import button at equal weight to the Calibrate button.
 - If a new entry path is added (e.g. "Start from template"), it should be treated as a secondary path (text button or link), never `variant="contained"`.
 - The tooltip on `"Import session"` must continue to explain what import does — it prevents users from confusing it with Lighthouse calibration.
+- Feature cards in the empty state should remain secondary to the primary CTA — do not add more than 3-4 cards or make them larger than the CTA button.

@@ -5,6 +5,7 @@ import "./index.css";
 
 import Layout from "./Layout";
 import App from "./App.jsx";
+import usePageTracking from "./hooks/usePageTracking.js";
 
 const ArticlesPage = lazy(() => import("./pages/ArticlesPage"));
 const ProjectsPage = lazy(() => import("./pages/ProjectsPage"));
@@ -15,10 +16,16 @@ function ScrollToTop() {
   return null;
 }
 
+function PageTracker() {
+  usePageTracking();
+  return null;
+}
+
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter>
       <ScrollToTop />
+      <PageTracker />
       <Routes>
         <Route element={<Layout />}>
           <Route path="/" element={<App />} />

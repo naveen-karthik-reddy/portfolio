@@ -1,12 +1,12 @@
 import { useRef, useState } from "react";
 import {
-  Box, Typography, Grid, Paper, IconButton, Tooltip,
+  Box, Typography, Paper, IconButton, Tooltip,
   Button, Dialog, DialogTitle, DialogContent, DialogContentText,
-  DialogActions, TextField, Snackbar, Alert, Chip,
+  DialogActions, TextField, Snackbar, Alert, Chip, keyframes,
 } from "@mui/material";
 import {
-  Edit, Delete, FileDownload, FileUpload, SpeedOutlined, CheckCircle, Science,
-  CalendarTodayOutlined, LayersOutlined,
+  Edit, Delete, FileDownload, FileUpload, SpeedOutlined, Science,
+  CalendarTodayOutlined, LayersOutlined, TrendingUp,
 } from "@mui/icons-material";
 import { useTheme, alpha } from "@mui/material/styles";
 import { useApp } from "../../context/useApp.js";
@@ -42,6 +42,11 @@ function ScoreRing({ score, color, size = 56 }) {
     </Box>
   );
 }
+
+const fadeInUp = keyframes`
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+`;
 
 export default function PageManager({ onClose }) {
   const { state, dispatch } = useApp();
@@ -182,29 +187,113 @@ export default function PageManager({ onClose }) {
   /* ── Empty state ── */
   if (pages.length === 0) {
     return (
-      <Box sx={{ minHeight: "calc(100vh - 130px)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", px: 3 }}>
+      <Box sx={{ minHeight: "calc(100vh - 130px)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", px: 3, py: 6 }}>
         {dialogs}
+
+        {/* Hero icon */}
         <Box sx={{
-          width: 88, height: 88, borderRadius: "50%",
+          width: 96, height: 96, borderRadius: "50%",
           background: isDark
-            ? "radial-gradient(circle, rgba(99,102,241,0.18) 0%, rgba(99,102,241,0.04) 100%)"
-            : "radial-gradient(circle, rgba(99,102,241,0.12) 0%, rgba(99,102,241,0.03) 100%)",
-          display: "flex", alignItems: "center", justifyContent: "center", mb: 3,
-          boxShadow: `0 0 0 12px ${alpha("#6366f1", 0.06)}`,
+            ? "radial-gradient(circle, rgba(99,102,241,0.2) 0%, rgba(99,102,241,0.05) 100%)"
+            : "radial-gradient(circle, rgba(99,102,241,0.14) 0%, rgba(99,102,241,0.03) 100%)",
+          display: "flex", alignItems: "center", justifyContent: "center", mb: 3.5,
+          boxShadow: `0 0 0 14px ${alpha("#6366f1", 0.07)}`,
+          animation: `${fadeInUp} 0.6s ease both`,
         }}>
-          <SpeedOutlined sx={{ fontSize: 38, color: "primary.main" }} />
+          <SpeedOutlined sx={{ fontSize: 42, color: "primary.main" }} />
         </Box>
-        <Typography variant="h6" sx={{ fontWeight: 800, mb: 1, letterSpacing: "-0.02em" }}>
+
+        {/* Title + description */}
+        <Typography variant="h5" sx={{
+          fontWeight: 900, mb: 1.5, letterSpacing: "-0.03em",
+          animation: `${fadeInUp} 0.6s 0.1s ease both`,
+        }}>
           Web Performance Planner
         </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 4, textAlign: "center", maxWidth: 420, lineHeight: 1.7 }}>
-          Every page starts from a real Lighthouse run. Upload a JSON report — the simulator fits its curves to your real score so every what-if change becomes a meaningful prediction.
+        <Typography variant="body1" color="text.secondary" sx={{
+          mb: 1, textAlign: "center", maxWidth: 500, lineHeight: 1.7,
+          animation: `${fadeInUp} 0.6s 0.2s ease both`,
+        }}>
+          Simulate Core Web Vitals changes before deploying to production.
+          Upload a Lighthouse JSON report — the simulator fits its scoring curves
+          to your real score so every what-if change becomes a calibrated prediction.
         </Typography>
-        <Button variant="contained" startIcon={<Science />} onClick={openCalibrationCreate} sx={{ borderRadius: 2, px: 3 }}>
-          Calibrate from Lighthouse
-        </Button>
-        <Typography variant="caption" color="text.secondary" sx={{ mt: 1.5 }}>
-          Resuming work?{" "}
+
+        {/* Primary CTA */}
+        <Box sx={{ animation: `${fadeInUp} 0.6s 0.3s ease both`, mb: 5 }}>
+          <Button
+            variant="contained" size="large"
+            startIcon={<Science />}
+            onClick={openCalibrationCreate}
+            sx={{ borderRadius: 2, px: 4, py: 1.25, fontSize: "0.9rem", fontWeight: 700 }}
+          >
+            Calibrate from Lighthouse
+          </Button>
+        </Box>
+
+        {/* Feature cards */}
+        <Box sx={{
+          display: "flex", gap: 2, maxWidth: 750, width: "100%", flexWrap: "wrap", justifyContent: "center",
+        }}>
+          {[
+            {
+              icon: <FileUpload sx={{ fontSize: 22 }} />,
+              title: "Import Lighthouse JSON",
+              desc: "Upload a real Lighthouse report to calibrate the simulator's scoring curves to your actual performance.",
+              delay: "0.4s",
+            },
+            {
+              icon: <LayersOutlined sx={{ fontSize: 22 }} />,
+              title: "Simulate What-If Changes",
+              desc: "Adjust resources, TTFB, and CDN settings — watch Core Web Vitals scores update in real time.",
+              delay: "0.5s",
+            },
+            {
+              icon: <TrendingUp sx={{ fontSize: 22 }} />,
+              title: "Get Optimization Roadmap",
+              desc: "See ranked suggestions with effort estimates and predicted score gains for each change.",
+              delay: "0.6s",
+            },
+          ].map((card) => (
+            <Box key={card.title} sx={{
+              flex: "1 1 200px", minWidth: 200, maxWidth: 300,
+              p: 2.5, borderRadius: 2.5,
+              border: "1px solid", borderColor: "divider",
+              bgcolor: isDark ? alpha(theme.palette.background.paper, 0.4) : alpha(theme.palette.background.paper, 0.7),
+              transition: "transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease",
+              animation: `${fadeInUp} 0.6s ${card.delay} ease both`,
+              "&:hover": {
+                transform: "translateY(-3px)",
+                borderColor: alpha(theme.palette.primary.main, 0.35),
+                boxShadow: isDark
+                  ? `0 8px 24px ${alpha(theme.palette.primary.main, 0.08)}`
+                  : `0 8px 24px ${alpha(theme.palette.primary.main, 0.06)}`,
+              },
+            }}>
+              <Box sx={{
+                width: 40, height: 40, borderRadius: 1.5,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                bgcolor: isDark ? alpha(theme.palette.primary.main, 0.12) : alpha(theme.palette.primary.main, 0.08),
+                color: "primary.main", mb: 1.5,
+              }}>
+                {card.icon}
+              </Box>
+              <Typography sx={{ fontWeight: 700, fontSize: "0.82rem", mb: 0.5 }}>
+                {card.title}
+              </Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.6 }}>
+                {card.desc}
+              </Typography>
+            </Box>
+          ))}
+        </Box>
+
+        {/* Import link */}
+        <Typography variant="caption" color="text.secondary" sx={{
+          mt: 4,
+          animation: `${fadeInUp} 0.6s 0.7s ease both`,
+        }}>
+          Already have a session?{" "}
           <Box
             component="span"
             onClick={() => importRef.current?.click()}
@@ -224,20 +313,20 @@ export default function PageManager({ onClose }) {
 
       {/* Header */}
       <Box sx={{
-        pt: 5, pb: 4, px: 3, textAlign: "center",
+        pt: 6, pb: 5, px: 3, textAlign: "center",
         borderBottom: 1, borderColor: "divider",
         background: isDark
-          ? "linear-gradient(160deg, rgba(99,102,241,0.07) 0%, transparent 60%)"
-          : "linear-gradient(160deg, rgba(99,102,241,0.05) 0%, transparent 60%)",
+          ? "linear-gradient(160deg, rgba(99,102,241,0.08) 0%, transparent 60%)"
+          : "linear-gradient(160deg, rgba(99,102,241,0.06) 0%, transparent 60%)",
       }}>
-        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 1.25, mb: 1 }}>
-          <SpeedOutlined sx={{ fontSize: 26, color: "primary.main" }} />
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 1.25, mb: 1.25 }}>
+          <SpeedOutlined sx={{ fontSize: 28, color: "primary.main" }} />
           <Typography variant="h6" sx={{ fontWeight: 900, letterSpacing: "-0.02em" }}>
             Web Performance Planner
           </Typography>
         </Box>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-          Click a page to open it, or calibrate a new one from a Lighthouse run.
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 3.5, maxWidth: 420, mx: "auto", lineHeight: 1.65 }}>
+          Open a page to inspect its dashboard, or calibrate a new one from a Lighthouse report to start simulating.
         </Typography>
         <Box sx={{ display: "flex", gap: 1.5, justifyContent: "center", flexWrap: "wrap", alignItems: "center" }}>
           <Button size="small" variant="contained" startIcon={<Science sx={{ fontSize: 15 }} />}
@@ -257,142 +346,121 @@ export default function PageManager({ onClose }) {
       {/* Cards grid */}
       <Box sx={{ flex: 1, overflowY: "auto", py: 4, px: { xs: 2, sm: 4 } }}>
         <Box sx={{ maxWidth: 960, mx: "auto" }}>
-          <Grid container spacing={2.5}>
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
             {pages.map((page) => {
-              const pageVars    = variations.filter((v) => v.pageId === page.id);
-              const baseline    = pageVars.find((v) => v.isBaseline) ?? pageVars[0] ?? null;
-              const isActive    = page.id === activePageId;
+              const pageVars   = variations.filter((v) => v.pageId === page.id);
+              const baseline   = pageVars.find((v) => v.isBaseline) ?? pageVars[0] ?? null;
 
-              const pageSettings  = page.scoringCurves ? { ...settings, scoringCurves: page.scoringCurves } : settings;
-              const mobileScore   = baseline ? computeScores(computeMetrics(baseline.resources ?? [], baseline.pageMeta ?? {}, PROFILES.mobile,  page.calibration), pageSettings).overall : null;
-              const desktopScore  = baseline ? computeScores(computeMetrics(baseline.resources ?? [], baseline.pageMeta ?? {}, PROFILES.desktop, page.calibration), pageSettings).overall : null;
-              const col = mobileScore !== null ? scoreColor(mobileScore) : "#9ca3af";
+              const pageSettings = page.scoringCurves ? { ...settings, scoringCurves: page.scoringCurves } : settings;
+              const mobileScore  = baseline ? computeScores(computeMetrics(baseline.resources ?? [], baseline.pageMeta ?? {}, PROFILES.mobile,  page.calibration), pageSettings).overall : null;
+              const desktopScore = baseline ? computeScores(computeMetrics(baseline.resources ?? [], baseline.pageMeta ?? {}, PROFILES.desktop, page.calibration), pageSettings).overall : null;
+              const col     = mobileScore  !== null ? scoreColor(mobileScore)  : "#9ca3af";
+              const deskCol = desktopScore !== null ? scoreColor(desktopScore) : "#9ca3af";
 
               return (
-                <Grid item xs={12} sm={6} md={4} key={page.id}>
-                  <Paper
-                    elevation={0}
-                    onClick={() => handleActivate(page)}
-                    sx={{
-                      position: "relative",
-                      border: "1.5px solid",
-                      borderColor: isActive ? "primary.main" : "divider",
-                      borderRadius: 3, overflow: "hidden", cursor: "pointer",
-                      transition: "transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease",
-                      boxShadow: isActive
-                        ? `0 0 0 1px ${alpha(theme.palette.primary.main, 0.18)}, 0 6px 24px ${alpha(theme.palette.primary.main, 0.14)}`
-                        : isDark ? "0 1px 6px rgba(0,0,0,0.2)" : "0 1px 6px rgba(0,0,0,0.07)",
-                      "&:hover": {
-                        transform: "translateY(-4px)",
-                        boxShadow: isActive
-                          ? `0 0 0 1px ${alpha(theme.palette.primary.main, 0.4)}, 0 12px 32px ${alpha(theme.palette.primary.main, 0.2)}`
-                          : isDark ? "0 10px 32px rgba(0,0,0,0.4)" : "0 10px 32px rgba(0,0,0,0.13)",
-                        borderColor: isActive ? "primary.main" : alpha(theme.palette.primary.main, 0.45),
-                        "& .page-actions": { opacity: 1 },
-                      },
-                    }}
-                  >
-                    {/* Score colour bar */}
-                    <Box sx={{ height: 3.5, background: `linear-gradient(90deg, ${col} 0%, ${alpha(col, 0.25)} 100%)` }} />
+                <Paper
+                  key={page.id}
+                  elevation={0}
+                  onClick={() => handleActivate(page)}
+                  sx={{
+                    display: "flex", flexDirection: "column",
+                    width: 256, flexShrink: 0,
+                    border: "1.5px solid", borderColor: "divider",
+                    borderRadius: 3, overflow: "hidden", cursor: "pointer",
+                    bgcolor: "background.paper",
+                    transition: "transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease",
+                    boxShadow: isDark ? "0 1px 6px rgba(0,0,0,0.18)" : "0 1px 4px rgba(0,0,0,0.06)",
+                    "&:hover": {
+                      transform: "translateY(-3px)",
+                      borderColor: alpha(theme.palette.primary.main, 0.4),
+                      boxShadow: isDark ? "0 8px 28px rgba(0,0,0,0.38)" : "0 8px 28px rgba(0,0,0,0.11)",
+                    },
+                  }}
+                >
+                  {/* Score colour bar */}
+                  <Box sx={{ height: 3, flexShrink: 0, background: `linear-gradient(90deg, ${col} 0%, ${alpha(col, 0.2)} 100%)` }} />
 
-                    {/* Active badge */}
-                    {isActive && (
-                      <Box sx={{
-                        position: "absolute", top: 12, right: 12,
-                        display: "flex", alignItems: "center", gap: 0.5,
-                        bgcolor: alpha(theme.palette.primary.main, isDark ? 0.18 : 0.1),
-                        border: `1px solid ${alpha(theme.palette.primary.main, 0.3)}`,
-                        borderRadius: 5, px: 0.9, py: 0.3,
-                      }}>
-                        <CheckCircle sx={{ fontSize: 11, color: "primary.main" }} />
-                        <Typography sx={{ fontSize: "0.58rem", fontWeight: 800, color: "primary.main", letterSpacing: "0.04em" }}>
-                          OPEN
-                        </Typography>
-                      </Box>
-                    )}
+                  <Box sx={{ p: 2.25, display: "flex", flexDirection: "column", flex: 1, gap: 1.75 }}>
 
-                    <Box sx={{ p: 2.5, pt: 2 }}>
-                      {/* Score ring + name */}
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2.25 }}>
-                        {mobileScore !== null
-                          ? <ScoreRing score={mobileScore} color={col} />
-                          : <Box sx={{ width: 56, height: 56, borderRadius: "50%", bgcolor: "action.hover", flexShrink: 0 }} />
-                        }
-                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                    {/* Score ring + name */}
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                      {mobileScore !== null
+                        ? <ScoreRing score={mobileScore} color={col} size={50} />
+                        : <Box sx={{ width: 50, height: 50, borderRadius: "50%", bgcolor: "action.hover", flexShrink: 0 }} />
+                      }
+                      <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <Tooltip title={page.name} placement="top" disableInteractive enterDelay={500}>
                           <Typography sx={{
-                            fontWeight: 700, fontSize: "0.92rem", lineHeight: 1.35,
+                            fontWeight: 700, fontSize: "0.87rem", lineHeight: 1.3,
                             overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-                            pr: isActive ? 5 : 0,
                           }}>
                             {page.name}
                           </Typography>
-                          {desktopScore !== null && (
-                            <Typography variant="caption" sx={{ color: "text.disabled", fontSize: "0.67rem" }}>
-                              Mobile&nbsp;<span style={{ color: col, fontWeight: 800 }}>{mobileScore}</span>
-                              &ensp;Desktop&nbsp;<span style={{ color: scoreColor(desktopScore), fontWeight: 800 }}>{desktopScore}</span>
-                            </Typography>
-                          )}
+                        </Tooltip>
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 0.4 }}>
+                          <Typography sx={{ fontSize: "0.62rem", color: "text.disabled" }}>Mobile</Typography>
+                          <Typography sx={{ fontSize: "0.68rem", fontWeight: 800, color: col }}>{mobileScore ?? "—"}</Typography>
+                          {desktopScore !== null && <>
+                            <Typography sx={{ fontSize: "0.62rem", color: "text.disabled", ml: 0.4 }}>Desktop</Typography>
+                            <Typography sx={{ fontSize: "0.68rem", fontWeight: 800, color: deskCol }}>{desktopScore}</Typography>
+                          </>}
                         </Box>
                       </Box>
-
-                      {/* Meta chips */}
-                      <Box sx={{ display: "flex", gap: 0.75, mb: 2, flexWrap: "wrap" }}>
-                        <Chip
-                          icon={<LayersOutlined sx={{ fontSize: "11px !important" }} />}
-                          label={`${pageVars.length} variation${pageVars.length !== 1 ? "s" : ""}`}
-                          size="small"
-                          sx={{ fontSize: "0.62rem", height: 20, bgcolor: "action.hover", "& .MuiChip-label": { px: 0.75 } }}
-                        />
-                        <Chip
-                          icon={<CalendarTodayOutlined sx={{ fontSize: "11px !important" }} />}
-                          label={formatDate(page.updatedAt)}
-                          size="small"
-                          sx={{ fontSize: "0.62rem", height: 20, bgcolor: "action.hover", "& .MuiChip-label": { px: 0.75 } }}
-                        />
-                      </Box>
-
-                      {/* Action icons */}
-                      <Box
-                        className="page-actions"
-                        sx={{
-                          display: "flex", alignItems: "center", justifyContent: "flex-end",
-                          gap: 0.25, pt: 1.5, borderTop: "1px solid", borderColor: "divider",
-                          opacity: 0.55,
-                          transition: "opacity 0.15s",
-                        }}
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <Tooltip title="Recalibrate from Lighthouse" arrow>
-                          <IconButton size="small" onClick={(e) => openRecalibrate(e, page)}
-                            sx={{ color: "text.secondary", "&:hover": { color: "primary.main" } }}>
-                            <Science sx={{ fontSize: 15 }} />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Rename" arrow>
-                          <IconButton size="small" onClick={(e) => openRename(e, page)}
-                            sx={{ color: "text.secondary", "&:hover": { color: "primary.main" } }}>
-                            <Edit sx={{ fontSize: 15 }} />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Export as JSON" arrow>
-                          <IconButton size="small" onClick={(e) => handleExport(e, page)}
-                            sx={{ color: "text.secondary", "&:hover": { color: "primary.main" } }}>
-                            <FileDownload sx={{ fontSize: 15 }} />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Delete" arrow>
-                          <IconButton size="small" onClick={(e) => openDelete(e, page)}
-                            sx={{ color: "text.secondary", "&:hover": { color: "error.main" } }}>
-                            <Delete sx={{ fontSize: 15 }} />
-                          </IconButton>
-                        </Tooltip>
-                      </Box>
                     </Box>
-                  </Paper>
-                </Grid>
+
+                    {/* Meta chips */}
+                    <Box sx={{ display: "flex", gap: 0.6, flexWrap: "wrap" }}>
+                      <Chip
+                        icon={<LayersOutlined sx={{ fontSize: "11px !important" }} />}
+                        label={`${pageVars.length} variation${pageVars.length !== 1 ? "s" : ""}`}
+                        size="small"
+                        sx={{ fontSize: "0.62rem", height: 20, bgcolor: "action.hover", "& .MuiChip-label": { px: 0.75 } }}
+                      />
+                      <Chip
+                        icon={<CalendarTodayOutlined sx={{ fontSize: "11px !important" }} />}
+                        label={formatDate(page.updatedAt)}
+                        size="small"
+                        sx={{ fontSize: "0.62rem", height: 20, bgcolor: "action.hover", "& .MuiChip-label": { px: 0.75 } }}
+                      />
+                    </Box>
+
+                    <Box sx={{ flex: 1 }} />
+
+                    {/* Footer: icon actions */}
+                    <Box
+                      sx={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 0.25, pt: 1.25, borderTop: "1px solid", borderColor: "divider" }}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Tooltip title="Recalibrate from Lighthouse" arrow>
+                        <IconButton size="small" onClick={(e) => openRecalibrate(e, page)}
+                          sx={{ color: "text.secondary", "&:hover": { color: "primary.main", bgcolor: alpha(theme.palette.primary.main, 0.08) } }}>
+                          <Science sx={{ fontSize: 15 }} />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Rename" arrow>
+                        <IconButton size="small" onClick={(e) => openRename(e, page)}
+                          sx={{ color: "text.secondary", "&:hover": { color: "primary.main", bgcolor: alpha(theme.palette.primary.main, 0.08) } }}>
+                          <Edit sx={{ fontSize: 15 }} />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Export as JSON" arrow>
+                        <IconButton size="small" onClick={(e) => handleExport(e, page)}
+                          sx={{ color: "text.secondary", "&:hover": { color: "primary.main", bgcolor: alpha(theme.palette.primary.main, 0.08) } }}>
+                          <FileDownload sx={{ fontSize: 15 }} />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Delete" arrow>
+                        <IconButton size="small" onClick={(e) => openDelete(e, page)}
+                          sx={{ color: "text.secondary", "&:hover": { color: "error.main", bgcolor: alpha(theme.palette.error.main, 0.08) } }}>
+                          <Delete sx={{ fontSize: 15 }} />
+                        </IconButton>
+                      </Tooltip>
+                    </Box>
+                  </Box>
+                </Paper>
               );
             })}
-          </Grid>
+          </Box>
         </Box>
       </Box>
     </Box>
