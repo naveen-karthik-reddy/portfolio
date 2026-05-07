@@ -43,7 +43,7 @@ const staggerContainer = {
 /* ==================== PAGE ROOT ==================== */
 
 export default function ArticlesPage() {
-  const { slug } = useParams();
+  const { "*": slug } = useParams();
   const article = slug ? getArticleBySlug(slug) : null;
 
   if (article) {

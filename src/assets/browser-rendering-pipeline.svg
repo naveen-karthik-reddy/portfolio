@@ -1,0 +1,252 @@
+<svg width="1080" height="570" viewBox="0 0 1080 570" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Drop shadow for step cards -->
+    <filter id="cardShadow" x="-5%" y="-5%" width="115%" height="130%">
+      <feDropShadow dx="0" dy="1.5" stdDeviation="2" flood-color="#00000012"/>
+    </filter>
+
+    <!-- Arrowhead marker -->
+    <marker id="arrow" viewBox="0 0 10 7" refX="9" refY="3.5" markerWidth="8" markerHeight="6" orient="auto">
+      <path d="M0 0 L10 3.5 L0 7 Z" fill="#9ca3af"/>
+    </marker>
+    <marker id="arrowDown" viewBox="0 0 7 10" refX="3.5" refY="9" markerWidth="6" markerHeight="8" orient="auto">
+      <path d="M0 0 L7 0 L3.5 10 Z" fill="#9ca3af"/>
+    </marker>
+
+    <!-- Gradients for accent bars -->
+    <linearGradient id="gradParse" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#3B82F6"/><stop offset="100%" stop-color="#2563EB"/></linearGradient>
+    <linearGradient id="gradCssom" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#6366F1"/><stop offset="100%" stop-color="#4F46E5"/></linearGradient>
+    <linearGradient id="gradMerge" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#10B981"/><stop offset="100%" stop-color="#059669"/></linearGradient>
+    <linearGradient id="gradLayout" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#F59E0B"/><stop offset="100%" stop-color="#D97706"/></linearGradient>
+    <linearGradient id="gradPaint" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#EF4444"/><stop offset="100%" stop-color="#DC2626"/></linearGradient>
+    <linearGradient id="gradComposite" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#8B5CF6"/><stop offset="100%" stop-color="#7C3AED"/></linearGradient>
+
+    <!-- Thread band gradients -->
+    <linearGradient id="gradMainThread" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#fff7ed" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#fff7ed" stop-opacity="0.5"/>
+    </linearGradient>
+    <linearGradient id="gradCompositor" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#f5f3ff" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#f5f3ff" stop-opacity="0.5"/>
+    </linearGradient>
+  </defs>
+
+  <!-- ==================== BACKGROUND ==================== -->
+  <rect width="1080" height="570" rx="14" fill="#fafbfc" stroke="#e2e4e9" stroke-width="1"/>
+
+  <!-- ==================== TITLE ==================== -->
+  <text x="540" y="38" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="22" font-weight="800" fill="#111827">Browser Rendering Pipeline</text>
+  <text x="540" y="62" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="13" fill="#6b7280">How the browser turns HTML and CSS into pixels on screen — six steps, two threads, one 16.67 ms frame budget</text>
+
+  <!-- ==================== THREAD BACKGROUND BANDS ==================== -->
+  <!-- Main thread band: spans steps 1-5 -->
+  <rect x="172" y="82" width="640" height="147" rx="10" fill="url(#gradMainThread)" stroke="#fdba74" stroke-width="1.2" stroke-dasharray="6,3"/>
+  <!-- Compositor thread band: spans step 6 -->
+  <rect x="832" y="82" width="145" height="147" rx="10" fill="url(#gradCompositor)" stroke="#c4b5fd" stroke-width="1.2" stroke-dasharray="6,3"/>
+
+  <!-- Thread labels -->
+  <text x="492" y="98" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="700" fill="#d97706" letter-spacing="0.8">MAIN THREAD</text>
+  <text x="904" y="98" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="700" fill="#7c3aed" letter-spacing="0.8">COMPOSITOR</text>
+
+  <!-- ==================== INPUT DOCUMENTS ==================== -->
+
+  <!-- HTML Document -->
+  <rect x="16" y="96" width="122" height="44" rx="5" fill="#fff" stroke="#d1d5db" stroke-width="1.2" filter="url(#cardShadow)"/>
+  <rect x="16" y="96" width="5" height="44" rx="2.5" fill="url(#gradParse)"/>
+  <text x="33" y="114" font-family="monospace" font-size="10" font-weight="700" fill="#6b7280">&lt;/&gt;</text>
+  <text x="52" y="124" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="700" fill="#1f2937">HTML</text>
+
+  <!-- CSS Document -->
+  <rect x="16" y="160" width="122" height="44" rx="5" fill="#fff" stroke="#d1d5db" stroke-width="1.2" filter="url(#cardShadow)"/>
+  <rect x="16" y="160" width="5" height="44" rx="2.5" fill="url(#gradCssom)"/>
+  <text x="33" y="178" font-family="monospace" font-size="10" font-weight="700" fill="#6b7280">#</text>
+  <text x="48" y="188" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="700" fill="#1f2937">CSS</text>
+
+  <!-- ==================== ARROWS: INPUTS → STEPS ==================== -->
+  <line x1="138" y1="118" x2="173" y2="118" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="138" y1="182" x2="173" y2="182" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- ==================== STEP CARDS ==================== -->
+
+  <!-- Card helper: white rect + left accent + shadow -->
+  <!-- Step 1: Parse HTML → DOM -->
+  <g>
+    <rect x="180" y="90" width="132" height="57" rx="7" fill="#fff" stroke="#e5e7eb" stroke-width="1" filter="url(#cardShadow)"/>
+    <rect x="180" y="90" width="5" height="57" rx="2.5" fill="url(#gradParse)"/>
+    <circle cx="198" cy="109" r="10" fill="#3B82F6"/>
+    <text x="198" y="113" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="800" fill="#fff">1</text>
+    <text x="218" y="112" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="700" fill="#1f2937">Parse HTML</text>
+    <text x="218" y="131" font-family="monospace" font-size="11" font-weight="600" fill="#3B82F6">→ DOM</text>
+  </g>
+
+  <!-- Step 2: Parse CSS → CSSOM -->
+  <g>
+    <rect x="180" y="157" width="132" height="57" rx="7" fill="#fff" stroke="#e5e7eb" stroke-width="1" filter="url(#cardShadow)"/>
+    <rect x="180" y="157" width="5" height="57" rx="2.5" fill="url(#gradCssom)"/>
+    <circle cx="198" cy="176" r="10" fill="#6366F1"/>
+    <text x="198" y="180" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="800" fill="#fff">2</text>
+    <text x="218" y="179" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="700" fill="#1f2937">Parse CSS</text>
+    <text x="218" y="198" font-family="monospace" font-size="11" font-weight="600" fill="#6366F1">→ CSSOM</text>
+  </g>
+
+  <!-- ==================== MERGE ARROWS: STEPS 1,2 → STEP 3 ==================== -->
+  <!-- Arrow from Step 1 to Step 3 — curves down-right -->
+  <path d="M312 118 C330 118, 335 150, 347 150" fill="none" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <!-- Arrow from Step 2 to Step 3 — curves up-right -->
+  <path d="M312 185 C330 185, 335 150, 347 150" fill="none" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Step 3: Merge → Render Tree -->
+  <g>
+    <rect x="353" y="122" width="132" height="57" rx="7" fill="#fff" stroke="#e5e7eb" stroke-width="1" filter="url(#cardShadow)"/>
+    <rect x="353" y="122" width="5" height="57" rx="2.5" fill="url(#gradMerge)"/>
+    <circle cx="371" cy="141" r="10" fill="#10B981"/>
+    <text x="371" y="145" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="800" fill="#fff">3</text>
+    <text x="391" y="144" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="700" fill="#1f2937">Merge</text>
+    <text x="391" y="163" font-family="monospace" font-size="11" font-weight="600" fill="#10B981">→ Render Tree</text>
+  </g>
+
+  <!-- Arrow: Step 3 → Step 4 -->
+  <line x1="485" y1="150" x2="516" y2="150" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Step 4: Layout -->
+  <g>
+    <rect x="523" y="122" width="125" height="57" rx="7" fill="#fff" stroke="#e5e7eb" stroke-width="1" filter="url(#cardShadow)"/>
+    <rect x="523" y="122" width="5" height="57" rx="2.5" fill="url(#gradLayout)"/>
+    <circle cx="541" cy="141" r="10" fill="#F59E0B"/>
+    <text x="541" y="145" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="800" fill="#fff">4</text>
+    <text x="561" y="144" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="700" fill="#1f2937">Layout</text>
+    <text x="561" y="163" font-family="monospace" font-size="11" font-weight="600" fill="#F59E0B">→ Box Model</text>
+  </g>
+
+  <!-- Arrow: Step 4 → Step 5 -->
+  <line x1="648" y1="150" x2="679" y2="150" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Step 5: Paint -->
+  <g>
+    <rect x="686" y="122" width="125" height="57" rx="7" fill="#fff" stroke="#e5e7eb" stroke-width="1" filter="url(#cardShadow)"/>
+    <rect x="686" y="122" width="5" height="57" rx="2.5" fill="url(#gradPaint)"/>
+    <circle cx="704" cy="141" r="10" fill="#EF4444"/>
+    <text x="704" y="145" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="800" fill="#fff">5</text>
+    <text x="724" y="144" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="700" fill="#1f2937">Paint</text>
+    <text x="724" y="163" font-family="monospace" font-size="11" font-weight="600" fill="#EF4444">→ Draw Calls</text>
+  </g>
+
+  <!-- Arrow: Step 5 → Step 6 -->
+  <line x1="811" y1="150" x2="842" y2="150" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Step 6: Composite -->
+  <g>
+    <rect x="849" y="122" width="140" height="57" rx="7" fill="#fff" stroke="#e5e7eb" stroke-width="1" filter="url(#cardShadow)"/>
+    <rect x="849" y="122" width="5" height="57" rx="2.5" fill="url(#gradComposite)"/>
+    <circle cx="867" cy="141" r="10" fill="#8B5CF6"/>
+    <text x="867" y="145" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="800" fill="#fff">6</text>
+    <text x="887" y="144" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="700" fill="#1f2937">Composite</text>
+    <text x="887" y="163" font-family="monospace" font-size="11" font-weight="600" fill="#8B5CF6">→ Layers</text>
+  </g>
+
+  <!-- ==================== OUTPUT: PIXELS ON SCREEN ==================== -->
+  <!-- Monitor icon -->
+  <g transform="translate(1010, 155)">
+    <!-- Stand -->
+    <rect x="15" y="32" width="16" height="8" rx="1.5" fill="#d1d5db"/>
+    <!-- Base -->
+    <rect x="5" y="38" width="36" height="5" rx="2" fill="#9ca3af"/>
+    <!-- Screen bezel -->
+    <rect x="0" y="0" width="46" height="34" rx="4" fill="#374151"/>
+    <!-- Screen inner -->
+    <rect x="4" y="4" width="38" height="26" rx="2" fill="#111827"/>
+    <!-- Screen content hint -->
+    <rect x="8" y="8" width="16" height="6" rx="1.5" fill="#3B82F6" opacity="0.7"/>
+    <rect x="27" y="8" width="12" height="6" rx="1.5" fill="#10B981" opacity="0.7"/>
+    <rect x="8" y="17" width="22" height="6" rx="1.5" fill="#6366F1" opacity="0.7"/>
+    <rect x="33" y="17" width="6" height="9" rx="1.5" fill="#F59E0B" opacity="0.7"/>
+  </g>
+
+  <!-- Arrow: Step 6 → Screen -->
+  <path d="M989 138 C1008 138, 1006 160, 1010 160" fill="none" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- "Pixels" label -->
+  <text x="1033" y="212" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="700" fill="#374151">Pixels</text>
+
+  <!-- ==================== PARALLEL INDICATOR ==================== -->
+  <!-- Bracket showing steps 1 & 2 run in parallel -->
+  <line x1="165" y1="106" x2="165" y2="196" stroke="#9ca3af" stroke-width="1"/>
+  <line x1="162" y1="106" x2="168" y2="106" stroke="#9ca3af" stroke-width="1"/>
+  <line x1="162" y1="196" x2="168" y2="196" stroke="#9ca3af" stroke-width="1"/>
+  <text x="153" y="155" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="9" font-weight="600" fill="#9ca3af" transform="rotate(-90, 153, 155)">parallel</text>
+
+  <!-- ==================== DIVIDER ==================== -->
+  <line x1="40" y1="258" x2="1040" y2="258" stroke="#e5e7eb" stroke-width="1"/>
+
+  <!-- ==================== FRAME BUDGET SECTION ==================== -->
+  <text x="40" y="290" font-family="system-ui, -apple-system, sans-serif" font-size="16" font-weight="700" fill="#111827">Frame Budget</text>
+  <text x="185" y="290" font-family="system-ui, -apple-system, sans-serif" font-size="13" fill="#6b7280">— one frame to do everything</text>
+
+  <!-- 60fps budget -->
+  <text x="540" y="322" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="28" font-weight="900" fill="#111827">16.67 ms</text>
+  <text x="540" y="342" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="600" fill="#6b7280">at 60 fps</text>
+  <text x="745" y="328" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#9ca3af">8.33 ms at 120 fps →</text>
+
+  <!-- stacked bar -->
+  <g transform="translate(70, 370)">
+    <!-- Segments -->
+    <rect x="0" y="0" width="108" height="28" rx="4" fill="#FCD34D"/>
+    <rect x="110" y="0" width="54" height="28" fill="#93C5FD"/>
+    <rect x="166" y="0" width="144" height="28" fill="#F59E0B"/>
+    <rect x="312" y="0" width="126" height="28" fill="#F87171"/>
+    <rect x="440" y="0" width="72" height="28" fill="#A78BFA"/>
+    <rect x="514" y="0" width="96" height="28" rx="4" fill="#e5e7eb"/>
+
+    <!-- Labels above bar -->
+    <text x="54" y="-8" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="600" fill="#92400e">JavaScript</text>
+    <text x="137" y="-8" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="600" fill="#1e40af">Style</text>
+    <text x="238" y="-8" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="600" fill="#92400e">Layout</text>
+    <text x="375" y="-8" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="600" fill="#991b1b">Paint</text>
+    <text x="476" y="-8" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="600" fill="#6d28d9">Composite</text>
+    <text x="562" y="-8" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="600" fill="#6b7280">Headroom</text>
+
+    <!-- Tick marks with times -->
+    <line x1="0" y1="38" x2="0" y2="44" stroke="#9ca3af" stroke-width="1"/>
+    <text x="0" y="56" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="9" fill="#9ca3af">0</text>
+
+    <line x1="108" y1="38" x2="108" y2="44" stroke="#9ca3af" stroke-width="1"/>
+    <text x="108" y="56" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="9" fill="#9ca3af">3</text>
+
+    <line x1="162" y1="38" x2="162" y2="44" stroke="#9ca3af" stroke-width="1"/>
+    <text x="162" y="56" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="9" fill="#9ca3af">4.5</text>
+
+    <line x1="306" y1="38" x2="306" y2="44" stroke="#9ca3af" stroke-width="1"/>
+    <text x="306" y="56" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="9" fill="#9ca3af">8.5</text>
+
+    <line x1="432" y1="38" x2="432" y2="44" stroke="#9ca3af" stroke-width="1"/>
+    <text x="432" y="56" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="9" fill="#9ca3af">12</text>
+
+    <line x1="504" y1="38" x2="504" y2="44" stroke="#9ca3af" stroke-width="1"/>
+    <text x="504" y="56" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="9" fill="#9ca3af">14</text>
+
+    <line x1="610" y1="38" x2="610" y2="44" stroke="#9ca3af" stroke-width="1"/>
+    <text x="610" y="56" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="9" fill="#9ca3af">16.67 ms</text>
+  </g>
+
+  <!-- ==================== BOTTOM NOTE ==================== -->
+  <text x="540" y="475" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#9ca3af">Missing the 16.67 ms deadline → dropped frame → user sees jank</text>
+
+  <!-- ==================== THREAD SUMMARY ROW ==================== -->
+  <g transform="translate(40, 500)">
+    <rect x="0" y="0" width="16" height="16" rx="3" fill="#F59E0B"/>
+    <text x="22" y="12" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="600" fill="#374151">Main Thread</text>
+    <text x="108" y="12" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#6b7280">— Parsing, JavaScript, Style, Layout, Paint (steps 1–5)</text>
+
+    <rect x="480" y="0" width="16" height="16" rx="3" fill="#8B5CF6"/>
+    <text x="502" y="12" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="600" fill="#374151">Compositor Thread</text>
+    <text x="620" y="12" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#6b7280">— Compositing, scroll, touch input (step 6)</text>
+
+    <!-- Legend: transform/opacity -->
+    <text x="40" y="42" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#9ca3af" font-style="italic">Tip:</text>
+    <text x="72" y="42" font-family="monospace" font-size="11" fill="#6b7280">transform</text>
+    <text x="132" y="42" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#9ca3af">and</text>
+    <text x="148" y="42" font-family="monospace" font-size="11" fill="#6b7280">opacity</text>
+    <text x="198" y="42" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#9ca3af">animations skip Layout &amp; Paint — compositor-only, always smooth</text>
+  </g>
+</svg>

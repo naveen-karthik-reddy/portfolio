@@ -1,0 +1,110 @@
+<svg width="1080" height="520" viewBox="0 0 1080 520" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="cardShadow" x="-5%" y="-5%" width="115%" height="130%">
+      <feDropShadow dx="0" dy="1.5" stdDeviation="2" flood-color="#00000012"/>
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 7" refX="9" refY="3.5" markerWidth="8" markerHeight="6" orient="auto">
+      <path d="M0 0 L10 3.5 L0 7 Z" fill="#9ca3af"/>
+    </marker>
+    <linearGradient id="gradLayout" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#F59E0B"/><stop offset="100%" stop-color="#D97706"/></linearGradient>
+    <linearGradient id="gradPaint" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#EF4444"/><stop offset="100%" stop-color="#DC2626"/></linearGradient>
+    <linearGradient id="gradComposite" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#8B5CF6"/><stop offset="100%" stop-color="#7C3AED"/></linearGradient>
+  </defs>
+
+  <rect width="1080" height="520" rx="14" fill="#fafbfc" stroke="#e2e4e9" stroke-width="1"/>
+
+  <text x="540" y="38" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="22" font-weight="800" fill="#111827">CSS &amp; JS Animations: Pipeline Cost</text>
+  <text x="540" y="62" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="13" fill="#6b7280">Which rendering steps your animation triggers determines whether it runs at 60fps or stutters</text>
+
+  <!-- ANIMATION COMPARISON TABLE -->
+  <!-- Left: Geometry animation (expensive) -->
+  <rect x="40" y="90" width="310" height="195" rx="10" fill="#fff7ed" stroke="#fdba74" stroke-width="1.2"/>
+  <text x="195" y="115" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="700" fill="#c2410c">❌ Geometry Animation</text>
+  <text x="195" y="133" text-anchor="middle" font-family="monospace" font-size="11" fill="#9ca3af">left, width, height, margin</text>
+
+  <!-- Pipeline steps for geometry -->
+  <rect x="60" y="148" width="80" height="36" rx="5" fill="#FCD34D" opacity="0.8"/>
+  <text x="100" y="165" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="700" fill="#92400e">Layout</text>
+  <text x="100" y="177" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="8" fill="#92400e">Recalculates</text>
+  <line x1="140" y1="166" x2="165" y2="166" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <rect x="170" y="148" width="80" height="36" rx="5" fill="#F87171" opacity="0.8"/>
+  <text x="210" y="165" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="700" fill="#991b1b">Paint</text>
+  <text x="210" y="177" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="8" fill="#991b1b">Repaints</text>
+  <line x1="250" y1="166" x2="275" y2="166" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <rect x="280" y="148" width="50" height="36" rx="5" fill="#A78BFA" opacity="0.5"/>
+  <text x="305" y="165" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="700" fill="#6d28d9">Comp</text>
+  <text x="305" y="177" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="8" fill="#6d28d9">Merge</text>
+
+  <text x="195" y="210" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#c2410c">All three steps — every frame</text>
+
+  <!-- Cost indicator -->
+  <text x="195" y="240" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="700" fill="#c2410c">Expensive: uses main thread</text>
+  <text x="195" y="258" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="700" fill="#c2410c">JS blocking = visible jank</text>
+
+  <!-- Right: transform/opacity animation (cheap) -->
+  <rect x="730" y="90" width="310" height="195" rx="10" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="1.2"/>
+  <text x="885" y="115" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="700" fill="#6d28d9">✅ Compositor-Only Animation</text>
+  <text x="885" y="133" text-anchor="middle" font-family="monospace" font-size="11" fill="#9ca3af">transform, opacity</text>
+
+  <!-- Pipeline steps for compositor-only -->
+  <rect x="780" y="148" width="80" height="36" rx="5" fill="#e5e7eb"/>
+  <text x="820" y="165" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="700" fill="#9ca3af">Layout</text>
+  <text x="820" y="177" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="8" fill="#9ca3af">Skipped</text>
+  <line x1="860" y1="166" x2="875" y2="166" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <rect x="880" y="148" width="70" height="36" rx="5" fill="#e5e7eb"/>
+  <text x="915" y="165" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="700" fill="#9ca3af">Paint</text>
+  <text x="915" y="177" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="8" fill="#9ca3af">Skipped</text>
+  <line x1="950" y1="166" x2="965" y2="166" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <rect x="970" y="148" width="50" height="36" rx="5" fill="#A78BFA" opacity="0.9"/>
+  <text x="995" y="165" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="700" fill="#6d28d9">Comp</text>
+  <text x="995" y="177" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="8" fill="#fff">Runs</text>
+
+  <text x="885" y="210" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#6d28d9">Only compositing — on its own thread</text>
+
+  <text x="885" y="240" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="700" fill="#6d28d9">Cheap: compositor thread</text>
+  <text x="885" y="258" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="700" fill="#6d28d9">Smooth even with busy main thread</text>
+
+  <!-- Center: arrow showing the shift -->
+  <g transform="translate(390, 160)">
+    <line x1="0" y1="0" x2="300" y2="0" stroke="#9ca3af" stroke-width="2" marker-end="url(#arrow)"/>
+    <text x="150" y="-8" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="700" fill="#059669">Always prefer this direction</text>
+  </g>
+
+  <!-- Divider -->
+  <line x1="60" y1="300" x2="1020" y2="300" stroke="#e5e7eb" stroke-width="1"/>
+
+  <!-- BOTTOM: Three animation approaches -->
+  <text x="60" y="332" font-family="system-ui, -apple-system, sans-serif" font-size="16" font-weight="700" fill="#111827">Choosing the Right Tool</text>
+
+  <!-- CSS Transition -->
+  <rect x="60" y="350" width="300" height="90" rx="7" fill="#fff" stroke="#e5e7eb" stroke-width="1" filter="url(#cardShadow)"/>
+  <rect x="60" y="350" width="5" height="90" rx="2.5" fill="url(#gradComposite)"/>
+  <text x="82" y="374" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="700" fill="#1f2937">CSS Transitions</text>
+  <text x="82" y="394" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#6b7280">Simple state changes</text>
+  <text x="82" y="412" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#6b7280">Hover, toggle, modal open/close</text>
+  <text x="82" y="430" font-family="monospace" font-size="10" font-weight="600" fill="#8B5CF6">transition: transform 300ms ease</text>
+
+  <!-- CSS Animations -->
+  <rect x="390" y="350" width="300" height="90" rx="7" fill="#fff" stroke="#e5e7eb" stroke-width="1" filter="url(#cardShadow)"/>
+  <rect x="390" y="350" width="5" height="90" rx="2.5" fill="url(#gradComposite)"/>
+  <text x="412" y="374" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="700" fill="#1f2937">CSS @keyframes</text>
+  <text x="412" y="394" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#6b7280">Multi-step, looping animations</text>
+  <text x="412" y="412" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#6b7280">Loading spinners, attention cues</text>
+  <text x="412" y="430" font-family="monospace" font-size="10" font-weight="600" fill="#8B5CF6">animation: slideIn 0.3s ease</text>
+
+  <!-- JS + rAF -->
+  <rect x="720" y="350" width="300" height="90" rx="7" fill="#fff" stroke="#e5e7eb" stroke-width="1" filter="url(#cardShadow)"/>
+  <rect x="720" y="350" width="5" height="90" rx="2.5" fill="url(#gradLayout)"/>
+  <text x="742" y="374" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="700" fill="#1f2937">JS + requestAnimationFrame</text>
+  <text x="742" y="394" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#6b7280">Physics, gestures, choreography</text>
+  <text x="742" y="412" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#6b7280">Runs on main thread — keep work lean</text>
+  <text x="742" y="430" font-family="monospace" font-size="10" font-weight="600" fill="#F59E0B">requestAnimationFrame(() => { … })</text>
+
+  <!-- Bottom rule -->
+  <rect x="60" y="462" width="960" height="34" rx="7" fill="#f0fdf4" stroke="#86efac" stroke-width="1"/>
+  <text x="540" y="484" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="700" fill="#166534">Rule: animate transform &amp; opacity. Never animate geometry (width, height, top, left). Use rAF; never setTimeout for animations.</text>
+</svg>

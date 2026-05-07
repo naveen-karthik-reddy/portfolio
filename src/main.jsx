@@ -30,7 +30,7 @@ createRoot(document.getElementById("root")).render(
         <Route element={<Layout />}>
           <Route path="/" element={<App />} />
           <Route path="/articles" element={<Suspense fallback={null}><ArticlesPage /></Suspense>} />
-          <Route path="/articles/:slug" element={<Suspense fallback={null}><ArticlesPage /></Suspense>} />
+          <Route path="/articles/*" element={<Suspense fallback={null}><ArticlesPage /></Suspense>} />
           <Route path="/projects" element={<Suspense fallback={null}><ProjectsPage /></Suspense>} />
           <Route path="/projects/:slug" element={<Suspense fallback={null}><ProjectsPage /></Suspense>} />
         </Route>

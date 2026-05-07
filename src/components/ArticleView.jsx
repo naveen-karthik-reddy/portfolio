@@ -19,6 +19,7 @@ import {
   Check,
   ExpandMore,
   Download,
+  Close,
 } from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
 import { motion } from "framer-motion";
@@ -57,7 +58,7 @@ import Seo from "./Seo";
 const RunableCodeBlock = lazy(() => import("./RunableCodeBlock"));
 
 /* Lazy-load article markdown files */
-const markdownFiles = import.meta.glob("../articles/*.md", {
+const markdownFiles = import.meta.glob("../articles/**/*.md", {
   query: "?raw",
   import: "default",
 });
@@ -308,16 +309,16 @@ function TableOfContents({ headings, grad, sidebar = false }) {
 
 /* ==================== PREV / NEXT NAV ==================== */
 
-const perfSeries = articlesData
-  .filter((a) => a.categories?.includes("performance"));
+// Build a flat index of all articles for prev/next across ALL categories
+const allArticlesFlat = articlesData;
 
 function PrevNextNav({ article, grad }) {
   const navigate = useNavigate();
-  const idx = perfSeries.findIndex((a) => a.id === article.id);
+  const idx = allArticlesFlat.findIndex((a) => a.id === article.id);
   if (idx === -1) return null;
 
-  const prev = perfSeries[idx - 1] ?? null;
-  const next = perfSeries[idx + 1] ?? null;
+  const prev = allArticlesFlat[idx - 1] ?? null;
+  const next = allArticlesFlat[idx + 1] ?? null;
 
   return (
     <Box
@@ -388,6 +389,7 @@ function PrevNextNav({ article, grad }) {
 function ArticleImage({ src, alt }) {
   const key = `../assets/${src}`;
   const [resolved, setResolved] = useState(assetCache[key] ?? null);
+  const [zoom, setZoom] = useState(false);
 
   useEffect(() => {
     if (assetCache[key]) {
@@ -409,21 +411,90 @@ function ArticleImage({ src, alt }) {
     }
   }, [src, key]);
 
+  useEffect(() => {
+    if (!zoom) return;
+    const handleKey = (e) => { if (e.key === "Escape") setZoom(false); };
+    document.addEventListener("keydown", handleKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", handleKey);
+      document.body.style.overflow = "";
+    };
+  }, [zoom]);
+
+  const imgSrc = resolved ?? src;
+
   return (
-    <Box
-      component="img"
-      src={resolved ?? src}
-      alt={alt ?? ""}
-      sx={{
-        display: "block",
-        width: "100%",
-        height: "auto",
-        borderRadius: 2,
-        my: 3,
-        border: "1px solid",
-        borderColor: "divider",
-      }}
-    />
+    <>
+      <Box
+        component="img"
+        src={imgSrc}
+        alt={alt ?? ""}
+        onClick={() => setZoom(true)}
+        sx={{
+          display: "block",
+          width: "100%",
+          height: "auto",
+          borderRadius: 2,
+          my: 3,
+          border: "1px solid",
+          borderColor: "divider",
+          cursor: "zoom-in",
+          transition: "opacity 0.2s, box-shadow 0.2s",
+          "&:hover": { opacity: 0.92, boxShadow: 3 },
+        }}
+      />
+
+      {zoom && (
+        <Box
+          onClick={() => setZoom(false)}
+          sx={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 10000,
+            bgcolor: "rgba(0,0,0,0.88)",
+            cursor: "zoom-out",
+          }}
+        >
+          <IconButton
+            onClick={() => setZoom(false)}
+            size="small"
+            sx={{
+              position: "fixed",
+              top: 16,
+              right: 16,
+              zIndex: 10001,
+              bgcolor: "background.paper",
+              border: "1px solid",
+              borderColor: "divider",
+              boxShadow: 3,
+              "&:hover": { bgcolor: "grey.200" },
+            }}
+          >
+            <Close fontSize="small" />
+          </IconButton>
+
+          <Box
+            component="img"
+            src={imgSrc}
+            alt={alt ?? ""}
+            onClick={(e) => e.stopPropagation()}
+            sx={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              maxWidth: "90vw",
+              maxHeight: "85vh",
+              width: "auto",
+              height: "auto",
+              borderRadius: 2,
+              bgcolor: "#fafbfc",
+            }}
+          />
+        </Box>
+      )}
+    </>
   );
 }
 
