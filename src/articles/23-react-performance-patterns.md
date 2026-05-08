@@ -155,4 +155,8 @@ The flame chart shows render time per component. The ranked chart sorts by most 
 
 ---
 
-These tools compound each other: `React.memo` needs `useCallback` to work correctly when props include functions, `useMemo` is pointless without memo'd children to benefit from stable references, and `startTransition` only helps when the slow part is a render, not a network call. Use the profiler first, apply targeted fixes second.
+These tools compound each other: `React.memo` needs `useCallback` to work correctly when props include functions. `useMemo` only helps when its result is passed to a memo'd child — an unmemo'd child re-renders regardless. And `startTransition` only helps when the slow part is a render, not a network call.
+
+> **Closure staleness with useCallback:** An empty dependency array `[]` means the callback never updates — it captures the initial values of state and props forever. If your callback reads state, include that state in the dependency array. A `useCallback` that always sees stale values is worse than no `useCallback` at all.
+
+Use the profiler first, apply targeted fixes second.

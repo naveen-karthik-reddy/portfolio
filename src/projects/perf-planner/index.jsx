@@ -2,14 +2,13 @@ import { useMemo, useState } from "react";
 import { Box, CircularProgress } from "@mui/material";
 import { AppProvider } from "./context/AppContext.jsx";
 import { useApp } from "./context/useApp.js";
-import { computeMetrics, computeScores, computeRoadmap, PROFILES } from "./lib/calculator.js";
+import { computeMetrics, computeScores, PROFILES } from "./lib/calculator.js";
 import { useAutoSave } from "./hooks/useAutoSave.js";
 import TopBar from "./components/layout/TopBar.jsx";
 import VariationTabs from "./components/layout/VariationTabs.jsx";
 import PageMetaBar from "./components/input/PageMetaBar.jsx";
 import ResourcePanel from "./components/resources/ResourcePanel.jsx";
 import ImpactDashboard from "./components/dashboard/ImpactDashboard.jsx";
-import OptimizationRoadmap from "./components/roadmap/OptimizationRoadmap.jsx";
 import ComparisonMode from "./components/comparison/ComparisonMode.jsx";
 import SettingsPanel from "./components/settings/SettingsPanel.jsx";
 import PageManager from "./components/pages/PageManager.jsx";
@@ -62,19 +61,6 @@ function PerfPlanner() {
   const baselineDesktopMetrics = (!isBaseline && baselineVariation)
     ? computeMetrics(baselineVariation.resources ?? [], baselineVariation.pageMeta ?? {}, desktopProfile, calibration)
     : null;
-
-  // Roadmap — keyed on activeVariation so it recomputes only when inputs/locks change
-  const roadmapItems = useMemo(() => {
-    if (!activeVariation) return [];
-    return computeRoadmap(
-      activeVariation.resources ?? [],
-      activeVariation.pageMeta ?? {},
-      activeVariation.locked ?? {},
-      PROFILES.mobile,
-      calibration,
-      effectiveSettings,
-    );
-  }, [activeVariation, calibration, effectiveSettings]);
 
   // Tab scores for all active-page variations
   const tabScores = useMemo(() => {
@@ -148,7 +134,7 @@ function PerfPlanner() {
           <PageMetaBar />
           <ResourcePanel />
         </Box>
-        {/* Dashboard + roadmap — right 68% */}
+        {/* Dashboard — right 68% */}
         <Box sx={{ width: "68%", overflowY: "auto", p: 2, display: "flex", flexDirection: "column", gap: 3 }}>
           <ImpactDashboard
             mobileMetrics={mobileMetrics}
@@ -163,7 +149,6 @@ function PerfPlanner() {
             calibratedFormFactor={activePage?.calibration?.formFactor ?? null}
             calibration={calibration}
           />
-          <OptimizationRoadmap items={roadmapItems} />
         </Box>
       </Box>
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} />

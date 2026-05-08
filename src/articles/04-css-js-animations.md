@@ -37,16 +37,10 @@ The practical translation: if you're moving an element, use `transform: translat
 
 ## CSS Transitions vs CSS Animations vs JS Animations
 
-**CSS Transitions** are the simplest tool. Triggered by a class change or pseudo-state, they interpolate between two property values over a duration.
-
-**CSS Animations** (`@keyframes`) give you multi-step control with timing functions per step. Both run on the compositor for `transform` and `opacity`.
-
-**JavaScript animations** (via `requestAnimationFrame` or libraries like GSAP) run on the main thread. They are more flexible — you can respond to physics, user input mid-animation, or drive complex sequences — but they compete with JS execution for main-thread time.
-
-Use CSS for simple state transitions. Use JS (or GSAP) when you need choreography, interruptibility, or physics.
+**CSS Transitions** are the simplest tool. Triggered by a class change or pseudo-state (like `:hover`), they interpolate between two property values over a duration. Use transitions when you have a clear **start state → end state** — opening a modal, expanding a card, highlighting a button.
 
 ```css
-/* ✅ CSS transition — clean, compositor-handled */
+/* ✅ Transition: ideal for A → B state changes */
 .modal {
   opacity: 0;
   transform: translateY(8px);
@@ -58,9 +52,34 @@ Use CSS for simple state transitions. Use JS (or GSAP) when you need choreograph
 }
 ```
 
+**CSS Animations** (`@keyframes`) give you multi-step control with timing functions per step. Use them when you need more than a simple start-to-end — looping spinners, pulsing indicators, entrance sequences with staggered stages.
+
+```css
+/* ✅ @keyframes: ideal for multi-step or looping motion */
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%      { transform: scale(1.05); opacity: 0.8; }
+}
+.indicator { animation: pulse 2s ease-in-out infinite; }
+```
+
+**JavaScript animations** (via `requestAnimationFrame` or libraries like GSAP) run on the main thread. They are more flexible — you can respond to physics, user input mid-animation, or drive complex sequences — but they compete with JS execution for main-thread time. Use JS when you need *interruptibility* (the user can cancel or redirect the animation mid-flight), *physics* (spring, inertia, friction), or *choreography* (sequencing multiple elements with staggered delays).
+
+**Quick decision guide:**
+- Simple A→B: CSS transition
+- Multi-step or looping: CSS @keyframes
+- Physics, interruptibility, or complex sequencing: JS + rAF (or GSAP)
+
 ```js
 // ✅ JS animation — fine for physics-based or interruptible motion
-function springAnimate(timestamp) {
+const element = document.querySelector('.ball');
+let position = 0;       // current x position in px
+let velocity = 0;       // current speed
+const target = 300;     // target x position
+const stiffness = 0.02; // how strongly the spring pulls
+const damping = 0.85;   // friction per frame (0-1, lower = more friction)
+
+function springAnimate() {
   velocity += (target - position) * stiffness;
   velocity *= damping;
   position += velocity;
@@ -85,7 +104,7 @@ function animate(timestamp) {
 requestAnimationFrame(animate);
 ```
 
-Never use `setInterval` or `setTimeout` for animation. They fire on their own schedule, not the browser's frame budget, causing tearing and dropped frames.
+Never use `setInterval` or `setTimeout` for animation. They fire on their own schedule, independent of the browser's frame lifecycle, so you end up either updating the DOM multiple times between frames (wasted work — the extra updates are never painted) or missing frames entirely (jank). rAF fires exactly once per frame, right before paint — no wasted work, no missed frames.
 
 ---
 
@@ -110,6 +129,25 @@ element.addEventListener('transitionend', () => {
 ```
 
 Blanket `will-change: transform` on every element is an anti-pattern that increases memory pressure without benefit.
+
+---
+
+## Accessibility: `prefers-reduced-motion`
+
+Some users experience motion sickness, vertigo, or seizures from animated content. The `prefers-reduced-motion` media query lets you respect their OS-level setting:
+
+```css
+/* ✅ Disable or tone down animations for users who've requested it */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+```
+
+A duration of `0.01ms` (not `0s`) ensures the animation completes instantly — firing any `animationend` / `transitionend` listeners that other code might depend on. For critical motion that conveys information (like a loading spinner), consider replacing it with a static indicator instead.
 
 ---
 

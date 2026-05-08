@@ -12,7 +12,7 @@ The browser performs six distinct steps to go from raw HTML bytes to pixels on s
 
 ## Step 1: Parsing HTML → DOM
 
-The browser's HTML parser reads the document byte by byte and builds the **[Document Object Model (DOM)](/articles/what-is-dom)** — a tree of nodes representing every element, attribute, and text content on the page.
+The browser's HTML parser reads the document byte by byte and builds the **[Document Object Model (DOM)](/articles/what-is-dom)** — a tree of nodes representing every element, attribute, and text content on the page. Think of a tree like a family tree: one root element (`<html>`) with children branching below it (`<head>`, `<body>`), each with their own children, and so on.
 
 Parsing is **incremental**: the browser doesn't wait for the full document before it starts building the DOM. It works through the stream and emits nodes as it goes. This is why placing `<script>` tags at the bottom of `<body>` matters — a blocking script encountered mid-parse halts the entire process.
 
@@ -23,13 +23,27 @@ Parsing is **incremental**: the browser doesn't wait for the full document befor
   <script src="app.js"></script>
 </head>
 
-<!-- ✅ Fetched in parallel, executed after HTML is parsed -->
+<!-- ✅ defer: Fetched in parallel, executed after HTML is fully parsed -->
 <head>
   <script src="app.js" defer></script>
 </head>
+
+<!-- ✅ async: Fetched in parallel, executed as soon as it's ready —
+     may interrupt parsing, useful for independent scripts like analytics -->
+<head>
+  <script src="analytics.js" async></script>
+</head>
 ```
 
+> **defer vs async:** Both download without blocking the parser. `defer` waits for the full DOM before executing (preserving script order). `async` executes the moment it finishes downloading, which may interrupt parsing and can cause scripts to run out of order. Use `defer` when script order matters (most cases); use `async` for standalone scripts like analytics or ads.
+
 The DOM is not the rendered output. It's a structured representation of the document's content. Styles live elsewhere.
+
+### The Preload Scanner
+
+While the main parser builds the DOM, a secondary parser called the **[preload scanner](/articles/what-is-preload-scanner)** runs ahead looking for resources — `<img>`, `<link>`, `<script src>` — and dispatches fetch requests early. This is why an image referenced below a blocking `<script>` still starts downloading before the script runs: the scanner already found it.
+
+The preload scanner is why the pipeline isn't quite as sequential as it first appears. The browser speculatively fetches resources it's likely to need, overlapping network work with parsing. This is also why resource hints like `preload` and `preconnect` work — they give the scanner explicit instructions it might otherwise miss.
 
 ---
 
@@ -83,7 +97,27 @@ Not all CSS is equally urgent. **Critical CSS** is the subset of styles needed t
 </head>
 ```
 
-Inlining avoids a network round trip entirely — best when the critical CSS is small (under ~14KB). A separate `critical.css` file loaded normally is a valid alternative when you'd rather keep styles out of the HTML; it still blocks, but a focused file is downloaded and parsed far faster than one large bundle. Either way, the non-critical rest loads without blocking via the `media="print"` trick — the browser fetches it at low priority, then `onload` flips it to `all` so it applies once it arrives.
+Inlining avoids a network round trip entirely — best when the critical CSS is small (under ~14KB). Why 14KB? That's roughly the initial congestion window of TCP — the amount of data the server can send in the very first round trip before waiting for an acknowledgement. If your critical CSS fits in that first window, it arrives with zero extra latency. A separate `critical.css` file loaded normally is a valid alternative when you'd rather keep styles out of the HTML; it still blocks, but a focused file is downloaded and parsed far faster than one large bundle.
+
+Either way, the non-critical rest loads without blocking via the `media="print"` trick:
+
+```html
+<link
+  rel="stylesheet"
+  href="non-critical.css"
+  media="print"
+  onload="this.media='all'"
+>
+<noscript><link rel="stylesheet" href="non-critical.css"></noscript>
+```
+
+Here's how this works step by step:
+
+1. The browser sees a `media="print"` stylesheet — it still **downloads** it (at low priority), but it doesn't **block rendering** because print styles don't apply to the screen.
+2. Once downloaded, `onload` fires and changes `media` to `all` — the styles now apply to the screen too.
+3. The `<noscript>` fallback ensures the stylesheet still loads if JavaScript is disabled — without JS, the `onload` trick can't fire, so the browser treats it as a regular blocking stylesheet inside `<noscript>`.
+
+The result: non-critical CSS arrives in the background without holding up the first paint.
 
 ---
 
@@ -91,7 +125,7 @@ Inlining avoids a network round trip entirely — best when the critical CSS is 
 
 The browser merges the DOM and CSSOM into the **Render Tree** — a new tree that contains only the nodes that are actually visible on screen.
 
-Nodes with `display: none` are excluded entirely. Pseudo-elements like `::before` are included even though they're not in the DOM. The render tree is the first structure that truly represents what the user will see.
+Nodes with `display: none` are excluded entirely — they take up no space and have no visual presence. In contrast, `visibility: hidden` elements *are* in the render tree (they occupy space in layout) but are simply not painted. Pseudo-elements like `::before` are included even though they're not in the DOM. The render tree is the first structure that truly represents what the user will see.
 
 ---
 
@@ -101,7 +135,7 @@ Given the render tree, the browser now calculates the **exact position and size 
 
 Layout takes the render tree and the viewport dimensions and produces a **box model** for every visible node — its x/y coordinates, width, height, and relationship to its parent.
 
-Layout is expensive. Changing anything that affects geometry — width, height, padding, margin, font size, or document structure — triggers a re-layout of everything downstream. This is why layout thrashing is a serious performance concern.
+Layout is expensive. Changing anything that affects geometry — width, height, padding, margin, font size, or document structure — triggers a re-layout of everything downstream. This is why **[layout thrashing](/articles/03-reflow-repaint-layout-thrashing)** is a serious performance concern: interleaving DOM reads and writes in a loop forces the browser to recalculate layout over and over, wasting precious frame budget.
 
 ```js
 // ❌ Each offsetHeight read forces a synchronous layout
@@ -166,4 +200,8 @@ Once this pipeline clicks, the reasoning behind most performance advice becomes 
 
 ---
 
-*Using React? See [How React Works Inside the Browser Pipeline](/articles/react-virtual-dom-reconciliation) — where the Virtual DOM, reconciler, and concurrent rendering fit into these six steps.*
+## Where to Go Next
+
+- **[#2 — The Critical Rendering Path](/articles/02-critical-rendering-path)** — the shortest sequence of steps the browser must complete before it can paint anything. Understanding the CRP is the direct next step after the pipeline.
+- **[#3 — Reflow, Repaint & Layout Thrashing](/articles/03-reflow-repaint-layout-thrashing)** — a deep dive into layout (Step 4) and how to stop wasting frame budget.
+- **[How React Works Inside the Browser Pipeline](/articles/react-virtual-dom-reconciliation)** — where the Virtual DOM, reconciler, and concurrent rendering fit into these six steps. Read this after you've absorbed the pipeline fundamentals.

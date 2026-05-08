@@ -37,7 +37,18 @@ console.log(karthik.greet()); // "Hello, I'm Karthik"
 console.log("Same prototype pattern:", naveen.__proto__ === Person.prototype); // true
 ```
 
-Key difference: class methods are **non-enumerable** and classes must be called with `new`. The function version has neither restriction.
+Key differences between `class` and a plain `function` + prototype:
+
+| | `class` | `function` |
+|---|---|---|
+| Called without `new` | TypeError | Works (but likely wrong) |
+| Methods enumerable? | No | Yes (by default) |
+| Body strict mode? | Always strict | Only with `"use strict"` |
+| Hoisted? | No (TDZ) | Function declarations: yes |
+| `super` available? | Yes | No |
+| `arguments` in methods? | No (use rest params) | Yes |
+
+These differences are why `class` isn't just syntax sugar — it enforces better practices.
 
 ---
 

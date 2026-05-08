@@ -37,7 +37,26 @@ The `font-display` descriptor controls this behavior:
 | `fallback` | ~100ms | ~3s | Most use cases |
 | `optional` | ~100ms | none | Non-critical fonts |
 
-**`swap`** shows fallback text immediately, then swaps in the custom font when ready. This prevents invisible text but can cause layout shift if the fallback and custom font have different metrics.
+**`swap`** shows fallback text immediately, then swaps in the custom font when ready. This prevents invisible text but can cause layout shift if the fallback and custom font have different metrics. You can minimize this shift with `size-adjust`:
+
+```css
+/* Fallback font overflows its container by 5% compared to Inter.
+   size-adjust shrinks it so the space taken matches Inter's metrics. */
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/inter-regular.woff2') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter Fallback';
+  src: local('Arial');
+  size-adjust: 95%;
+  ascent-override: 96%;
+}
+```
+
+Use [Font Style Matcher](https://meowni.ca/font-style-matcher/) to find the right override values for your font pair.
 
 **`optional`** is the most performance-friendly: if the font isn't cached and can't load within a short window, the browser abandons it for this page load. Use it for decorative fonts.
 
@@ -147,7 +166,18 @@ Variable fonts encode the entire design space of a typeface (weight, width, slan
 }
 ```
 
-For designs using more than 2–3 weights, a variable font is almost always smaller than the sum of the individual files.
+For designs using more than 2–3 weights, a variable font is almost always smaller than the sum of the individual files. However, a variable font file is typically larger than a single static weight — if your design uses only one or two weights, individual static files may be smaller. Profile both approaches to know for sure.
+
+The **CSS Font Loading API** (`document.fonts`) lets you programmatically detect when fonts are ready:
+
+```js
+// Wait for all fonts to load — useful before measuring layout
+await document.fonts.ready;
+console.log('All fonts loaded');
+
+// Load a specific font on demand
+await document.fonts.load('italic 1em "Playfair Display"');
+```
 
 ---
 

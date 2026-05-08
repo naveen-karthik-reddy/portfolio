@@ -14,25 +14,35 @@ When the stack is busy, nothing else can run — not a click handler, not a pain
 
 Async operations — `setTimeout`, `fetch`, DOM events, `IndexedDB` — are handled by Web APIs provided by the browser, outside the JS engine. When they complete, they queue a **callback** (also called a **macrotask** or **task**) into the **task queue**.
 
-The event loop's job is simple: when the call stack is empty, pick the next task from the queue and push it onto the stack.
+The event loop follows a strict algorithm — here it is step by step:
+
+1. **Pick one macrotask** from the task queue and run it to completion (push it onto the call stack, execute every synchronous instruction, pop it off).
+2. **Drain all microtasks.** After the macrotask finishes, run every pending microtask in the queue. New microtasks added during this phase also run before moving on — the queue must be completely empty.
+3. **Run `requestAnimationFrame` callbacks** (if the browser decides it's time for a new frame).
+4. **Render** — recalculate styles, layout, paint, and composite (if needed and frame budget allows).
+5. **Repeat** — go back to step 1.
 
 ```text
-Call Stack → empty?
-  ↓ yes
-Microtask queue → drain completely
-  ↓ empty
-Task Queue → pick one task, run it
+Pick ONE macrotask → run to completion
   ↓
-Render (if frame budget allows)
+Drain ALL microtasks (including new ones added during this step)
+  ↓
+requestAnimationFrame callbacks (if a frame is due)
+  ↓
+Style → Layout → Paint → Composite (if needed)
   ↓
 Repeat
 ```
+
+This is why a slow macrotask blocks everything: the event loop can't move to step 2 (microtasks) or step 4 (rendering) until the current macrotask finishes.
 
 ---
 
 ## Microtasks vs Macrotasks
 
 This is where most developers get confused.
+
+Why the names? **Macrotasks** are the "big" units — one per event-loop tick, each representing a discrete piece of work. **Microtasks** are the "small" units that run immediately after the current macrotask, before the next one. Think of it as: one macrotask, then a burst of microtasks, then repeat.
 
 **Macrotasks** (task queue): `setTimeout`, `setInterval`, `setImmediate`, I/O callbacks, UI events.
 
@@ -49,7 +59,7 @@ Promise.resolve().then(() => console.log('microtask'));
 // macrotask
 ```
 
-And if your microtask queue chains infinitely:
+And if your microtask queue chains infinitely, you get **microtask starvation** — the event loop never escapes step 2, so rendering and user input are blocked indefinitely:
 
 ```js
 function loop() {

@@ -20,7 +20,7 @@ JavaScript compresses particularly well because of repeated keywords (`function`
 | Compression speed | Fast | Slower at max levels |
 | Content-Encoding header | `gzip` | `br` |
 
-**Brotli** consistently achieves 15–25% better compression than Gzip at equivalent quality settings. The decompression speed is comparable, so the client pays no meaningful penalty.
+**Brotli** consistently achieves 15–25% better compression than Gzip at equivalent quality settings. Both use numeric quality levels: Gzip 1–9, Brotli 0–11. Higher levels = smaller files but slower compression. Decompression speed is comparable regardless of level, so the client pays no meaningful penalty. For pre-compression at build time, always use Brotli level 11 — compression speed doesn't matter at build time, only the output size does.
 
 The browser signals what it accepts via the `Accept-Encoding` request header:
 
@@ -85,7 +85,9 @@ Most CDNs (Cloudflare, Vercel, Netlify, AWS CloudFront) automatically apply Brot
 
 **Compress:** HTML, CSS, JavaScript, JSON, XML, SVG, plain text, web fonts (WOFF — note: WOFF2 is already compressed internally).
 
-**Don't compress:** JPEG, PNG, WebP, AVIF, GIF, MP4, ZIP, WASM (already compressed), PDF. These formats have built-in compression; re-compressing adds CPU cost for minimal or no size reduction, and can sometimes increase file size.
+**Don't compress:** JPEG, PNG, WebP, AVIF, GIF, MP4, ZIP, WASM, PDF. These formats have built-in compression. For example, WOFF2 uses Brotli internally — compressing it again at the server level adds CPU cost for virtually zero additional savings and may even increase the file size. As a rule of thumb: if the format already does its own compression, the server shouldn't try to compress it again.
+
+> **Why this matters for metrics:** Compression directly reduces transfer time (fewer bytes over the wire), which improves TTFB for those resources and FCP/LCP for anything on the critical path. A 500KB JS bundle compressed to 150KB downloads in roughly one-third the time — and on slow connections, that can be the difference between passing or failing Core Web Vitals thresholds.
 
 ---
 

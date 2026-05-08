@@ -49,7 +49,18 @@ A single large image served to mobile is wasteful. `srcset` lets you provide mul
 />
 ```
 
-`sizes` tells the browser how wide the image will be displayed (as a CSS length), before it knows your stylesheet. Without it, the browser assumes 100vw and downloads the largest variant.
+Each entry in `srcset` is `URL <width>w` — the `w` descriptor is the **intrinsic width of that image file in CSS pixels**, not the file size. The browser uses this + `sizes` + the screen's device pixel ratio (DPR) to pick the best variant.
+
+`sizes` is a list of **media-condition + slot-width** pairs. The browser reads them left to right and uses the first matching one:
+
+```
+sizes="(max-width: 600px) 100vw, 50vw"
+       ↑ media condition     ↑ slot  ↑ fallback (no media = always matches)
+```
+
+This means: "On screens ≤ 600px wide, this image fills the full viewport width (100vw). On anything wider, it fills half the viewport (50vw)."
+
+The browser then calculates: `slot width × DPR = required image width`, and picks the smallest `srcset` candidate that covers it. On a 375px-wide phone at 2x DPR with the first condition matching: 375 × 2 = 750px needed → browser picks the 800w variant. Without `sizes`, the browser assumes 100vw, and a 2560px desktop monitor at 1x would wastefully download the 1600w image.
 
 In a React/Next.js app, the `<Image>` component handles this for you — but understanding what it generates helps when you're debugging why a 1600w image is loading on a 375px screen.
 
@@ -145,4 +156,8 @@ Preload it early in the `<head>`, give it `fetchpriority="high"`, and never lazy
 
 ---
 
-Images are one of the rare cases where the web platform's built-in tools are genuinely excellent — `srcset`, `<picture>`, `loading`, `fetchpriority` all work without a library. The hard part is consistency: it's easy to get the hero right and then ship an unoptimized `<img>` two components down. Making format negotiation and `width`/`height` part of your team's code review checklist pays off faster than most performance tooling.
+Images are one of the rare cases where the web platform's built-in tools are genuinely excellent — `srcset`, `<picture>`, `loading`, `fetchpriority` all work without a library.
+
+That said, generating and managing all those variants by hand is tedious. **Image CDNs** like Cloudinary, imgix, or Cloudflare Images can auto-generate WebP/AVIF, resize on the fly via URL parameters, and cache the results at the edge. Next.js's built-in `<Image>` component does the same at build time. If you're not using one of these, at minimum run your images through a build-step optimizer like `sharp` or `squoosh` to produce WebP/AVIF variants.
+
+The hard part is consistency: it's easy to get the hero right and then ship an unoptimized `<img>` two components down. Making format negotiation and `width`/`height` part of your team's code review checklist pays off faster than most performance tooling.

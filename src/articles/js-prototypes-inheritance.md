@@ -1,4 +1,8 @@
-JavaScript uses prototypal inheritance, not classical inheritance. Every object has an internal `[[Prototype]]` link to another object. Understanding this chain — and the difference between `__proto__` and `prototype` — is the key to understanding how properties are looked up, how `new` works, and what `class` actually does.
+JavaScript uses prototypal inheritance, not classical inheritance. Every object has an internal `[[Prototype]]` link to another object.
+
+**Think of prototypes like looking up a word in a family of dictionaries.** You first check your own dictionary (the object itself). If the word isn't there, you check your parent's dictionary. Then your grandparent's. You keep going up the chain until you find the definition — or run out of dictionaries. This is exactly how property lookup works in JavaScript.
+
+Understanding this chain — and the difference between `__proto__` and `prototype` — is the key to understanding how properties are looked up, how `new` works, and what `class` actually does.
 
 **Prerequisites:** [JS Foundations #3 — Closures](/articles/javascript-series/js-closures-lexical-scope)
 
@@ -28,9 +32,13 @@ console.log(naveen.__proto__ === Person.prototype); // true
 // Person.prototype is just a plain object
 console.log(typeof Person.prototype); // "object"
 
-// naveen doesn't own greet — it's on the prototype
-console.log(naveen.hasOwnProperty("greet")); // false
-console.log(naveen.hasOwnProperty("name"));  // true
+// `hasOwnProperty` checks if a property lives directly on the object
+// (not inherited via the prototype chain)
+console.log(naveen.hasOwnProperty("greet")); // false — it's inherited
+console.log(naveen.hasOwnProperty("name"));  // true — directly on naveen
+
+// Modern code prefers Object.getPrototypeOf() over .__proto__
+console.log(Object.getPrototypeOf(naveen) === Person.prototype); // true
 ```
 
 The mental model:
@@ -119,7 +127,6 @@ function myNew(constructor, ...args) {
 
   // Step 2: Link its __proto__ to constructor's prototype
   Object.setPrototypeOf(obj, constructor.prototype);
-  // Equivalent to: obj.__proto__ = constructor.prototype;
 
   // Step 3: Call constructor with 'this' set to the new object
   const result = constructor.apply(obj, args);
@@ -132,6 +139,16 @@ const naveen = myNew(Person, "Naveen");
 console.log(naveen.name);                    // "Naveen"
 console.log(naveen instanceof Person);       // true
 console.log(naveen.__proto__ === Person.prototype); // true
+
+// Edge case: if the constructor explicitly returns an object, new returns THAT object
+function Trick() {
+  this.ignored = true;
+  return { override: "I win!" };
+}
+
+const t = new Trick();
+console.log(t.ignored); // undefined — the returned object replaced 'this'
+console.log(t.override); // "I win!"
 ```
 
 ---
@@ -265,7 +282,52 @@ console.log(b instanceof Array);  // false — Array.prototype not in chain
 
 ---
 
-## 9. `class` — Syntax Sugar Over Prototypes
+## 9. `for...in` vs `hasOwnProperty` — Why It Matters
+
+`for...in` loops over **all enumerable properties**, including inherited ones. Use `hasOwnProperty` to filter them out:
+
+```js-exec
+const parent = { inherited: "from parent" };
+const child = Object.create(parent);
+child.own = "from child";
+
+console.log("for...in (includes inherited):");
+for (const key in child) {
+  console.log(" ", key); // "own", "inherited"
+}
+
+console.log("Own properties only:");
+for (const key in child) {
+  if (child.hasOwnProperty(key)) {
+    console.log(" ", key); // "own" only
+  }
+}
+```
+
+Always guard `for...in` with `hasOwnProperty` unless you specifically want inherited properties.
+
+---
+
+## 10. `Object.create(null)` — An Object with No Prototype
+
+Sometimes you want a plain dictionary without any inherited baggage (no `toString`, `hasOwnProperty`, etc.):
+
+```js-exec
+const dict = Object.create(null);
+dict.apple = "fruit";
+dict.carrot = "vegetable";
+
+console.log(dict.toString); // undefined — no Object.prototype!
+console.log(dict.hasOwnProperty); // undefined — no inherited methods
+console.log("apple" in dict); // true — 'in' still works for checking keys
+console.log(Object.keys(dict)); // ["apple", "carrot"] — works fine
+```
+
+This is useful for lookup maps where keys might collide with built-in method names (like `toString`, `constructor`, `__proto__`).
+
+---
+
+## 11. `class` — Syntax Sugar Over Prototypes
 
 Modern `class` syntax does the same thing under the hood:
 

@@ -6,7 +6,7 @@ import {
 } from "@mui/material";
 import {
   Edit, Delete, FileDownload, FileUpload, SpeedOutlined, Science,
-  CalendarTodayOutlined, LayersOutlined, TrendingUp,
+  CalendarTodayOutlined, LayersOutlined,
 } from "@mui/icons-material";
 import { useTheme, alpha } from "@mui/material/styles";
 import { useApp } from "../../context/useApp.js";
@@ -247,12 +247,6 @@ export default function PageManager({ onClose }) {
               title: "Simulate What-If Changes",
               desc: "Adjust resources, TTFB, and CDN settings — watch Core Web Vitals scores update in real time.",
               delay: "0.5s",
-            },
-            {
-              icon: <TrendingUp sx={{ fontSize: 22 }} />,
-              title: "Get Optimization Roadmap",
-              desc: "See ranked suggestions with effort estimates and predicted score gains for each change.",
-              delay: "0.6s",
             },
           ].map((card) => (
             <Box key={card.title} sx={{

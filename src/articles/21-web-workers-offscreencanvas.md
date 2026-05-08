@@ -147,7 +147,11 @@ This enables `import` statements inside the worker, making it easier to share ut
 
 ## Worker Pools
 
-For tasks that recur frequently (processing a stream of items), creating a new Worker per task is expensive. A **worker pool** maintains a fixed set of workers and distributes work across them.
+For tasks that recur frequently (processing a stream of items), creating a new Worker per task is expensive. A **worker pool** maintains a fixed set of workers and distributes work across them. Size the pool based on the available CPU cores:
+
+```js
+const poolSize = navigator.hardwareConcurrency || 4; // fallback if API unavailable
+```
 
 Libraries like `comlink` and `workerpool` handle this pattern, including promise-based message passing that removes the manual `onmessage` boilerplate.
 

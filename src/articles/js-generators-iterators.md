@@ -1,4 +1,10 @@
-Iterators and generators let you define custom iteration behavior — for lazy sequences, infinite streams, and pausable functions. This article covers `Symbol.iterator`, generator functions, `yield*`, and patterns like range and take.
+Iterators and generators let you define custom iteration behavior — for lazy sequences, infinite streams, and pausable functions.
+
+**Think of it like this:**
+- An **iterator** is like a bookmark in a book — it remembers where you are and hands you the next page each time you ask. Each call to `.next()` turns one page.
+- A **generator** is like a recipe — you can pause after each step (`yield`), do something else, and resume right where you left off (`next()`). The ingredients and current step are preserved between pauses.
+
+This article covers `Symbol.iterator`, generator functions, `yield*`, and patterns like range and take.
 
 **Prerequisites:** [Async #5 — async/await Under the Hood](/articles/javascript-series/js-async-await-under-hood)
 
@@ -6,7 +12,18 @@ Iterators and generators let you define custom iteration behavior — for lazy s
 
 ## 1. The Iterator Protocol
 
-An object is an **iterator** if it has a `next()` method that returns `{ value, done }`. An object is **iterable** if it has a `[Symbol.iterator]()` method that returns an iterator:
+Before the code, a quick distinction:
+
+```
+Iterable                      Iterator
+"I can be looped over"        "I track WHERE you are in the loop"
+
+Has [Symbol.iterator]()       Has next() → { value, done }
+    ↓                              ↓
+Returns an iterator            Each call moves forward
+```
+
+An object is an **iterator** if it has a `next()` method that returns `{ value, done }`. An object is **iterable** if it has a `[Symbol.iterator]()` method that returns an iterator. `for...of` only works with iterables — it calls `[Symbol.iterator]()` under the hood to get an iterator, then calls `.next()` until `done` is true.
 
 ```js-exec
 // Manual iterator
@@ -67,7 +84,7 @@ console.log("Spread:", [...range]); // [1, 2, 3, 4, 5]
 
 ## 3. Generator Functions — `function*` and `yield`
 
-A generator function returns a generator object that is BOTH iterable and an iterator:
+A generator function returns a generator object that is BOTH iterable and an iterator. Each `yield` pauses execution — the function doesn't run to completion. Next `.next()` resumes from where it left off.
 
 ```js-exec
 function* simpleGenerator() {
@@ -82,8 +99,16 @@ function* simpleGenerator() {
 
 const gen = simpleGenerator();
 
-// Each .next() runs until the next yield, then pauses
-for (const value of gen) {
+// Manual .next() calls — see exactly when it pauses and resumes
+console.log("Manual next():");
+console.log(gen.next()); // Generator started → { value: 1, done: false }
+console.log(gen.next()); // After first yield → { value: 2, done: false }
+console.log(gen.next()); // After second yield → { value: 3, done: false }
+console.log(gen.next()); // Generator done → { value: undefined, done: true }
+
+// for...of calls .next() automatically and stops when done is true:
+console.log("\nfor...of (new generator):");
+for (const value of simpleGenerator()) {
   console.log("Got:", value);
 }
 ```
@@ -116,6 +141,19 @@ function* combined() {
 }
 
 console.log([...combined()]); // [1, 2, "A", "B", true, false]
+
+// yield* itself evaluates to the delegated generator's RETURN value:
+function* inner() {
+  yield 1;
+  return "inner-done";
+}
+
+function* outer() {
+  const result = yield* inner();
+  console.log("yield* returned:", result); // "inner-done"
+}
+
+console.log([...outer()]); // [1], then logs "yield* returned: inner-done"
 ```
 
 ---
@@ -150,6 +188,17 @@ console.log("First 10 Fibonacci:", first10);
 ---
 
 ## 6. Two-Way Communication — Passing Values INTO a Generator
+
+This is the most mind-bending generator feature and the foundation of `async`/`await`. Data flows BOTH ways:
+
+- **Outward:** `yield expression` sends `expression` out via `{ value: expression, done: false }`
+- **Inward:** `.next(value)` sends `value` back IN, and it becomes the result of the `yield` expression
+
+```
+gen.next(10)  ──→  [PAUSED AT yield]  → value goes IN
+                   const a = yield "What is a?";
+                                      ──→  "What is a?" goes OUT  →  caller gets { value: "What is a?", done: false }
+```
 
 `.next(value)` passes `value` back to where `yield` paused:
 
@@ -208,6 +257,30 @@ console.log(g2.next());    // { value: 1, done: false }
 console.log(g2.return(99)); // { value: 99, done: true }
 console.log(g2.next());     // { value: undefined, done: true }
 ```
+
+---
+
+## 8. Practical Use — State Machines
+
+Generators make excellent state machines because `yield` naturally represents a transition:
+
+```js-exec
+function* trafficLight() {
+  while (true) {
+    yield "🟢 GREEN";
+    yield "🟡 YELLOW";
+    yield "🔴 RED";
+  }
+}
+
+const light = trafficLight();
+console.log(light.next().value); // 🟢 GREEN
+console.log(light.next().value); // 🟡 YELLOW
+console.log(light.next().value); // 🔴 RED
+console.log(light.next().value); // 🟢 GREEN (loops forever)
+```
+
+No state variable, no switch/case — the generator body IS the state machine. Each `yield` is a state; each `.next()` is a transition.
 
 ---
 

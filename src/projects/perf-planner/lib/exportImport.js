@@ -26,7 +26,6 @@ export function downloadPageAsJSON(page, variations) {
       variations: variations.map((v) => ({
         name: v.name,
         isBaseline: !!v.isBaseline,
-        locked: v.locked ?? {},
         pageMeta: v.pageMeta ?? { ttfb: 0, cdn: false },
         resources: v.resources ?? [],
       })),
@@ -66,7 +65,6 @@ export function parseImportFile(file) {
           pageId: newPageId,
           name: v.name ?? `Variation ${i + 1}`,
           isBaseline: v.isBaseline ?? i === 0,
-          locked: v.locked ?? {},
           pageMeta: v.pageMeta ?? { ttfb: 0, cdn: false },
           resources: Array.isArray(v.resources) ? v.resources : [],
           createdAt: now,

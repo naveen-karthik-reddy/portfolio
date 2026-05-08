@@ -1,4 +1,6 @@
-Type coercion is why `[] + {}` produces `"[object Object]"` and `[] == ![]` is `true`. This article walks through the abstract equality algorithm, implicit coercion rules, and every edge case that interviewers love to ask about.
+**Type coercion** is when JavaScript automatically converts a value from one type to another — like turning the number `1` into the string `"1"`, or the other way around. This happens silently in many operations, and if you don't know the rules, the results look like nonsense: `[] + {}` becomes `"[object Object]"` and `[] == ![]` is `true`.
+
+This article walks through the abstract equality algorithm, implicit vs explicit coercion, and every edge case worth knowing.
 
 **Prerequisites:** [JS Foundations #1 — Variables & Scope](/articles/javascript-series/js-variables-scope-hoisting)
 
@@ -108,16 +110,17 @@ console.log([] + {});      // "[object Object]" — [].toString() → "" + {}.to
 console.log({} + []);      // "[object Object]" in most cases, but depends on position!
 ```
 
-The `{} + []` gotcha: `{}` at the start is parsed as an empty block statement, not an object:
+The `{} + []` gotcha: when `{}` appears at the **start of a statement**, the engine parses it as an empty **code block**, not an object. The result is `+[]` which coerces the empty array to `0`:
 
 ```js-exec
-// {} + [] — when {} is at the start, it's a block, not an object
-// This is equivalent to:  (empty block); +[]
-// +[] → +"" → 0
+// {} + [] at the start → {} is a block, then +[] → 0
+console.log(eval("{} + []")); // 0 — eval forces statement context
 
-// But within parentheses, {} is treated as an object:
-console.log({} + []);      // "[object Object]" (in console.log context)
+// Inside an expression (like console.log arguments), {} is an object:
+console.log({} + []);        // "[object Object]"
 ```
+
+The key lesson: `{} + []` at statement-level is `0`, but inside parentheses or function arguments it's `"[object Object]"`. This is a parsing ambiguity, not a coercion rule.
 
 ---
 
@@ -157,7 +160,59 @@ console.log(+[1, 2]);      // NaN — [1,2] → "1,2" → NaN
 
 ---
 
-## 7. ToPrimitive — How Objects Become Primitives
+## 7. Comparison Operators — `<`, `>`, `<=`, `>=`
+
+These operators also coerce types. If both operands are strings, they compare lexicographically (dictionary order). Otherwise, both are coerced to numbers:
+
+```js-exec
+// Both strings → lexicographic (dictionary) comparison
+console.log("apple" < "banana");   // true — "a" comes before "b"
+console.log("10" < "2");           // true — "1" < "2" in lexicographic order!
+
+// Mixed types → both coerced to numbers
+console.log("10" > 2);             // true — "10" → 10, 10 > 2
+console.log("5" < 10);             // true — "5" → 5
+
+// Edge case: if a value cannot become a valid number, the result is always false
+console.log("hello" < 10);         // false — "hello" → NaN, and NaN < anything is false
+console.log("hello" > 10);         // false — same reason
+console.log(NaN >= 0);             // false — any comparison with NaN is false
+```
+
+The `"10" < "2"` trap is a common bug when sorting arrays of strings that look like numbers.
+
+---
+
+## 8. Explicit Coercion — You're in Control
+
+Implicit coercion is what happens automatically with `==`, `+`, etc. **Explicit coercion** is when you deliberately convert a type using built-in functions:
+
+```js-exec
+// String → Number
+console.log(Number("42"));         // 42
+console.log(Number(""));           // 0
+console.log(Number("  hello  "));  // NaN
+
+// Number → String
+console.log(String(42));           // "42"
+console.log(String(true));         // "true"
+console.log(String(null));         // "null"
+
+// Any → Boolean
+console.log(Boolean("hello"));     // true
+console.log(Boolean(0));           // false
+console.log(Boolean([]));          // true — remember, [] is truthy!
+
+// Shorthand: !! converts anything to boolean
+console.log(!!"hello");            // true
+console.log(!!0);                  // false
+```
+
+Prefer explicit coercion when you need a specific type. It's clearer and avoids surprises.
+
+---
+
+## 9. ToPrimitive — How Objects Become Primitives
 
 When coercion needs a primitive from an object, the engine calls `ToPrimitive`:
 1. If hint is `"string"` → try `toString()` then `valueOf()`
@@ -204,7 +259,7 @@ console.log(custom + "");      // hint: default → "default"
 
 ---
 
-## 8. `Object.is()` — Better Strict Equality
+## 10. `Object.is()` — Better Strict Equality
 
 `Object.is()` is like `===` but with two corrections:
 
@@ -225,7 +280,7 @@ console.log(Object.is({}, {}));    // false
 
 ---
 
-## 9. Truthy and Falsy
+## 11. Truthy and Falsy
 
 The **6 falsy values**: `false`, `0`, `""`, `null`, `undefined`, `NaN`. Everything else is truthy — including `[]`, `{}`, `" "`, and `-1`.
 

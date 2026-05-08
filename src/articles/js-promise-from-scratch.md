@@ -84,7 +84,13 @@ console.log("State after construction:", p.state); // "pending"
 
 ## 3. Implementing `.then()` and `.catch()`
 
-`.then()` registers callbacks and returns a NEW promise for chaining:
+`.then()` registers callbacks and returns a NEW promise for chaining. Crucially, `.then()` callbacks run **asynchronously as microtasks** — they're scheduled via `queueMicrotask()`, which means they execute after the current synchronous code finishes but before any macrotasks (like `setTimeout`):
+
+```
+Synchronous code → drain all microtasks → one macrotask → drain all microtasks → ...
+```
+
+This is why `Promise.resolve().then(fn)` runs `fn` after the current call stack empties.
 
 ```js-exec
 // Continuing MyPromise class...

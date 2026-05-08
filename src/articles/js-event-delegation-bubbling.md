@@ -1,4 +1,6 @@
-DOM events flow through three phases — capture, target, bubble — before they reach their destination. Event delegation leverages this to handle hundreds of child elements with a single listener on the parent. This article covers the full event flow and the delegation pattern.
+DOM events flow through three phases — capture, target, bubble — before they reach their destination. **Event delegation** is the technique of putting a single listener on a parent to handle events from all its children (present and future). Instead of 1000 listeners on 1000 buttons, you have 1 listener on the container.
+
+**Why this works:** Events bubble up. A click on a nested `<button>` eventually reaches its parent `<div>` — the parent can check `event.target` to figure out which child was clicked. This article covers the full event flow and the delegation pattern.
 
 ---
 

@@ -1,5 +1,7 @@
 Most performance optimization starts with a guess. Someone reads that images should be lazy-loaded, adds the attribute everywhere, and declares the site fast. Chrome DevTools' Performance panel replaces guessing with evidence — a frame-by-frame trace of every JS call, layout, paint, and network request, all on one synchronized timeline. If there's a bottleneck, it's in there. You just have to learn to read it.
 
+> **Open DevTools alongside this article.** Press F12, go to the Performance tab, record a quick trace of your own page, and follow along. The flame chart makes much more sense when you're looking at one.
+
 ---
 
 ## Recording a Trace
@@ -30,7 +32,24 @@ The flame chart is organized into tracks:
 
 **Compositor** and **GPU** — off-main-thread work. Healthy animations show activity here and not on the Main track.
 
-**Timings** — markers for LCP, FCP, DCL (DOMContentLoaded), and Load events as vertical lines.
+**Timings** — markers for LCP, FCP, DCL (DOMContentLoaded), and Load events as vertical lines. In newer Chrome versions, you'll also see a **Web Vitals** track showing the LCP element screenshot, layout shift indicators, and INP interactions.
+
+### Navigating the Flame Chart
+
+- **Scroll vertically (mouse wheel)** to zoom in/out on the time axis.
+- **Click-drag horizontally** to pan across the timeline.
+- **Click-drag in the overview bar** (the thin strip at the top) to select a specific time range and zoom into it. This is the most useful navigation gesture — it lets you focus on one long task or one slow frame.
+- **W/S keys** jump between events. **A/D keys** move left/right.
+
+### The Tabs: Summary, Bottom-Up, Call Tree
+
+After recording, you'll see three analysis tabs at the bottom:
+
+**Summary** — a pie chart showing time breakdown by category (Scripting, Rendering, Painting, System, Idle). This is your starting point: if "Scripting" is 80%, you have a JS problem. If "Rendering" dominates, you have a layout problem.
+
+**Bottom-Up** — functions ranked by **self time** (time spent inside the function itself, excluding its children). This identifies the actual hot function. A function that calls 50 sub-functions might appear heavy in the Call Tree but have near-zero self time — the real cost is in one of those children.
+
+**Call Tree** — the top-down call hierarchy showing **total time** (self time + all descendants). Use this to trace which user-facing event triggered the work.
 
 ---
 

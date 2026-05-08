@@ -4,7 +4,9 @@ Performance optimization typically targets the average user on a decent connecti
 
 ## The Network Information API
 
-`navigator.connection` exposes the user's network conditions. The three signals you'll use most often:
+`navigator.connection` exposes the user's network conditions. **This API is currently only supported in Chromium-based browsers** (Chrome, Edge, Opera, Samsung Internet). In Firefox and Safari, `navigator.connection` is `undefined` — always guard with optional chaining (`?.`) and provide sensible defaults for unsupported browsers.
+
+The three signals you'll use most often:
 
 ```js
 const conn = navigator.connection;

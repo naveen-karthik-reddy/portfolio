@@ -11,6 +11,8 @@ import {
   Collapse,
   Tooltip,
   GlobalStyles,
+  Dialog,
+  Fade,
 } from "@mui/material";
 import {
   ArrowBack,
@@ -505,6 +507,7 @@ export default function ArticleView({ article }) {
   const isDark = theme.palette.mode === "dark";
   const grad = `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`;
   const [copied, setCopied] = useState(false);
+  const [lightbox, setLightbox] = useState(null); // null | { src, alt }
   const [content, setContent] = useState("");
 
   useEffect(() => {
@@ -1018,6 +1021,32 @@ export default function ArticleView({ article }) {
             <Box className="no-print" sx={{ display: { xs: "block", lg: "none" } }}>
               <TableOfContents headings={headings} grad={grad} />
             </Box>
+
+            {article.image && (
+              <Box
+                sx={{ mb: 4, borderRadius: 2, overflow: "hidden", cursor: "pointer" }}
+                onClick={() => setLightbox({ src: `/articles/images/${article.image}`, alt: article.title })}
+              >
+                <Box
+                  component="img"
+                  src={`/articles/images/${article.image}`}
+                  alt={article.title}
+                  sx={{ width: "100%", display: "block", transition: "transform 0.2s", "&:hover": { transform: "scale(1.01)" } }}
+                />
+              </Box>
+            )}
+
+            <Dialog open={Boolean(lightbox)} onClose={() => setLightbox(null)} maxWidth={false} fullScreen TransitionComponent={Fade} PaperProps={{ sx: { m: 0, bgcolor: "transparent" } }}>
+              <IconButton
+                onClick={() => setLightbox(null)}
+                sx={{ position: "fixed", top: 16, right: 16, zIndex: 1900, bgcolor: "rgba(0,0,0,0.5)", color: "#fff", "&:hover": { bgcolor: "rgba(0,0,0,0.7)" } }}
+              >
+                <Close />
+              </IconButton>
+              {lightbox && (
+                <Box component="img" src={lightbox.src} alt={lightbox.alt} sx={{ width: "100vw", height: "100vh", objectFit: "contain", display: "block" }} />
+              )}
+            </Dialog>
 
             <Box component="article" sx={{ "& > *:first-of-type": { mt: 0 } }}>
               <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>{content}</ReactMarkdown>

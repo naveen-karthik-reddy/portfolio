@@ -4,6 +4,27 @@ Every JavaScript developer uses `var`, `let`, and `const` — but few understand
 
 ---
 
+## 0. What Is a Variable?
+
+A **variable** is a named container in memory that holds a value. When you write `let age = 25`, three things happen:
+
+1. **Declaration** — you tell the engine "I want a variable named `age`"
+2. **Initialization** — the engine sets aside memory for it (and may fill it with `undefined`)
+3. **Assignment** — the value `25` is placed into that memory
+
+Different keywords (`var`, `let`, `const`) change *when* initialization happens and *where* the variable lives — that's what scope and hoisting are about.
+
+Think of it like this:
+
+```
+let age = 25;
+//  ┬   ┬
+//  │   └── Assignment (put 25 in the box)
+//  └────── Declaration + Initialization (create the box)
+```
+
+---
+
 ## 1. The Three Ways to Declare Variables
 
 JavaScript gives you three keywords: `var` (function-scoped, hoisted with `undefined`), `let` (block-scoped, TDZ), and `const` (block-scoped, TDZ, cannot be reassigned).
@@ -55,7 +76,9 @@ function scopeDemo() {
 scopeDemo();
 ```
 
-This is why `let` replaced `var` for loop variables — `var` leaks out and causes closure bugs, while `let` creates a fresh binding per iteration.
+This is the single biggest reason `var` is considered harmful: it doesn't respect block boundaries, so a variable declared inside an `if` or `for` leaks into the surrounding function. This leads to accidental overwrites, closure bugs in loops, and code that's hard to reason about. `let` and `const` fix all three by being block-scoped and creating fresh bindings per loop iteration.
+
+`setTimeout` schedules a function to run **later**, after the loop has already finished. With `var`, all three callbacks point to the same `i` (now `3`). With `let`, each iteration gets its own `j` with the value frozen at that iteration.
 
 ```js-exec
 // var in loop — only ONE variable, shared across all iterations
@@ -71,7 +94,43 @@ for (let j = 0; j < 3; j++) {
 
 ---
 
-## 3. Hoisting — What Gets Lifted
+## 3. Global Scope — The `window` Difference
+
+`var` in global scope attaches itself to the global object (`window` in browsers, `globalThis` everywhere). `let` and `const` do not — they exist in a separate global lexical environment.
+
+```js-exec
+var globalVar = "I'm on window";
+let globalLet = "I'm not on window";
+
+console.log(window.globalVar); // "I'm on window" ✅
+console.log(window.globalLet); // undefined — let doesn't attach to window
+```
+
+This matters because `window` properties can collide with built-ins (`name`, `status`, `top`) and third-party scripts. `let`/`const` keep your variables isolated.
+
+---
+
+## 4. Redeclaration Rules
+
+`var` lets you redeclare the same variable name in the same scope — no error, just silently overwrites. `let` and `const` throw a `SyntaxError` if you try.
+
+```js-exec
+// var allows redeclaration (common source of bugs)
+var count = 1;
+var count = 2; // No error — silently overwrites
+console.log("count:", count); // 2
+
+// let blocks redeclaration in the same scope
+let total = 10;
+// let total = 20; // ❌ SyntaxError: Identifier 'total' has already been declared
+console.log("total:", total);
+```
+
+The rule: **you can redeclare `var` anywhere in the same function. You cannot redeclare a `let`/`const` in the same block scope.** However, you CAN use the same `let` name in a nested block — that's shadowing (covered below), not redeclaration.
+
+---
+
+## 5. Hoisting — What Gets Lifted
 
 During compilation, the engine registers all declarations *before* executing code. `var` declarations are hoisted and initialized to `undefined`. `let` and `const` are hoisted but **not initialized** — they exist in the TDZ.
 
@@ -134,7 +193,7 @@ let inTDZ = "here";
 
 ---
 
-## 4. Function Declarations vs Function Expressions
+## 6. Function Declarations vs Function Expressions
 
 Function **declarations** are hoisted completely — name AND body. Function **expressions** (assigning to a variable) follow the variable's hoisting rules.
 
@@ -173,7 +232,7 @@ arrowFn(); // ✅ Fine after declaration
 
 ---
 
-## 5. Shadowing — When Inner Blocks Hide Outer Variables
+## 7. Shadowing — When Inner Blocks Hide Outer Variables
 
 A variable in an inner scope **shadows** a variable with the same name in an outer scope if it's declared with the same keyword or a more restrictive one.
 
@@ -191,29 +250,45 @@ shadowDemo();
 console.log(message); // → "outer" — the shadow died with the function
 ```
 
-Illegal shadowing — `var` cannot shadow `let` in the same scope:
+Illegal shadowing — `var` cannot shadow `let` because `var` is scoped to the **function**, not the block. So when the engine hoists `var`, it tries to register it in the same scope as the outer `let` — causing a collision:
 
 ```js-exec
 // This is fine: let in outer scope, let shadows in inner block
 let val = 10;
 if (true) {
-  let val = 20; // OK — different block
+  let val = 20; // OK — different block, independent variable
   console.log("inner:", val);
 }
 console.log("outer:", val);
 
-// But this fails — var cannot shadow let even inside a block:
+// But this fails — var hoists to the FUNCTION scope, not the block:
 // let count = 5;
-// if (true) {
-//   var count = 10; // SyntaxError: Identifier 'count' has already been declared
+// function demo() {
+//   if (true) {
+//     var count = 10; // SyntaxError — var hoists to 'demo', collides with outer 'let'
+//   }
 // }
 ```
 
 ---
 
-## 6. The Scope Chain — How the Engine Looks Up Variables
+## 8. The Scope Chain — How the Engine Looks Up Variables
 
 When you reference a variable, the engine walks the **scope chain** from inner to outer until it finds a match — or throws `ReferenceError`.
+
+```
+Global Scope
+├── outerVar (not here — go deeper)
+├── global  ✅ FOUND
+│
+└── outer() Scope
+    ├── innerVar (not here — go deeper)
+    ├── outerVar ✅ FOUND
+    │
+    └── inner() Scope
+        ├── innerVar ✅ FOUND
+        └── (not here → check outer)
+```
 
 ```js-exec
 const global = "I am global";
@@ -240,7 +315,7 @@ This scope chain is what makes closures possible — inner functions retain acce
 
 ---
 
-## 7. `var` Hoisting in Functions
+## 9. `var` Hoisting in Functions
 
 `var` inside a function is hoisted to the top of that function, not to the global scope:
 

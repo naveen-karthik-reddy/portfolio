@@ -60,7 +60,7 @@ The `crossorigin` attribute is required when the resource will be fetched with C
 <link rel="preload" as="image" href="/footer-banner.webp">
 ```
 
-The `as` attribute is mandatory — it tells the browser what type of resource to expect, which controls the fetch priority and ensures the response goes into the right cache.
+The `as` attribute is mandatory — it tells the browser what type of resource to expect, which controls the fetch priority and ensures the response goes into the right cache. **Without `as`, the browser cannot determine the resource type and the preload is ignored entirely.** The response lands in a generic fetch cache instead of the correct dedicated cache (CSS, script, font, image), so even if it downloads, it won't match the actual request when the resource is later used.
 
 **When to use it:**
 - Your LCP image (especially if it's set as a CSS `background-image`, which the parser can't discover)
@@ -124,5 +124,7 @@ Without this, each module in the import graph is discovered and fetched sequenti
 **Using `preload` instead of `prefetch` for next-page resources:** Preloaded resources are fetched at high priority on the *current* page, competing with the resources you actually need now.
 
 **Adding hints without measuring:** Resource hints are hints — their actual benefit depends on the network waterfall of your specific page. Always verify with Lighthouse or WebPageTest that they're shortening time-to-first-byte or time-to-LCP, not just adding requests.
+
+**Preloading resources with short cache lifetimes:** If you preload a resource with `Cache-Control: no-cache` or a very short `max-age`, the preloaded version may be stale by the time the page actually uses it (especially if the preload finishes in the `<head>` but the resource isn't consumed until after a user interaction). Preload is most effective for long-lived, deterministic resources like versioned assets.
 
 The right set of resource hints is small and deliberate — a few targeted `preconnect` and `preload` tags based on real waterfall analysis will do more than a dozen hints added by instinct.

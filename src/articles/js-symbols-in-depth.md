@@ -1,4 +1,8 @@
-Symbols are the 7th primitive type in JavaScript. They're unique, immutable, and used both for private-like properties and for hooking into JavaScript's built-in behaviors through **well-known symbols**. This article covers both aspects with runnable examples.
+Symbols are the 7th primitive type in JavaScript. They solve a concrete problem: **guaranteed-unique property keys.**
+
+Before Symbols, if two libraries both added a property called `"id"` to the same object, one would silently overwrite the other. The workaround was ugly prefixed strings like `"__myLib_id_abc123"`. Symbols fix this: `Symbol("id")` is never equal to another `Symbol("id")`, so collisions are impossible.
+
+Beyond unique keys, Symbols also let you hook into JavaScript's internal protocols through **well-known symbols** — making objects iterable, controlling type coercion, customizing `instanceof`, and more. This article covers both aspects.
 
 **Prerequisites:** [JS Foundations #4 — Prototypes](/articles/javascript-series/js-prototypes-inheritance)
 

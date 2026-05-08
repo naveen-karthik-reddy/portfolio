@@ -55,9 +55,9 @@ Stream 4: [= hero.webp =]
 
 ### Header Compression (HPACK)
 
-HTTP/2 uses **HPACK** compression for headers. Common headers (like `Content-Type`, `Cookie`, `Host`) are stored in a shared lookup table and referenced by index rather than retransmitted verbatim.
+HTTP/2 uses **HPACK** compression for headers. Common headers (like `Content-Type`, `Cookie`, `Host`) are stored in a shared lookup table and referenced by index rather than retransmitted verbatim. A 2KB cookie header on every request becomes a few bytes.
 
-A 2KB cookie header on every request becomes a few bytes.
+Note: HTTP/3 replaces HPACK with **QPACK**, which solves a subtle HPACK limitation — HPACK's shared dictionary must stay in sync between client and server, which means a lost TCP packet can stall header decompression (another form of head-of-line blocking). QPACK avoids this by allowing the dictionary to update asynchronously.
 
 ### Stream Prioritisation
 
@@ -75,7 +75,7 @@ HTTP/2 included a Server Push feature — the server could proactively send reso
 |----------------------|--------|
 | Concatenate JS/CSS files | **No longer necessary** — multiplexing handles parallel loading of many small files |
 | CSS sprites | **No longer necessary** — individual icon files are fine |
-| Domain sharding | **Counterproductive** — multiple origins each require their own connection; use a single origin |
+| Domain sharding | **Counterproductive** — each origin needs its own TCP+TLS handshake, adding latency. With HTTP/2 multiplexing, one connection already handles unlimited parallel requests. Splitting across domains adds connection overhead without any parallelism benefit |
 | Inlining small resources | Still useful for critical CSS, but less critical for small scripts/images |
 
 With HTTP/2, **many small files are often better than a few large ones** — granular code splitting becomes more efficient.
@@ -114,7 +114,7 @@ Stream 3: [==========]             ← unaffected, continues normally
 
 ### HTTP/3 Adoption
 
-As of 2025, HTTP/3 is supported by all major browsers and is used by Cloudflare, Google, and most major CDNs. If you're using a modern CDN, you're likely already serving HTTP/3 with no configuration required.
+HTTP/3 is supported by all major browsers and is used by Cloudflare, Google, and most major CDNs. If you're using a modern CDN, you're likely already serving HTTP/3 with no configuration required.
 
 You can verify HTTP/3 is active in DevTools → Network → Protocol column (shows `h3`) or check the response headers:
 

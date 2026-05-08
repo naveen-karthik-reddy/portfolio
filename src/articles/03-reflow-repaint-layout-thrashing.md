@@ -18,6 +18,8 @@ Reflow always triggers repaint. Repaint does not always trigger reflow.
 - Changing `className` on elements affecting layout
 - Resizing the window
 
+> **Scoping reflow:** [CSS containment](/articles/05-css-containment) (`contain: layout`) and `content-visibility: auto` limit how far a reflow cascades. If a change inside a contained subtree can't affect anything outside it, the browser skips the rest of the page. See [article #5](/articles/05-css-containment) for the full breakdown.
+
 **Operations that trigger repaint only:**
 - Changing `color`, `background-color`, `border-color`, `outline`
 - Changing `visibility` (not `display`)
@@ -27,6 +29,16 @@ Reflow always triggers repaint. Repaint does not always trigger reflow.
 - `transform`
 - `opacity`
 - `filter` (on composited layers)
+
+---
+
+## The "Dirty Bit" — Why Forced Sync Layout Happens
+
+When you write to a layout-affecting DOM property (like `el.style.width = '200px'`), the browser doesn't immediately recalculate the page's geometry. Instead, it marks layout as **dirty** and schedules a recalculation for the next frame. This batching is efficient — 50 writes in one frame trigger one layout, not 50.
+
+The problem arises when you **read** a geometry property (like `el.offsetWidth`) while layout is dirty. The browser cannot give you a stale answer — your code is asking "how wide is this element *right now*?" So it must **synchronously recalculate layout** before returning the value. This is called a **forced synchronous layout**.
+
+Once you understand this dirty-bit mechanism, the fix becomes obvious: do all your reads first (when layout is clean), then all your writes (which mark it dirty). Never alternate.
 
 ---
 
@@ -93,7 +105,7 @@ Layout thrashing is a common cause of long tasks. A loop that performs 100 force
 
 ### 1. Use requestAnimationFrame for visual updates
 
-Wrap DOM writes in [`requestAnimationFrame`](/articles/what-is-requestanimationframe) to ensure they run at the start of a new frame, after the browser has finished any pending work:
+Wrap DOM writes in [`requestAnimationFrame`](/articles/what-is-requestanimationframe) to schedule them just before the next paint — synced to the display's refresh rate (typically 60fps). rAF guarantees your code runs after the browser has finished layout for the current frame, so your writes don't trigger a mid-frame recalculation:
 
 ```js
 requestAnimationFrame(() => {
@@ -126,7 +138,16 @@ CSS animations on `transform` and `opacity` run on the compositor thread and don
 }
 ```
 
-Use sparingly — every promoted layer consumes GPU memory.
+Use sparingly — every promoted layer consumes GPU memory. More importantly, **apply it just before the animation and remove it afterwards**. Leaving `will-change` on permanently wastes GPU memory on elements that aren't currently animating:
+
+```js
+// ✅ Apply before, remove after
+element.style.willChange = 'transform';
+element.addEventListener('transitionend', () => {
+  element.style.willChange = 'auto';
+});
+element.classList.add('animate-in');
+```
 
 ### 4. Virtualise long lists
 

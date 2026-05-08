@@ -137,3 +137,5 @@ function sum(...nums) {
 ```
 
 Most of these patterns cost nothing at the source level — writing consistent constructors and avoiding post-construction mutation is just good object design anyway. The JIT benefit is a side effect of code that's already easier to reason about.
+
+> **Deeper dive:** See [JS V8 #1 — JIT Compilation & Hidden Classes](/articles/javascript-series/js-v8-jit-compilation) and [V8 #3 — Deoptimization Patterns](/articles/javascript-series/js-deopt-patterns) in the JavaScript series for a more detailed walkthrough of V8 internals, including inline caching and concrete deopt patterns.

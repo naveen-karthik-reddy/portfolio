@@ -1,10 +1,32 @@
-Error handling in JavaScript goes beyond `try/catch`. Custom error classes, the `finally` block, unhandled promise rejections, and global error listeners — this article covers the full error management toolkit.
+Error handling in JavaScript goes beyond `try/catch`. **Without error handling, a single uncaught error crashes your entire program** — the rest of your code never runs. Error handling lets you gracefully recover, show fallback UI, log what went wrong, and keep the app alive.
+
+This article covers the full toolkit: `try/catch/finally`, custom error classes, re-throwing patterns, unhandled promise rejections, and global error listeners.
 
 **Prerequisites:** [JS Foundations #1 — Variables & Scope](/articles/javascript-series/js-variables-scope-hoisting)
 
 ---
 
-## 1. `try/catch/finally` — The Basics
+## 1. `throw` — Starting an Error
+
+Before we can catch errors, we need to know how to **create** one. The `throw` statement immediately stops the current function and starts unwinding the call stack until a `catch` block is found:
+
+```js-exec
+function validateAge(age) {
+  if (age < 0) {
+    throw new Error("Age cannot be negative");
+    // Nothing after 'throw' ever runs — execution stops here
+  }
+  return "Age is valid";
+}
+
+validateAge(-5); // This throws — try commenting this out
+```
+
+If no `catch` exists anywhere up the stack, the program terminates (or the promise rejects unhandled). Always throw `Error` objects, never plain strings or numbers — `Error` objects include a stack trace showing exactly where the problem happened.
+
+---
+
+## 2. `try/catch/finally` — The Basics
 
 The `try` block runs code that may throw. The `catch` block receives the error. The `finally` block runs regardless of whether an error occurred:
 
@@ -39,7 +61,7 @@ try {
 
 ---
 
-## 2. The Error Object
+## 3. The Error Object
 
 JavaScript has several built-in error types:
 
@@ -72,7 +94,7 @@ try {
 
 ---
 
-## 3. Custom Error Classes
+## 4. Custom Error Classes
 
 Extend `Error` to create domain-specific errors with extra data:
 
@@ -114,7 +136,7 @@ Using `instanceof` to distinguish error types is cleaner than checking `err.name
 
 ---
 
-## 4. `finally` Always Runs — Even After `return`
+## 5. `finally` Always Runs — Even After `return`
 
 The `finally` block executes even if `try` has a `return` statement:
 
@@ -151,7 +173,36 @@ console.log(finallyOverrides()); // "from finally"
 
 ---
 
-## 5. Catching Async Errors
+## 6. Re-throwing Errors
+
+Sometimes you catch an error to log it, then **re-throw** it so a higher-level handler can deal with it:
+
+```js-exec
+function saveToDatabase(data) {
+  throw new Error("Database connection failed");
+}
+
+function processRequest(data) {
+  try {
+    saveToDatabase(data);
+  } catch (err) {
+    console.log("Logging:", err.message);
+    throw err; // Re-throw — let the caller decide how to handle this
+  }
+}
+
+try {
+  processRequest({ name: "Naveen" });
+} catch (err) {
+  console.log("Top-level handler:", err.message); // Both layers act
+}
+```
+
+This is the **log-and-throw** pattern — useful in layered architectures where the top-level code decides what to show the user.
+
+---
+
+## 7. Catching Async Errors
 
 `try/catch` works with `async/await` — just wrap the `await`:
 
@@ -194,7 +245,7 @@ failingPromise().catch((err) => console.log("Caught with .catch:", err.message))
 
 ---
 
-## 6. Unhandled Promise Rejections
+## 8. Unhandled Promise Rejections
 
 A rejected promise with no `.catch()` triggers the `unhandledrejection` event:
 
@@ -217,7 +268,7 @@ Always add a `.catch()` or `try/catch` around your promises.
 
 ---
 
-## 7. Global Error Handling
+## 9. Global Error Handling
 
 Catch errors that escape all `try/catch` blocks:
 
@@ -241,7 +292,7 @@ console.log("only for logging/monitoring.");
 
 ---
 
-## 8. Error Boundary Pattern
+## 10. Error Boundary Pattern
 
 In complex apps, wrap parts of the app in "error boundaries" that catch errors and show a fallback UI:
 
@@ -269,7 +320,7 @@ for (let i = 0; i < 5; i++) {
 
 ---
 
-## 9. Throwing Non-Error Values
+## 11. Throwing Non-Error Values
 
 You can `throw` anything — but don't. Always throw `Error` objects so you get stack traces:
 

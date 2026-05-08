@@ -1,4 +1,11 @@
-JavaScript is single-threaded — one call stack, one thing at a time. Yet it handles thousands of concurrent operations. The secret is the **event loop**: the mechanism that coordinates the call stack, microtask queue, and macrotask queue. Understanding it explains why `setTimeout(fn, 0)` doesn't run immediately and why Promises jump the queue.
+JavaScript is single-threaded — one call stack, one thing at a time. Yet it handles thousands of concurrent operations without breaking a sweat. The secret is the **event loop**.
+
+**Think of JavaScript as a chef in a small kitchen:**
+- The **Call Stack** is the one dish the chef is actively cooking right now.
+- **Macrotasks** (setTimeout, I/O) are order tickets lined up on the counter. The chef picks up one ticket at a time.
+- **Microtasks** (Promises, queueMicrotask) are urgent garnish requests — the chef finishes ALL garnishes before grabbing the next order ticket.
+
+This explains why `setTimeout(fn, 0)` doesn't run immediately (it's a new ticket) and why Promises jump the queue (they're garnishes on the current dish).
 
 **Prerequisites:** [JS Foundations #3 — Closures](/articles/javascript-series/js-closures-lexical-scope)
 

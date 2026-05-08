@@ -23,10 +23,14 @@ Each Core Web Vital targets one of these dimensions.
 - Needs improvement: 2.5s – 4s
 - Poor: > 4s
 
-**Common LCP elements:**
-- Hero images (`<img>`, `background-image`)
-- Large text blocks (H1, lead paragraph)
-- Video poster frames
+**LCP is dynamic** — the "largest" element can change during page load. The browser might first paint a large H1 heading as the LCP candidate, then later a hero image finishes loading and becomes the new (and final) LCP element. The LCP score is always the time of the final candidate, so a late-loading hero image pushes your LCP out.
+
+**Elements considered for LCP:**
+- `<img>` elements
+- `<image>` elements inside `<svg>`
+- `<video>` poster images
+- Elements with `background-image` loaded via `url()` (not CSS gradients)
+- Block-level text nodes (headings, paragraphs)
 
 **What degrades LCP:**
 - Slow server response (high TTFB)
@@ -64,7 +68,13 @@ Other high-impact fixes: serve images in WebP/AVIF, reduce TTFB by serving from 
 - Needs improvement: 0.1 – 0.25
 - Poor: > 0.25
 
-**The score** is calculated per shift event as: `impact fraction × distance fraction`. Multiple shifts compound into the cumulative score.
+**The score** is calculated per shift event as: `impact fraction × distance fraction`.
+
+- **Impact fraction** — what percentage of the viewport area was affected by the shift? If an element moved 300px but only occupied 20% of the viewport, the impact fraction is 0.20.
+- **Distance fraction** — how far did the element move relative to the viewport? If a 200px-tall element shifts down by 50px in a 1000px viewport, the distance fraction is 0.05.
+- **Score** = 0.20 × 0.05 = 0.01 for this single shift.
+
+Multiple shifts compound into the cumulative score across the page's full lifespan. A layout shift 30 seconds after load (from a late-loading ad, a cookie banner, or a toast notification) counts just as much as one during initial load — CLS is measured from navigation until the page is unloaded.
 
 **Common causes of CLS:**
 - Images without `width` and `height` attributes — the browser can't reserve space before the image loads
@@ -99,7 +109,15 @@ Other high-impact fixes: serve images in WebP/AVIF, reduce TTFB by serving from 
 .toast.visible { transform: translateY(0); }
 ```
 
-For ads and embeds, reserve space with a fixed `min-height` on the container. For font FOUT, use `font-display: optional` if the shift is severe, or size your fallback font to closely match the web font metrics.
+For ads and embeds, reserve space with a fixed `min-height` on the container.
+
+For font-induced layout shift (FOUT/FOIT), choose the right `font-display` strategy:
+- `font-display: swap` — show fallback text immediately, swap to web font when ready. Causes a shift but no invisible text period.
+- `font-display: optional` — show fallback text; only use web font if it's cached from a previous visit. Zero shift on first load, but the web font may never appear.
+- `font-display: block` — hide text for up to ~3s waiting for the font. No shift, but invisible text is worse for LCP.
+- `font-display: fallback` — short block period (~100ms), then fallback. Web font gets a short swap window on subsequent loads.
+
+For most content sites, `swap` with a well-matched fallback font is the best balance.
 
 ---
 
@@ -131,14 +149,27 @@ button.addEventListener('click', () => {
 
 // ✅ Yield before the heavy work so the browser can acknowledge the click first
 button.addEventListener('click', async () => {
-  // yield → browser paints the button's :active state, feels responsive
+  // scheduler.yield() hands control back to the browser so it can paint the
+  // button's :active state, then resumes this function before other queued
+  // tasks. The user sees an instant visual response, then the work happens.
   await scheduler.yield();
   const results = filterAndSortLargeDataset(allProducts);
   renderProductList(results);
 });
+
+// ✅ Fallback without scheduler.yield() (Chrome 129+):
+// setTimeout(fn, 0) works too, but resumes after other pending tasks
+button.addEventListener('click', () => {
+  setTimeout(() => {
+    const results = filterAndSortLargeDataset(allProducts);
+    renderProductList(results);
+  }, 0);
+});
 ```
 
 For React apps, INP problems often trace back to re-rendering too much on interaction. Profile with the React DevTools Profiler to find components that re-render unnecessarily, then apply `memo`, `useMemo`, or `useCallback` where it actually helps.
+
+> **INP in the field ≈ TBT in the lab.** Since you can't simulate real user interactions in Lighthouse, look at **Total Blocking Time (TBT)** — the sum of all time the main thread was blocked for more than 50ms. TBT correlates strongly with INP: a high TBT means the main thread is busy, which means interactions will queue up and feel slow. Reducing long tasks improves both metrics.
 
 ---
 

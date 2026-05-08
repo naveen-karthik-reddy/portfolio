@@ -1,4 +1,20 @@
-Destructuring, spread, and rest syntax are three of the most-used ES6 features. They replace whole blocks of manual extraction, copying, and argument collection with concise syntax. This article covers every variant with runnable examples.
+Destructuring, spread, and rest syntax are three of the most-used ES6 features. They replace whole blocks of manual extraction, copying, and argument collection with concise syntax.
+
+**Before vs After:**
+
+```js
+// Without destructuring — verbose, repetitive
+const first = arr[0];
+const second = arr[1];
+const name = user.name;
+const role = user.role;
+
+// With destructuring — clean, one line per source
+const [first, second] = arr;
+const { name, role } = user;
+```
+
+This article covers every variant with runnable examples.
 
 **Prerequisites:** [JS Foundations #1 — Variables & Scope](/articles/javascript-series/js-variables-scope-hoisting)
 
@@ -131,7 +147,21 @@ createUser({ name: "Karthik", role: "Admin" });   // Karthik, Admin, true
 createUser(); // undefined, User, true — no crash!
 ```
 
-The `= {}` at the end makes the entire parameter optional — without it, destructuring `undefined` throws a TypeError.
+The `= {}` at the end makes the entire parameter optional. Without it, calling the function with no arguments tries to destructure `undefined`, which throws:
+
+```js-exec
+function unsafe({ name }) {
+  console.log(name);
+}
+
+try {
+  unsafe(); // No argument — destructures undefined → TypeError
+} catch (e) {
+  console.log("Error:", e.message);
+}
+```
+
+Always add `= {}` when a destructured parameter is optional.
 
 ---
 
@@ -167,6 +197,12 @@ const defaults = { theme: "light", fontSize: 14, notifications: true };
 const userPrefs = { theme: "dark", fontSize: 16 };
 const settings = { ...defaults, ...userPrefs };
 console.log(settings); // { theme: "dark", fontSize: 16, notifications: true }
+
+// ⚠️ Spread creates SHALLOW copies — nested objects still share references:
+const original = { name: "Naveen", address: { city: "NYC" } };
+const copy = { ...original };
+copy.address.city = "SF";
+console.log(original.address.city); // "SF" — mutated through the copy!
 ```
 
 ---

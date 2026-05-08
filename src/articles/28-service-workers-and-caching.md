@@ -181,3 +181,7 @@ They add complexity and are not always the right tool. For simple static sites s
 **Don't cache HTML with a long-lived cache-first strategy.** If a user's browser caches your shell HTML forever and you push an update, they'll get stale HTML. Use network-first or stale-while-revalidate for HTML.
 
 The biggest maintenance trap is forgetting to version your cache names when you change your precache manifest. Bump the version string in `CACHE_NAME` with every deploy that changes the assets list, and your activate handler will clean up the old entries automatically.
+
+> **Why `response.clone()`?** Response bodies are streams that can only be consumed once. When you cache a response AND return it to the page, you need two independent copies — one to store in the cache, one to serve. `response.clone()` creates that second copy. Using the original response in both places would cause one to fail silently.
+
+> **Workbox:** Writing service worker logic by hand is error-prone. Google's [Workbox](https://developer.chrome.com/docs/workbox/) library provides production-ready implementations of all the strategies above with automatic cache versioning and precache manifest generation. Most projects should use Workbox rather than hand-rolling their own SW.

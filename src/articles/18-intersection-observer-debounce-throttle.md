@@ -48,7 +48,7 @@ document.querySelectorAll('.animate-on-scroll').forEach((el) => {
 
 **Options:**
 - `threshold` — a value or array of values (0–1) indicating what percentage of the target must be visible to trigger the callback.
-- `rootMargin` — expands or contracts the root's bounding box, like CSS margin. `"200px"` fires the callback 200px before the element enters the viewport — useful for preloading.
+- `rootMargin` — expands or contracts the root's bounding box, like CSS margin. Positive values expand the area (e.g., `"200px"` means "treat the viewport as 200px larger on all sides" — the callback fires when the element is within 200px of entering). Negative values shrink it. Useful for preloading before the element becomes visible.
 - `root` — defaults to the viewport. Pass a scrollable container to observe within it.
 
 **Common use cases:**

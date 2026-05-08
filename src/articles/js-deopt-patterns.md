@@ -1,4 +1,8 @@
-TurboFan optimizes hot functions based on assumptions about types and object shapes. When those assumptions are violated, it **deoptimizes** — throws away optimized code and falls back to the interpreter. This article covers the most common deopt triggers with before/after examples.
+TurboFan (V8's optimizing compiler) watches functions that run frequently. It observes the types and object shapes passed in, then generates highly specialized machine code assuming those types won't change. When those assumptions are broken, it **deoptimizes** — throws away the optimized code and falls back to the slower interpreter.
+
+**Why this matters:** deoptimization isn't free. It costs CPU time and the function runs slower until it gets re-optimized. In hot code paths (scroll handlers, animation loops, data processing), repeated deopts can cause visible jank.
+
+This article covers the most common deopt triggers with before/after examples.
 
 **Prerequisites:** [V8 #1 — JIT Compilation](/articles/javascript-series/js-v8-jit-compilation)
 

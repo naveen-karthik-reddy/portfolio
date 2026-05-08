@@ -57,7 +57,19 @@ When the parser encounters a `<script>` tag (without `async` or `defer`), it:
 
 JavaScript can manipulate the DOM and CSSOM, so the parser cannot safely continue without executing the script first. A slow script in `<head>` blocks the entire page.
 
-There's an additional subtlety: **JavaScript also blocks on CSS**. Before executing a script, the browser ensures all preceding stylesheets are parsed. A script after a stylesheet is therefore blocked by both.
+There's an additional subtlety: **JavaScript also blocks on CSS**. Before executing a script, the browser ensures all preceding stylesheets are parsed. A script placed after a stylesheet is therefore blocked by both:
+
+```
+1. Browser encounters <link rel="stylesheet" href="styles.css">
+2. Parser keeps building the DOM (CSS doesn't block the parser)
+3. Parser encounters <script src="app.js" defer></script>
+4. Script is fetched, but CANNOT execute yet — it's waiting on styles.css
+5. styles.css finally downloads and is parsed into the CSSOM
+6. Now the script executes (because defer waits for full DOM)
+7. The parsed DOM + CSSOM are ready → render tree → layout → paint
+```
+
+This is why a slow stylesheet in `<head>` can delay everything even when scripts are deferred: every script queued behind it is waiting too. The fix is simple — keep blocking stylesheets as small as possible, and place non-critical styles after scripts so they don't gate execution.
 
 ---
 
@@ -124,13 +136,17 @@ The preload scanner cannot discover resources injected by JavaScript. Dynamicall
 
 ## Measuring the CRP
 
-Chrome DevTools → Network tab → **Waterfall view** shows which resources are on the critical path. Look for:
+Chrome DevTools → Network tab → **Waterfall view** shows which resources are on the critical path. A waterfall is a visual timeline where each row represents one resource (HTML, CSS, JS, image, font) and each horizontal bar shows when the resource was requested, how long it took to download, and whether it blocked anything behind it. Look for:
 
 - Resources at the top of the waterfall that block everything below them.
 - Long blue bars (HTML transfer) with stylesheets queued behind them.
 - Scripts before the first green line (DOM content loaded).
 
 The **Lighthouse** audit "Eliminate render-blocking resources" identifies exactly which files are on your critical path and estimates how much time removing them would save.
+
+To find which CSS rules are actually used on a page (and which are dead weight on your critical path), open DevTools → **Coverage** tab (Cmd/Ctrl+Shift+P → "Show Coverage"), reload the page, and inspect the red bars in your CSS files. Red = unused bytes that delayed first paint for no reason. Lighthouse's "Reduce unused CSS" audit does the same analysis programmatically.
+
+> **The CRP ends at first paint, not at `onload`.** Once pixels are on screen, the critical path is complete — even if images are still loading, fonts haven't arrived, and JavaScript hasn't hydrated the page. The CRP is about getting *something* visible as fast as possible. Everything after first paint is progressive enhancement.
 
 ---
 

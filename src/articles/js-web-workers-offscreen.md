@@ -1,4 +1,6 @@
-JavaScript is single-threaded, but Web Workers let you run code on background threads. Heavy computation on the main thread blocks rendering and input. Move that work to a Worker and the UI stays responsive. This article covers dedicated workers, `postMessage`, and transferables.
+JavaScript is single-threaded — there's only one chef in the kitchen. If the chef spends 5 minutes chopping vegetables, no orders get taken, no food gets served, and customers (users) wait. **Web Workers** are like hiring a prep cook — you hand off the chopping (`postMessage`), and the chef keeps taking orders while the prep cook does the heavy lifting. When the prep cook is done, they hand the vegetables back (`onmessage`), and the chef plates the dish.
+
+This article covers dedicated workers, `postMessage`, and transferables.
 
 **Prerequisites:** [Async #1 — The Event Loop](/articles/javascript-series/js-event-loop-in-depth)
 

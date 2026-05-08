@@ -47,7 +47,6 @@ export default function VariationTabs({ variations, activeVariationId, tabScores
       id: crypto.randomUUID(),
       name: `Variation ${variations.length + 1}`,
       isBaseline: false,
-      locked: {},
       pageMeta: { ...(baseline.pageMeta ?? {}) },
       resources: (baseline.resources ?? []).map((r) => ({ ...r, id: crypto.randomUUID() })),
       createdAt: now,

@@ -37,6 +37,8 @@ Additionally, **preload** your critical fonts so they start downloading early:
 <link rel="preload" href="/fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
 ```
 
+The `as` attribute tells the browser *what kind* of resource this is so it can apply the correct priority and Content-Security-Policy. The `crossorigin` attribute is required for fonts because the browser fetches fonts via CORS — without it, the preloaded font and the actual font request won't match, and the font will be downloaded twice.
+
 ---
 
 ## Critical CSS vs Non-Critical CSS
@@ -72,9 +74,9 @@ Tools like [critical](https://github.com/addyosmani/critical) can automate criti
 
 Beyond `async` and `defer`, there are higher-level patterns for loading JavaScript efficiently.
 
-### Module/Nomodule Split
+### Module/Nomodule Split (Legacy)
 
-Serve modern ES modules to modern browsers and a bundled fallback to legacy ones:
+If you need to support Internet Explorer or very old browsers, serve modern ES modules to modern browsers and a bundled fallback to legacy ones:
 
 ```html
 <script type="module" src="app.modern.js"></script>
@@ -82,6 +84,8 @@ Serve modern ES modules to modern browsers and a bundled fallback to legacy ones
 ```
 
 Modern browsers download and execute the `module` script (which is deferred by default) and ignore `nomodule`. Legacy browsers do the opposite. This eliminates transpilation overhead for the majority of users.
+
+> **Today, this pattern is largely unnecessary.** ES modules and the features they imply (arrow functions, `const`/`let`, Promises) are supported by 96%+ of global browsers. Unless your analytics show a meaningful IE11 user base, you can drop the legacy bundle entirely.
 
 ### Third-Party Script Loading
 
@@ -131,7 +135,16 @@ The native `loading="lazy"` attribute tells the browser to defer offscreen image
 <img src="product.jpg" loading="lazy" alt="Product" width="800" height="600">
 ```
 
-Do **not** lazy load above-the-fold images — especially the LCP image. That delays the metric that matters most.
+Do **not** lazy load above-the-fold images — especially the LCP image. That delays the metric that matters most. Instead, give the LCP image the highest priority:
+
+```html
+<!-- ✅ Eager loading + high fetch priority for the hero / LCP image -->
+<img src="hero.webp" loading="eager" fetchpriority="high" alt="Hero" width="1200" height="600">
+```
+
+Also consider adding `decoding="async"` to non-critical below-fold images — it tells the browser to decode the image data off the main thread, keeping the main thread free for more urgent work.
+
+For serving different image sizes to different screens, use `srcset` and `sizes`. See [article #11](/articles/11-image-optimization) for the complete guide to image optimization.
 
 ### Components (React / Vue / etc.)
 

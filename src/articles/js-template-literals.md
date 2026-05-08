@@ -105,7 +105,18 @@ console.log(html);
 
 ## 4. Tagged Templates — Processing with a Function
 
-A **tagged template** is a function call where the template literal is broken into pieces and passed to a function:
+A **tagged template** is a function call where the template literal is broken into pieces and passed to a function. Here's how the engine splits the template:
+
+```
+tag`Hello ${name}, you are ${age} years old`
+         ┬              ┬
+         └── value[0]   └── value[1]
+
+strings: ["Hello ", ", you are ", " years old"]  ← always one more than values
+values:  [  name  ,      age     ]
+```
+
+The tag function stitches them back together however it wants.
 
 ```js-exec
 // The tag function receives:

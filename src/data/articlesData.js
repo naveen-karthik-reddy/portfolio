@@ -4,15 +4,17 @@ export const articlesData = [
      ═══════════════════════════════════════════════════════════════ */
   {
     id: "01-browser-rendering-pipeline",
+    image: "01-browser-rendering-pipeline.png",
     title: "Performance #1 - How the Browser Renders a Page",
     excerpt: "From HTML bytes to pixels: DOM, CSSOM, Render Tree, Layout, Paint, and Compositing — the six steps every browser frame goes through.",
     readTime: "9 min read",
     tags: ["Performance", "Browser", "Fundamentals"],
     categories: ["performance"],
-    image: "browser-rendering-pipeline.svg",
+    image: "01-browser-rendering-pipeline.png",
   },
   {
     id: "02-critical-rendering-path",
+    image: "02-critical-rendering-path.png",
     title: "Performance #2 - The Critical Rendering Path",
     excerpt: "The browser can't paint until CSS is parsed and blocking scripts are executed. Understanding the CRP is the first step to a fast first paint.",
     readTime: "8 min read",
@@ -21,6 +23,7 @@ export const articlesData = [
   },
   {
     id: "03-reflow-repaint-layout-thrashing",
+    image: "03-reflow-repaint-layout-thrashing.png",
     title: "Performance #3 - Reflow, Repaint & Layout Thrashing",
     excerpt: "Interleaving DOM reads and writes in a loop forces the browser to recalculate layout dozens of times per frame. Here's what it is and how to stop it.",
     readTime: "8 min read",
@@ -29,6 +32,7 @@ export const articlesData = [
   },
   {
     id: "04-css-js-animations",
+    image: "04-css-js-animations.png",
     title: "Performance #4 - CSS & JS Animations — Compositor-Only Properties & rAF",
     excerpt: "Animate only transform and opacity to stay on the compositor thread. Here's why those two properties are free, and how requestAnimationFrame keeps JS animations in sync with the browser.",
     readTime: "8 min read",
@@ -37,6 +41,7 @@ export const articlesData = [
   },
   {
     id: "05-css-containment",
+    image: "05-css-containment.png",
     title: "Performance #5 - CSS Containment & content-visibility",
     excerpt: "CSS containment tells the browser a subtree is isolated, so it can skip work it would otherwise do. content-visibility: auto can cut rendering time by 5-10x on content-heavy pages.",
     readTime: "7 min read",
@@ -45,6 +50,7 @@ export const articlesData = [
   },
   {
     id: "06-event-loop-task-queue",
+    image: "06-event-loop-task-queue.png",
     title: "Performance #6 - The JavaScript Event Loop & Task Queue",
     excerpt: "JavaScript is single-threaded. Understanding the event loop, microtask queue, and long tasks is the foundation for knowing why pages freeze and how to fix it.",
     readTime: "9 min read",
@@ -53,6 +59,7 @@ export const articlesData = [
   },
   {
     id: "07-devtools-performance-profiler",
+    image: "07-devtools-performance-profiler.png",
     title: "Performance #7 - DevTools Performance Profiler",
     excerpt: "Chrome DevTools' Performance panel gives you a frame-by-frame trace of everything the browser did. Here's how to read flame charts, spot long tasks, and find layout thrashing.",
     readTime: "8 min read",
@@ -61,6 +68,7 @@ export const articlesData = [
   },
   {
     id: "08-core-web-vitals",
+    image: "08-core-web-vitals.png",
     title: "Performance #8 - Core Web Vitals Explained",
     excerpt: "LCP, CLS, and INP are Google's three signals for user experience quality. This is what each one measures, what breaks them, and how to fix them.",
     readTime: "10 min read",
@@ -69,6 +77,7 @@ export const articlesData = [
   },
   {
     id: "09-lighthouse-and-rum",
+    image: "09-lighthouse-and-rum.png",
     title: "Performance #9 - Lighthouse & Real User Monitoring",
     excerpt: "Lab data tells you what's broken. Field data tells you what real users experience. Here's how Lighthouse scoring works and when RUM fills the gaps.",
     readTime: "8 min read",
@@ -77,6 +86,7 @@ export const articlesData = [
   },
   {
     id: "10-resource-loading-strategies",
+    image: "10-resource-loading-strategies.png",
     title: "Performance #10 - Resource Loading Strategies",
     excerpt: "How you load fonts, CSS, scripts, and images is as important as what you load. This covers FOIT/FOUT, critical CSS, async JS, and lazy loading.",
     readTime: "11 min read",
@@ -85,6 +95,7 @@ export const articlesData = [
   },
   {
     id: "11-image-optimization",
+    image: "11-image-optimization.png",
     title: "Performance #11 - Image Optimization — WebP, AVIF, srcset & Lazy Loading",
     excerpt: "Images are the largest resources on most pages and the most common cause of slow LCP. Here's how to choose the right format, serve the right size, and prevent layout shift.",
     readTime: "9 min read",
@@ -93,6 +104,7 @@ export const articlesData = [
   },
   {
     id: "12-font-optimization",
+    image: "12-font-optimization.png",
     title: "Performance #12 - Font Optimization",
     excerpt: "Custom fonts cause invisible text, layout shift, and extra network round trips. font-display, self-hosting, subsetting, and variable fonts — here's what each one fixes.",
     readTime: "8 min read",
@@ -101,6 +113,7 @@ export const articlesData = [
   },
   {
     id: "13-compression-brotli-gzip",
+    image: "13-compression-brotli-gzip.png",
     title: "Performance #13 - Compression — Brotli & Gzip",
     excerpt: "Text-based resources compress by 60-75%. Brotli saves another 15-25% over Gzip. Here's how both work, how to pre-compress at build time, and what never to compress.",
     readTime: "7 min read",
@@ -109,6 +122,7 @@ export const articlesData = [
   },
   {
     id: "14-browser-networking-and-caching",
+    image: "14-browser-networking-and-caching.png",
     title: "Performance #14 - Browser Networking & Caching",
     excerpt: "Every resource travels through DNS, TCP, TLS, and HTTP before it arrives. Understanding this journey — and HTTP caching — is core to reducing load times.",
     readTime: "10 min read",
@@ -117,6 +131,7 @@ export const articlesData = [
   },
   {
     id: "15-http2-and-http3",
+    image: "15-http2-and-http3.png",
     title: "Performance #15 - HTTP/2 & HTTP/3 — What Changes for Performance",
     excerpt: "HTTP/1.1's bottlenecks drove concatenation and sprites. HTTP/2 multiplexing and HTTP/3 QUIC change the rules — here's what still matters.",
     readTime: "8 min read",
@@ -125,6 +140,7 @@ export const articlesData = [
   },
   {
     id: "16-resource-hints",
+    image: "16-resource-hints.png",
     title: "Performance #16 - Resource Hints — Preload, Prefetch, Preconnect",
     excerpt: "Give the browser advance notice about what it will need. Used correctly, resource hints eliminate dead time in the network waterfall.",
     readTime: "7 min read",
@@ -133,6 +149,7 @@ export const articlesData = [
   },
   {
     id: "17-priority-hints-fetch-priority",
+    image: "17-priority-hints-fetch-priority.png",
     title: "Performance #17 - Priority Hints & Fetch Priority",
     excerpt: "The browser's resource prioritization heuristics are good but not perfect. fetchpriority lets you correct them — boosting the LCP image, deprioritizing non-critical scripts.",
     readTime: "7 min read",
@@ -141,6 +158,7 @@ export const articlesData = [
   },
   {
     id: "18-intersection-observer-debounce-throttle",
+    image: "18-intersection-observer-debounce-throttle.png",
     title: "Performance #18 - Intersection Observer, Debouncing & Throttling",
     excerpt: "Scroll events fire hundreds of times per second. Intersection Observer, debouncing, and throttling are the tools that keep your handlers from hammering the main thread.",
     readTime: "9 min read",
@@ -149,6 +167,7 @@ export const articlesData = [
   },
   {
     id: "19-v8-jit-compilation",
+    image: "19-v8-jit-compilation.png",
     title: "Performance #19 - V8 & JIT Compilation — How JS Engines Optimize Your Code",
     excerpt: "V8 compiles hot functions to optimized machine code based on observed types. Hidden classes, monomorphic call sites, and deoptimization — here's what it means for how you write JS.",
     readTime: "9 min read",
@@ -157,6 +176,7 @@ export const articlesData = [
   },
   {
     id: "20-memory-leaks-garbage-collection",
+    image: "20-memory-leaks-garbage-collection.png",
     title: "Performance #20 - Memory Leaks & Garbage Collection",
     excerpt: "JavaScript manages memory automatically — until it doesn't. The four leak patterns every SPA developer hits: forgotten listeners, detached DOM nodes, closure captures, and unbounded caches.",
     readTime: "9 min read",
@@ -165,6 +185,7 @@ export const articlesData = [
   },
   {
     id: "21-web-workers-offscreencanvas",
+    image: "21-web-workers-offscreencanvas.png",
     title: "Performance #21 - Web Workers & OffscreenCanvas",
     excerpt: "Heavy computation on the main thread blocks rendering and input. Web Workers move that work to a background thread. OffscreenCanvas moves canvas rendering there too.",
     readTime: "8 min read",
@@ -173,6 +194,7 @@ export const articlesData = [
   },
   {
     id: "22-ssr-csr-ssg-isr",
+    image: "22-ssr-csr-ssg-isr.png",
     title: "Performance #22 - SSR vs CSR vs SSG vs ISR",
     excerpt: "The rendering strategy you choose determines TTFB, LCP, hydration cost, and SEO. This is the highest-leverage architectural decision in web performance.",
     readTime: "10 min read",
@@ -181,6 +203,7 @@ export const articlesData = [
   },
   {
     id: "23-react-performance-patterns",
+    image: "23-react-performance-patterns.png",
     title: "Performance #23 - React Performance Patterns",
     excerpt: "React.memo, useMemo, useCallback, stable keys, React.lazy, and startTransition — when each one helps, when it hurts, and how to find what's actually slow with the React Profiler.",
     readTime: "10 min read",
@@ -189,6 +212,7 @@ export const articlesData = [
   },
   {
     id: "24-virtual-scrolling-windowing",
+    image: "24-virtual-scrolling-windowing.png",
     title: "Performance #24 - Virtual Scrolling & Windowing",
     excerpt: "Rendering 10,000 list items creates 10,000 DOM nodes. Windowing renders only what's visible, keeping DOM count constant. Here's how react-window and @tanstack/virtual work.",
     readTime: "8 min read",
@@ -197,6 +221,7 @@ export const articlesData = [
   },
   {
     id: "25-perceived-performance",
+    image: "25-perceived-performance.png",
     title: "Performance #25 - Perceived Performance — Skeletons, Optimistic UI & Progress",
     excerpt: "A page can load in 2s and feel slow. Another takes 4s and feels fast. Skeleton screens, optimistic UI, blur-up images, and smart progress indicators close that gap.",
     readTime: "8 min read",
@@ -205,6 +230,7 @@ export const articlesData = [
   },
   {
     id: "26-bundle-optimization",
+    image: "26-bundle-optimization.png",
     title: "Performance #26 - Bundle Optimization — Tree Shaking & Code Splitting",
     excerpt: "JavaScript is the most expensive resource on the web. Tree shaking removes dead code; code splitting loads only what each page needs.",
     readTime: "10 min read",
@@ -213,6 +239,7 @@ export const articlesData = [
   },
   {
     id: "27-third-party-scripts",
+    image: "27-third-party-scripts.png",
     title: "Performance #27 - Third-Party Scripts & the Facade Pattern",
     excerpt: "Third-party scripts are often the largest source of main-thread blocking time on production sites. Load-on-interaction, the facade pattern, and Partytown are your main tools.",
     readTime: "9 min read",
@@ -221,6 +248,7 @@ export const articlesData = [
   },
   {
     id: "28-service-workers-and-caching",
+    image: "28-service-workers-and-caching.png",
     title: "Performance #28 - Service Workers & Caching Strategies",
     excerpt: "Service workers act as a programmable network proxy. Learn Cache-First, Network-First, and Stale-While-Revalidate strategies — and when each one makes sense.",
     readTime: "10 min read",
@@ -229,6 +257,7 @@ export const articlesData = [
   },
   {
     id: "29-adaptive-loading",
+    image: "29-adaptive-loading.png",
     title: "Performance #29 - Adaptive Loading — Network & Device-Aware Experiences",
     excerpt: "navigator.connection, deviceMemory, and hardwareConcurrency let you serve lighter experiences to constrained users. Here's how to use them without creating a degraded second-class experience.",
     readTime: "8 min read",
@@ -237,6 +266,7 @@ export const articlesData = [
   },
   {
     id: "30-performance-budgets",
+    image: "30-performance-budgets.png",
     title: "Performance #30 - Performance Budgets & CI Enforcement",
     excerpt: "Without a budget, performance degrades silently — one PR at a time. Lighthouse CI and size-limit enforce metric and bundle-size constraints on every pull request.",
     readTime: "8 min read",
@@ -248,7 +278,8 @@ export const articlesData = [
      JavaScript series — Level 1: Foundations (Beginner)
      ═══════════════════════════════════════════════════════════════ */
   {
-    id: "javascript-series/js-variables-scope-hoisting",
+    id: "js-variables-scope-hoisting",
+    image: "js-variables-scope-hoisting.png",
     title: "JS Foundations #1 — Variables, Scope & Hoisting",
     excerpt: "Understand var, let, const, block scope vs function scope, hoisting mechanics, and the Temporal Dead Zone — with executable examples you can edit and run.",
     readTime: "10 min read",
@@ -256,7 +287,8 @@ export const articlesData = [
     categories: ["javascript"],
   },
   {
-    id: "javascript-series/js-this-demystified",
+    id: "js-this-demystified",
+    image: "js-this-demystified.png",
     title: "JS Foundations #2 — this Demystified",
     excerpt: "Master the four binding rules (default, implicit, explicit, new), arrow function this, and common gotchas — every example is editable and runnable.",
     readTime: "11 min read",
@@ -264,7 +296,8 @@ export const articlesData = [
     categories: ["javascript"],
   },
   {
-    id: "javascript-series/js-closures-lexical-scope",
+    id: "js-closures-lexical-scope",
+    image: "js-closures-lexical-scope.png",
     title: "JS Foundations #3 — Closures & Lexical Scope",
     excerpt: "How closures work at the memory level, why they power module patterns, memoization, and function factories — plus the classic setTimeout-in-a-loop interview question.",
     readTime: "11 min read",
@@ -272,7 +305,8 @@ export const articlesData = [
     categories: ["javascript"],
   },
   {
-    id: "javascript-series/js-prototypes-inheritance",
+    id: "js-prototypes-inheritance",
+    image: "js-prototypes-inheritance.png",
     title: "JS Foundations #4 — Prototypes & Inheritance",
     excerpt: "Understand __proto__ vs prototype, the prototype chain, what new actually does, and how class extends desugars to prototypes.",
     readTime: "11 min read",
@@ -280,7 +314,8 @@ export const articlesData = [
     categories: ["javascript"],
   },
   {
-    id: "javascript-series/js-equality-coercion",
+    id: "js-equality-coercion",
+    image: "js-equality-coercion.png",
     title: "JS Foundations #5 — Equality & Type Coercion",
     excerpt: "Abstract equality algorithm, implicit coercion rules, == vs === edge cases, Object.is, and why [] == ![] is true — all explained with diagrams and runnable examples.",
     readTime: "10 min read",
@@ -288,7 +323,8 @@ export const articlesData = [
     categories: ["javascript"],
   },
   {
-    id: "javascript-series/js-error-handling",
+    id: "js-error-handling",
+    image: "js-error-handling.png",
     title: "JS Foundations #6 — Error Handling",
     excerpt: "try/catch/finally, custom error classes, unhandled rejection events, global error handlers, and error propagation patterns — with runnable examples.",
     readTime: "9 min read",
@@ -296,7 +332,8 @@ export const articlesData = [
     categories: ["javascript"],
   },
   {
-    id: "javascript-series/js-destructuring-spread-rest",
+    id: "js-destructuring-spread-rest",
+    image: "js-destructuring-spread-rest.png",
     title: "JS Foundations #7 — Destructuring, Spread & Rest",
     excerpt: "Array and object destructuring, nested destructuring with defaults, spread for copying/merging, rest parameters, and the difference between spread and rest syntax.",
     readTime: "10 min read",
@@ -304,7 +341,8 @@ export const articlesData = [
     categories: ["javascript"],
   },
   {
-    id: "javascript-series/js-template-literals",
+    id: "js-template-literals",
+    image: "js-template-literals.png",
     title: "JS Foundations #8 — Template Literals & Tagged Templates",
     excerpt: "Template literal syntax, multiline strings, expression interpolation, tagged templates, and building a styled-components–like function from scratch.",
     readTime: "8 min read",
@@ -316,7 +354,8 @@ export const articlesData = [
      JavaScript series — Level 2: Functions & Arrays (Beginner→Int.)
      ═══════════════════════════════════════════════════════════════ */
   {
-    id: "javascript-series/js-call-apply-bind",
+    id: "js-call-apply-bind",
+    image: "js-call-apply-bind.png",
     title: "Functions #1 — call(), apply() & bind() Polyfills",
     excerpt: "Implement Function.prototype.call, apply, and bind from scratch. Understand how each borrows this, and why bind returns a bound function you can't rebind.",
     readTime: "12 min read",
@@ -324,7 +363,8 @@ export const articlesData = [
     categories: ["javascript"],
   },
   {
-    id: "javascript-series/js-currying-partial-application",
+    id: "js-currying-partial-application",
+    image: "js-currying-partial-application.png",
     title: "Functions #2 — Currying & Partial Application",
     excerpt: "Transform f(a,b,c) into f(a)(b)(c), implement infinite currying sum(1)(2)(3)(), and understand partial application vs currying.",
     readTime: "10 min read",
@@ -332,7 +372,8 @@ export const articlesData = [
     categories: ["javascript"],
   },
   {
-    id: "javascript-series/js-debounce-throttle",
+    id: "js-debounce-throttle",
+    image: "js-debounce-throttle.png",
     title: "Functions #3 — Debounce & Throttle",
     excerpt: "Implement debounce (leading, trailing, immediate) and throttle (with trailing edge). Understand when each fits, with runnable scroll/resize simulation examples.",
     readTime: "12 min read",
@@ -340,7 +381,8 @@ export const articlesData = [
     categories: ["javascript"],
   },
   {
-    id: "javascript-series/js-array-methods-polyfills-1",
+    id: "js-array-methods-polyfills-1",
+    image: "js-array-methods-polyfills-1.png",
     title: "Arrays #1 — map, filter, reduce Polyfills",
     excerpt: "Build Array.prototype.map, filter, and reduce from scratch. Understand callback signatures, thisArg, sparse array handling, and edge cases.",
     readTime: "12 min read",
@@ -348,7 +390,8 @@ export const articlesData = [
     categories: ["javascript"],
   },
   {
-    id: "javascript-series/js-array-methods-polyfills-2",
+    id: "js-array-methods-polyfills-2",
+    image: "js-array-methods-polyfills-2.png",
     title: "Arrays #2 — flat, flatMap, find, every, some Polyfills",
     excerpt: "Implement Array.prototype.flat with depth, flatMap, find, findIndex, every, and some — with sparse array handling and edge cases.",
     readTime: "11 min read",
@@ -356,7 +399,8 @@ export const articlesData = [
     categories: ["javascript"],
   },
   {
-    id: "javascript-series/js-memoize-once",
+    id: "js-memoize-once",
+    image: "js-memoize-once.png",
     title: "Functions #4 — memoize() & once()",
     excerpt: "Implement memoize with custom key resolver, once that runs a function at most one time, and understand how closures make both possible.",
     readTime: "9 min read",
@@ -364,7 +408,8 @@ export const articlesData = [
     categories: ["javascript"],
   },
   {
-    id: "javascript-series/js-recursion-patterns",
+    id: "js-recursion-patterns",
+    image: "js-recursion-patterns.png",
     title: "Recursion Patterns — Tree Walk, Permutations & More",
     excerpt: "Deep flatten, Fibonacci (recursive, memoized, iterative), generating all permutations and combinations, and tail-call optimization explained.",
     readTime: "11 min read",
@@ -372,7 +417,8 @@ export const articlesData = [
     categories: ["javascript"],
   },
   {
-    id: "javascript-series/js-deep-clone-compare",
+    id: "js-deep-clone-compare",
+    image: "js-deep-clone-compare.png",
     title: "Data #1 — Deep Clone & Deep Compare",
     excerpt: "Structural clone handling Date, RegExp, Map, Set, Array, plain objects, and circular references. Plus deep equality that handles NaN, +0/-0, and all edge cases.",
     readTime: "12 min read",
@@ -380,7 +426,8 @@ export const articlesData = [
     categories: ["javascript"],
   },
   {
-    id: "javascript-series/js-flatten-unflatten-object",
+    id: "js-flatten-unflatten-object",
+    image: "js-flatten-unflatten-object.png",
     title: "Data #2 — Flatten & Unflatten Nested Objects",
     excerpt: "Convert { a: { b: { c: 1 } } } to { 'a.b.c': 1 } and back. Recursive and iterative approaches with custom separator support.",
     readTime: "9 min read",
@@ -392,7 +439,8 @@ export const articlesData = [
      JavaScript series — Level 3: Async JavaScript (Intermediate)
      ═══════════════════════════════════════════════════════════════ */
   {
-    id: "javascript-series/js-event-loop-in-depth",
+    id: "js-event-loop-in-depth",
+    image: "js-event-loop-in-depth.png",
     title: "Async #1 — The Event Loop in Depth",
     excerpt: "Call stack, microtask queue (Promise.then, queueMicrotask), macrotask queue (setTimeout, events), render steps, and starvation — the complete execution model.",
     readTime: "12 min read",
@@ -400,7 +448,8 @@ export const articlesData = [
     categories: ["javascript"],
   },
   {
-    id: "javascript-series/settimeout-setinterval",
+    id: "settimeout-setinterval",
+    image: "settimeout-setinterval.png",
     title: "Async #2 — setTimeout & setInterval Deep Dive",
     excerpt: "Master browser timers — schedule callbacks, repeat them, cancel them, understand the drift problem, and learn nested setTimeout vs setInterval. Every example is editable and runnable.",
     readTime: "10 min read",
@@ -408,7 +457,8 @@ export const articlesData = [
     categories: ["javascript"],
   },
   {
-    id: "javascript-series/js-promise-from-scratch",
+    id: "js-promise-from-scratch",
+    image: "js-promise-from-scratch.png",
     title: "Async #3 — Building a Promise from Scratch",
     excerpt: "Implement the Promise constructor, then, catch, finally, resolve, reject — with state machine (pending/fulfilled/rejected), chaining, and microtask scheduling.",
     readTime: "14 min read",
@@ -416,7 +466,8 @@ export const articlesData = [
     categories: ["javascript"],
   },
   {
-    id: "javascript-series/js-promise-combinators",
+    id: "js-promise-combinators",
+    image: "js-promise-combinators.png",
     title: "Async #4 — Promise.all, allSettled, race, any",
     excerpt: "Implement all four Promise combinators from scratch. Understand the subtle differences: short-circuit rejection, AggregateError, and the order of resolution.",
     readTime: "12 min read",
@@ -424,7 +475,8 @@ export const articlesData = [
     categories: ["javascript"],
   },
   {
-    id: "javascript-series/js-async-await-under-hood",
+    id: "js-async-await-under-hood",
+    image: "js-async-await-under-hood.png",
     title: "Async #5 — async/await Under the Hood",
     excerpt: "Desugar async/await to generators + Promises. Understand paused execution, .next() driving the state machine, and why await blocks but doesn't freeze the thread.",
     readTime: "12 min read",
@@ -432,7 +484,8 @@ export const articlesData = [
     categories: ["javascript"],
   },
   {
-    id: "javascript-series/js-generators-iterators",
+    id: "js-generators-iterators",
+    image: "js-generators-iterators.png",
     title: "Async #6 — Generators & Iterators",
     excerpt: "Symbol.iterator, generator functions, yield and yield*, custom iterables, range generators, and pausing function execution with .next().",
     readTime: "11 min read",
@@ -440,7 +493,8 @@ export const articlesData = [
     categories: ["javascript"],
   },
   {
-    id: "javascript-series/js-async-iteration",
+    id: "js-async-iteration",
+    image: "js-async-iteration.png",
     title: "Async #7 — Async Iteration",
     excerpt: "for await...of, async generators, async iterators, and building a paginated API consumer that iterates over pages lazily.",
     readTime: "10 min read",
@@ -448,7 +502,8 @@ export const articlesData = [
     categories: ["javascript"],
   },
   {
-    id: "javascript-series/js-concurrency-limits",
+    id: "js-concurrency-limits",
+    image: "js-concurrency-limits.png",
     title: "Async #8 — Concurrency Control & Retry Patterns",
     excerpt: "Execute async tasks sequentially, with a concurrency pool, retry with exponential backoff, and cancel in-flight operations — all with runnable examples.",
     readTime: "12 min read",
@@ -456,7 +511,8 @@ export const articlesData = [
     categories: ["javascript"],
   },
   {
-    id: "javascript-series/js-abort-controller",
+    id: "js-abort-controller",
+    image: "js-abort-controller.png",
     title: "Async #9 — AbortController & Cancelable Async",
     excerpt: "Cancel fetch requests, remove event listeners, abort async work, and wire AbortSignal through custom functions — the standard way to clean up in-flight work.",
     readTime: "9 min read",
@@ -468,7 +524,8 @@ export const articlesData = [
      JavaScript series — Level 4: Objects & Data (Int.→Advanced)
      ═══════════════════════════════════════════════════════════════ */
   {
-    id: "javascript-series/js-map-set-weakmap-weakset",
+    id: "js-map-set-weakmap-weakset",
+    image: "js-map-set-weakmap-weakset.png",
     title: "Data #3 — Map, Set, WeakMap, WeakSet Polyfills",
     excerpt: "Implement Map (hash map), Set, WeakMap (garbage-collectable keys), and WeakSet — understand when to use each over plain objects and arrays.",
     readTime: "11 min read",
@@ -476,7 +533,8 @@ export const articlesData = [
     categories: ["javascript"],
   },
   {
-    id: "javascript-series/js-object-create-instanceof",
+    id: "js-object-create-instanceof",
+    image: "js-object-create-instanceof.png",
     title: "Prototypes #2 — Object.create() & instanceof Polyfills",
     excerpt: "Implement Object.create(proto, descriptors) and the instanceof operator from scratch. Understand the prototype chain walk in each.",
     readTime: "10 min read",
@@ -484,7 +542,8 @@ export const articlesData = [
     categories: ["javascript"],
   },
   {
-    id: "javascript-series/js-symbols-in-depth",
+    id: "js-symbols-in-depth",
+    image: "js-symbols-in-depth.png",
     title: "Symbols — Well-Known Symbols, Hidden Properties & More",
     excerpt: "Every well-known Symbol (Symbol.iterator, Symbol.toPrimitive, Symbol.hasInstance, etc.), private-like properties, and custom toString/valueOf behavior.",
     readTime: "10 min read",
@@ -492,7 +551,8 @@ export const articlesData = [
     categories: ["javascript"],
   },
   {
-    id: "javascript-series/js-proxy-reflect-api",
+    id: "js-proxy-reflect-api",
+    image: "js-proxy-reflect-api.png",
     title: "Proxy & Reflect — Validation, Observables & Traps",
     excerpt: "Build a validation proxy, a negative-array-index proxy, an observable object, and understand all 13 proxy traps with Reflect counterparts.",
     readTime: "12 min read",
@@ -500,7 +560,8 @@ export const articlesData = [
     categories: ["javascript"],
   },
   {
-    id: "javascript-series/js-json-stringify-parser",
+    id: "js-json-stringify-parser",
+    image: "js-json-stringify-parser.png",
     title: "Parsing #1 — Building a Simple JSON.stringify()",
     excerpt: "Understand the JSON grammar and build a simplified stringify that handles primitives, arrays, objects, and nested structures. Handles circular reference detection.",
     readTime: "11 min read",
@@ -508,7 +569,8 @@ export const articlesData = [
     categories: ["javascript"],
   },
   {
-    id: "javascript-series/js-url-query-parser",
+    id: "js-url-query-parser",
+    image: "js-url-query-parser.png",
     title: "Parsing #2 — URL & Query String Parsing",
     excerpt: "Parse query strings into objects (handling arrays, nested keys, and encoding), build URL query strings, and implement a lightweight template engine.",
     readTime: "9 min read",
@@ -516,7 +578,8 @@ export const articlesData = [
     categories: ["javascript"],
   },
   {
-    id: "javascript-series/js-string-templating-engine",
+    id: "js-string-templating-engine",
+    image: "js-string-templating-engine.png",
     title: "Parsing #3 — Building a Template Engine",
     excerpt: "Build a Handlebars-style template engine that replaces {{ variables }}, handles nested objects, loops, and conditionals — using regex and string parsing.",
     readTime: "10 min read",
@@ -528,7 +591,8 @@ export const articlesData = [
      JavaScript series — Level 5: Engine Internals (Advanced)
      ═══════════════════════════════════════════════════════════════ */
   {
-    id: "javascript-series/js-v8-jit-compilation",
+    id: "js-v8-jit-compilation",
+    image: "js-v8-jit-compilation.png",
     title: "V8 #1 — JIT Compilation & Hidden Classes",
     excerpt: "How V8's interpreter (Ignition) and optimizing compiler (TurboFan) work. Hidden classes, inline caching, and monomorphic vs megamorphic call sites.",
     readTime: "12 min read",
@@ -536,7 +600,8 @@ export const articlesData = [
     categories: ["javascript"],
   },
   {
-    id: "javascript-series/js-memory-leaks-gc",
+    id: "js-memory-leaks-gc",
+    image: "js-memory-leaks-gc.png",
     title: "V8 #2 — Memory Leaks & Garbage Collection",
     excerpt: "Mark-and-sweep, generational GC, the four leak patterns (forgotten timers, detached DOM, closure captures, unbounded caches), and heap snapshot debugging.",
     readTime: "12 min read",
@@ -544,7 +609,8 @@ export const articlesData = [
     categories: ["javascript"],
   },
   {
-    id: "javascript-series/js-hoisting-tdz-deep",
+    id: "js-hoisting-tdz-deep",
+    image: "js-hoisting-tdz-deep.png",
     title: "Engine #1 — Hoisting & TDZ: What the Engine Actually Does",
     excerpt: "How the parser creates execution contexts, hoists declarations, initializes let/const in the TDZ, and why typeof is not safe for TDZ variables.",
     readTime: "10 min read",
@@ -552,7 +618,8 @@ export const articlesData = [
     categories: ["javascript"],
   },
   {
-    id: "javascript-series/js-module-systems",
+    id: "js-module-systems",
+    image: "js-module-systems.png",
     title: "Modules — IIFE, CommonJS, AMD, ESM",
     excerpt: "The evolution from IIFE module pattern → CommonJS → AMD → ES Modules. Understand each system's syntax, scope rules, and loading semantics.",
     readTime: "10 min read",
@@ -560,7 +627,8 @@ export const articlesData = [
     categories: ["javascript"],
   },
   {
-    id: "javascript-series/js-classes-under-hood",
+    id: "js-classes-under-hood",
+    image: "js-classes-under-hood.png",
     title: "Classes Under the Hood — Desugaring to Prototypes",
     excerpt: "Every class feature (constructor, methods, getters/setters, static, extends, super, private fields) desugared to ES5 prototypes and closures.",
     readTime: "11 min read",
@@ -568,7 +636,8 @@ export const articlesData = [
     categories: ["javascript"],
   },
   {
-    id: "javascript-series/js-deopt-patterns",
+    id: "js-deopt-patterns",
+    image: "js-deopt-patterns.png",
     title: "V8 #3 — Deoptimization Patterns",
     excerpt: "What deopts a function in V8: delete, arguments object, polymorphic property access, try/catch in hot functions, and changing object shape — with before/after examples.",
     readTime: "10 min read",
@@ -580,7 +649,8 @@ export const articlesData = [
      JavaScript series — Level 6: Design Patterns & Data Structures
      ═══════════════════════════════════════════════════════════════ */
   {
-    id: "javascript-series/js-event-emitter",
+    id: "js-event-emitter",
+    image: "js-event-emitter.png",
     title: "Patterns #1 — Event Emitter / Pub-Sub",
     excerpt: "Implement on, off, emit, and once from scratch. Handle multiple listeners per event, once-only listeners, and wildcard events.",
     readTime: "10 min read",
@@ -588,7 +658,8 @@ export const articlesData = [
     categories: ["javascript"],
   },
   {
-    id: "javascript-series/js-observer-pattern",
+    id: "js-observer-pattern",
+    image: "js-observer-pattern.png",
     title: "Patterns #2 — Observer Pattern & Reactive Primitives",
     excerpt: "Build a basic observable with subscribe/unsubscribe/notify, computed values, and a simple reactive store — the patterns behind RxJS and Redux.",
     readTime: "10 min read",
@@ -596,7 +667,8 @@ export const articlesData = [
     categories: ["javascript"],
   },
   {
-    id: "javascript-series/js-singleton-factory-patterns",
+    id: "js-singleton-factory-patterns",
+    image: "js-singleton-factory-patterns.png",
     title: "Patterns #3 — Singleton, Factory & Constructor",
     excerpt: "Singleton via closures and ES modules, factory functions vs constructor functions vs class, and when each pattern makes sense.",
     readTime: "9 min read",
@@ -604,7 +676,8 @@ export const articlesData = [
     categories: ["javascript"],
   },
   {
-    id: "javascript-series/js-linked-list",
+    id: "js-linked-list",
+    image: "js-linked-list.png",
     title: "Data Structures #1 — Linked List",
     excerpt: "Implement singly and doubly linked lists with insert, delete, search, reverse, and detect-cycle methods. Understand O(1) vs O(n) trade-offs.",
     readTime: "11 min read",
@@ -612,7 +685,8 @@ export const articlesData = [
     categories: ["javascript"],
   },
   {
-    id: "javascript-series/js-hash-table",
+    id: "js-hash-table",
+    image: "js-hash-table.png",
     title: "Data Structures #2 — Hash Table",
     excerpt: "Build a hash table with bucket array, collision chaining, dynamic resizing, and a basic hash function. Understand load factor and rehashing.",
     readTime: "11 min read",
@@ -620,7 +694,8 @@ export const articlesData = [
     categories: ["javascript"],
   },
   {
-    id: "javascript-series/js-lru-cache",
+    id: "js-lru-cache",
+    image: "js-lru-cache.png",
     title: "Data Structures #3 — LRU Cache",
     excerpt: "Least Recently Used cache combining a hash map with a doubly linked list for O(1) get and put. With capacity eviction and usage examples.",
     readTime: "10 min read",
@@ -628,7 +703,8 @@ export const articlesData = [
     categories: ["javascript"],
   },
   {
-    id: "javascript-series/js-binary-heap-priority-queue",
+    id: "js-binary-heap-priority-queue",
+    image: "js-binary-heap-priority-queue.png",
     title: "Data Structures #4 — Binary Heap & Priority Queue",
     excerpt: "Implement a min-heap (array-based), bubble-up and sink-down, and a priority queue with O(log n) enqueue and dequeue.",
     readTime: "11 min read",
@@ -636,7 +712,8 @@ export const articlesData = [
     categories: ["javascript"],
   },
   {
-    id: "javascript-series/js-trie-prefix-tree",
+    id: "js-trie-prefix-tree",
+    image: "js-trie-prefix-tree.png",
     title: "Data Structures #5 — Trie (Prefix Tree)",
     excerpt: "Build insert, search, startsWith, and autocomplete on a Trie. Handle deletion and understand space/time trade-offs vs hash maps.",
     readTime: "10 min read",
@@ -648,7 +725,8 @@ export const articlesData = [
      JavaScript series — Level 7: Functional Programming (Advanced)
      ═══════════════════════════════════════════════════════════════ */
   {
-    id: "javascript-series/js-compose-pipe",
+    id: "js-compose-pipe",
+    image: "js-compose-pipe.png",
     title: "FP #1 — compose() & pipe()",
     excerpt: "Implement right-to-left compose and left-to-right pipe. Handle multiple arguments, async pipes, and real-world transformation pipelines.",
     readTime: "10 min read",
@@ -656,7 +734,8 @@ export const articlesData = [
     categories: ["javascript"],
   },
   {
-    id: "javascript-series/js-transduce",
+    id: "js-transduce",
+    image: "js-transduce.png",
     title: "FP #2 — transduce() — Map + Filter in One Pass",
     excerpt: "Build a transducer that fuses map and filter into a single reduction pass. Understand the reducer-transform pattern and when it matters.",
     readTime: "11 min read",
@@ -664,7 +743,8 @@ export const articlesData = [
     categories: ["javascript"],
   },
   {
-    id: "javascript-series/js-maybe-either-monad",
+    id: "js-maybe-either-monad",
+    image: "js-maybe-either-monad.png",
     title: "FP #3 — Maybe & Either Monads",
     excerpt: "Build Maybe (Some/None) and Either (Right/Left) monads for error-safe pipelines. Chain operations without null checks or try/catch litter.",
     readTime: "12 min read",
@@ -672,7 +752,8 @@ export const articlesData = [
     categories: ["javascript"],
   },
   {
-    id: "javascript-series/js-point-free-style",
+    id: "js-point-free-style",
+    image: "js-point-free-style.png",
     title: "FP #4 — Point-Free Style & Referential Transparency",
     excerpt: "Write functions without naming arguments. Understand referential transparency, pure functions, side effects, and when point-free makes code clearer (or worse).",
     readTime: "9 min read",
@@ -680,7 +761,8 @@ export const articlesData = [
     categories: ["javascript"],
   },
   {
-    id: "javascript-series/js-immutability-patterns",
+    id: "js-immutability-patterns",
+    image: "js-immutability-patterns.png",
     title: "FP #5 — Immutability Patterns",
     excerpt: "Object.freeze, deep freeze, structuredClone, spread-based updates, Immer-style produce(), and Immutable.js concepts — preventing unintended mutation.",
     readTime: "10 min read",
@@ -692,7 +774,8 @@ export const articlesData = [
      JavaScript series — Level 8: Browser & Web APIs (Int.→Adv.)
      ═══════════════════════════════════════════════════════════════ */
   {
-    id: "javascript-series/js-requestanimationframe-idlecallback",
+    id: "js-requestanimationframe-idlecallback",
+    image: "js-requestanimationframe-idlecallback.png",
     title: "Web APIs #1 — requestAnimationFrame & requestIdleCallback",
     excerpt: "Sync JavaScript to the display refresh rate with rAF, perform low-priority work with requestIdleCallback, and understand where each fits in the frame lifecycle.",
     readTime: "10 min read",
@@ -700,7 +783,8 @@ export const articlesData = [
     categories: ["javascript"],
   },
   {
-    id: "javascript-series/js-web-workers-offscreen",
+    id: "js-web-workers-offscreen",
+    image: "js-web-workers-offscreen.png",
     title: "Web APIs #2 — Web Workers & OffscreenCanvas",
     excerpt: "Move heavy computation off the main thread with Web Workers. Dedicated vs shared workers, postMessage, transferables, and OffscreenCanvas for canvas rendering.",
     readTime: "11 min read",
@@ -708,7 +792,8 @@ export const articlesData = [
     categories: ["javascript"],
   },
   {
-    id: "javascript-series/js-intersection-observer",
+    id: "js-intersection-observer",
+    image: "js-intersection-observer.png",
     title: "Web APIs #3 — Intersection Observer",
     excerpt: "Lazy load images, infinite scroll, and track ad visibility — all without scroll event handlers. Understanding thresholds, rootMargin, and the observer callback.",
     readTime: "10 min read",
@@ -716,7 +801,8 @@ export const articlesData = [
     categories: ["javascript"],
   },
   {
-    id: "javascript-series/js-event-delegation-bubbling",
+    id: "js-event-delegation-bubbling",
+    image: "js-event-delegation-bubbling.png",
     title: "DOM Events #1 — Event Delegation & Bubbling",
     excerpt: "Capture phase, target phase, bubble phase, stopPropagation vs stopImmediatePropagation, and how event delegation eliminates hundreds of listeners.",
     readTime: "10 min read",
@@ -724,7 +810,8 @@ export const articlesData = [
     categories: ["javascript"],
   },
   {
-    id: "javascript-series/js-drag-and-drop",
+    id: "js-drag-and-drop",
+    image: "js-drag-and-drop.png",
     title: "DOM Events #2 — Drag & Drop",
     excerpt: "Native drag and drop API, custom drag implementation with mousedown/mousemove/mouseup, touch support, and accessibility considerations.",
     readTime: "10 min read",
@@ -732,7 +819,8 @@ export const articlesData = [
     categories: ["javascript"],
   },
   {
-    id: "javascript-series/js-storage-cookies-indexeddb",
+    id: "js-storage-cookies-indexeddb",
+    image: "js-storage-cookies-indexeddb.png",
     title: "Web APIs #4 — localStorage, Cookies, sessionStorage & IndexedDB",
     excerpt: "Compare all four storage APIs. Implement a localStorage wrapper with TTL expiry, cookie get/set/delete utilities, and a basic IndexedDB CRUD store.",
     readTime: "12 min read",
@@ -745,6 +833,7 @@ export const articlesData = [
      ═══════════════════════════════════════════════════════════════ */
   {
     id: "react-virtual-dom-reconciliation",
+    image: "react-virtual-dom-reconciliation.png",
     title: "How React Works Inside the Browser Pipeline",
     excerpt:
       "Virtual DOM, reconciliation, state batching, and concurrent rendering — explained in terms of the six browser pipeline steps every frame goes through.",
@@ -758,6 +847,7 @@ export const articlesData = [
      ═══════════════════════════════════════════════════════════════ */
   {
     id: "what-is-dom",
+    image: "what-is-dom.png",
     title: "What is the DOM?",
     excerpt: "The DOM is the browser's live, in-memory tree representation of an HTML document. Here's how it's structured, why DOM operations are expensive, and how it relates to the render tree.",
     readTime: "4 min read",
@@ -766,6 +856,7 @@ export const articlesData = [
   },
   {
     id: "what-is-cssom",
+    image: "what-is-cssom.png",
     title: "What is the CSSOM?",
     excerpt: "The CSS Object Model is the browser's internal tree of all computed styles. It's render-blocking by design — here's why, and what that means for performance.",
     readTime: "4 min read",
@@ -774,6 +865,7 @@ export const articlesData = [
   },
   {
     id: "what-is-css-specificity",
+    image: "what-is-css-specificity.png",
     title: "What is CSS Specificity?",
     excerpt: "Specificity is the four-column scoring system browsers use to decide which CSS rule wins. Inline > ID > class > element — here's how it works and why it matters.",
     readTime: "4 min read",
@@ -782,6 +874,7 @@ export const articlesData = [
   },
   {
     id: "what-is-main-thread",
+    image: "what-is-main-thread.png",
     title: "What is the Main Thread?",
     excerpt: "The browser's main thread runs JavaScript, layout, paint, and everything else — one task at a time. Here's what that means for performance and how to protect it.",
     readTime: "4 min read",
@@ -790,6 +883,7 @@ export const articlesData = [
   },
   {
     id: "what-is-compositor-thread",
+    image: "what-is-compositor-thread.png",
     title: "What is the Compositor Thread?",
     excerpt: "The compositor thread assembles painted layers into the final screen image — independently of the main thread. It's why transform and opacity animations stay smooth under load.",
     readTime: "4 min read",
@@ -798,6 +892,7 @@ export const articlesData = [
   },
   {
     id: "what-are-compositing-layers",
+    image: "what-are-compositing-layers.png",
     title: "What are Compositing Layers?",
     excerpt: "Compositing layers are GPU-backed bitmaps the browser composites separately. They're why transform and opacity animations can run at 60fps without touching the main thread.",
     readTime: "5 min read",
@@ -806,6 +901,7 @@ export const articlesData = [
   },
   {
     id: "what-is-preload-scanner",
+    image: "what-is-preload-scanner.png",
     title: "What is the Preload Scanner?",
     excerpt: "The preload scanner is a secondary HTML parser that dispatches resource fetches while the main parser is blocked — it's why resources below a blocking script still load early.",
     readTime: "4 min read",
@@ -818,6 +914,7 @@ export const articlesData = [
      ═══════════════════════════════════════════════════════════════ */
   {
     id: "what-is-call-stack",
+    image: "what-is-call-stack.png",
     title: "What is the Call Stack?",
     excerpt: "The call stack is the data structure the JS engine uses to track function execution. It's a single-threaded LIFO stack — here's how it works and why a busy stack freezes the page.",
     readTime: "4 min read",
@@ -826,6 +923,7 @@ export const articlesData = [
   },
   {
     id: "what-is-microtask-queue",
+    image: "what-is-microtask-queue.png",
     title: "What is the Microtask Queue?",
     excerpt: "Microtasks run after every task, before the next frame. Understanding when Promises execute — and how they can starve the task queue — requires knowing this queue.",
     readTime: "5 min read",
@@ -834,6 +932,7 @@ export const articlesData = [
   },
   {
     id: "what-are-long-tasks",
+    image: "what-are-long-tasks.png",
     title: "What are Long Tasks?",
     excerpt: "Any main-thread task over 50ms is a long task. Here's why that threshold matters, how to find long tasks in DevTools, and how to break them up.",
     readTime: "5 min read",
@@ -842,6 +941,7 @@ export const articlesData = [
   },
   {
     id: "what-is-jit-compilation",
+    image: "what-is-jit-compilation.png",
     title: "What is JIT Compilation?",
     excerpt: "JIT combines an interpreter (fast startup) with a compiler (fast execution) to make JavaScript run near native speed. Here's how V8's two-tier pipeline works.",
     readTime: "4 min read",
@@ -850,6 +950,7 @@ export const articlesData = [
   },
   {
     id: "what-is-requestanimationframe",
+    image: "what-is-requestanimationframe.png",
     title: "What is requestAnimationFrame?",
     excerpt: "requestAnimationFrame syncs your JavaScript to the display refresh rate. Here's how it works, why it's the right tool for JS animations, and how it differs from setTimeout.",
     readTime: "4 min read",
@@ -858,6 +959,7 @@ export const articlesData = [
   },
   {
     id: "what-is-debouncing",
+    image: "what-is-debouncing.png",
     title: "What is Debouncing?",
     excerpt: "Debouncing ensures a function runs only once after a burst of rapid calls stops. Here's how it works, trailing vs leading edge, and when to use it over throttling.",
     readTime: "4 min read",
@@ -866,6 +968,7 @@ export const articlesData = [
   },
   {
     id: "what-is-throttling",
+    image: "what-is-throttling.png",
     title: "What is Throttling?",
     excerpt: "Throttling limits a function to run at most once per interval, guaranteeing regular execution during bursts. Here's how it differs from debouncing and when each one fits.",
     readTime: "4 min read",
@@ -878,6 +981,7 @@ export const articlesData = [
      ═══════════════════════════════════════════════════════════════ */
   {
     id: "what-is-virtual-dom",
+    image: "what-is-virtual-dom.png",
     title: "What is the Virtual DOM?",
     excerpt: "The Virtual DOM is an in-memory JavaScript tree React uses to batch DOM updates. Here's what it is, why it exists, and how it differs from the real DOM.",
     readTime: "4 min read",
@@ -886,6 +990,7 @@ export const articlesData = [
   },
   {
     id: "what-is-reconciliation",
+    image: "what-is-reconciliation.png",
     title: "What is Reconciliation?",
     excerpt: "Reconciliation is how React diffs two Virtual DOM trees to find the minimum set of real DOM mutations. Here are the two assumptions that make it run in O(n).",
     readTime: "4 min read",
@@ -894,6 +999,7 @@ export const articlesData = [
   },
   {
     id: "what-is-react-fiber",
+    image: "what-is-react-fiber.png",
     title: "What is React Fiber?",
     excerpt: "Fiber is React's internal unit of work — a linked-list architecture that makes rendering interruptible, prioritisable, and resumable. It's the engine behind concurrent mode.",
     readTime: "5 min read",
@@ -902,6 +1008,7 @@ export const articlesData = [
   },
   {
     id: "what-is-hydration",
+    image: "what-is-hydration.png",
     title: "What is Hydration?",
     excerpt: "Hydration is how React attaches event handlers to server-rendered HTML. Here's what actually happens, why it can be slow, and how React 18 makes it interruptible.",
     readTime: "5 min read",
@@ -910,6 +1017,7 @@ export const articlesData = [
   },
   {
     id: "what-is-react-suspense",
+    image: "what-is-react-suspense.png",
     title: "What is React Suspense?",
     excerpt: "Suspense lets a component wait for something before rendering — a lazy-loaded chunk, a data fetch — and shows a fallback in the meantime. Here's how the boundary works.",
     readTime: "4 min read",
@@ -922,6 +1030,7 @@ export const articlesData = [
      ═══════════════════════════════════════════════════════════════ */
   {
     id: "what-is-ttfb",
+    image: "what-is-ttfb.png",
     title: "What is TTFB?",
     excerpt: "Time to First Byte measures everything between sending a request and receiving the first byte — DNS, TCP, TLS, and server processing. It's the gate every other metric waits behind.",
     readTime: "4 min read",
@@ -930,6 +1039,7 @@ export const articlesData = [
   },
   {
     id: "what-is-fcp",
+    image: "what-is-fcp.png",
     title: "What is First Contentful Paint (FCP)?",
     excerpt: "FCP measures the moment any content first appears on screen — the first visual feedback that the page is loading. Here's what delays it and how to improve it.",
     readTime: "4 min read",
@@ -938,6 +1048,7 @@ export const articlesData = [
   },
   {
     id: "what-is-cdn",
+    image: "what-is-cdn.png",
     title: "What is a CDN?",
     excerpt: "A CDN is a distributed network of servers that serve your content from locations close to each user. Here's how it reduces latency, what to put on it, and how it affects TTFB.",
     readTime: "4 min read",
@@ -946,6 +1057,7 @@ export const articlesData = [
   },
   {
     id: "what-is-dns",
+    image: "what-is-dns.png",
     title: "What is DNS?",
     excerpt: "DNS translates domain names into IP addresses — and every network request starts with it. Here's how resolution works, what it costs in latency, and how to reduce that cost.",
     readTime: "4 min read",
@@ -954,6 +1066,7 @@ export const articlesData = [
   },
   {
     id: "what-is-cache-control",
+    image: "what-is-cache-control.png",
     title: "What is Cache-Control?",
     excerpt: "Cache-Control is the HTTP header that controls browser and CDN caching. The right directives eliminate repeated downloads — here's what each one does and when to use it.",
     readTime: "4 min read",
@@ -962,6 +1075,7 @@ export const articlesData = [
   },
   {
     id: "what-is-stale-while-revalidate",
+    image: "what-is-stale-while-revalidate.png",
     title: "What is Stale-While-Revalidate?",
     excerpt: "Serve a cached response instantly, revalidate in the background. The closest thing caching has to a free lunch — and when not to use it.",
     readTime: "5 min read",
@@ -970,6 +1084,7 @@ export const articlesData = [
   },
   {
     id: "what-is-streaming-ssr",
+    image: "what-is-streaming-ssr.png",
     title: "What is Streaming SSR?",
     excerpt: "Streaming SSR sends HTML in chunks as each component's data resolves, rather than waiting for the full page. The shell arrives instantly; the rest streams in progressively.",
     readTime: "4 min read",
@@ -982,15 +1097,17 @@ export const articlesData = [
      ═══════════════════════════════════════════════════════════════ */
   {
     id: "web-performance-planner",
+    image: "web-performance-planner.png",
     title: "Web Performance Planner — Building a Lighthouse Score Simulator",
     excerpt:
-      "A guide to using the Web Performance Planner — model your Core Web Vitals before shipping, diagnose an underperforming page, and get a ranked list of what to fix first.",
-    readTime: "10 min read",
+      "A guide to using the Web Performance Planner — import a Lighthouse report and simulate Core Web Vitals changes in real time before shipping a single line of code.",
+    readTime: "5 min read",
     tags: ["Performance", "React", "Web Vitals", "Engineering"],
     categories: ["performance", "product"],
   },
   {
     id: "holdings-analyzer",
+    image: "holdings-analyzer.png",
     title: "Holdings Analyzer — A Portfolio Dashboard from Your Zerodha CSV",
     excerpt:
       "Upload your Zerodha Console holdings export and get a full portfolio dashboard: P&L, dividend income, valuation ratios, risk metrics, analyst ratings, and financial calculators — instantly.",
@@ -1004,6 +1121,7 @@ export const articlesData = [
      ═══════════════════════════════════════════════════════════════ */
   {
     id: "claude-figma-mcp-integration",
+    image: "claude-figma-mcp-integration.png",
     title: "Figma MCP Integration Guide",
     excerpt:
       "Learn how to connect Figma MCP with Claude, extract design context, and generate production-ready UI code efficiently.",
@@ -1013,6 +1131,7 @@ export const articlesData = [
   },
   {
     id: "figma-llm-problem",
+    image: "figma-llm-problem.png",
     title: "The Real Problem with Figma + LLMs",
     excerpt:
       "Why AI-generated UI code from Figma designs is often inaccurate, and how to fix it through better design structure.",

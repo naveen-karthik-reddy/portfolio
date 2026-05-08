@@ -1,4 +1,10 @@
-Scroll events fire at ~60Hz (every 16ms). Resize events can fire hundreds of times per second. Run expensive work on every event and you tank frame rate. Debounce and throttle are the two patterns that prevent this. This article implements both from scratch, including leading/trailing edge variants.
+Scroll events fire at ~60Hz (every 16ms). Resize events can fire hundreds of times per second. Run expensive work on every event and you tank frame rate.
+
+**Think of it with a real-world analogy:**
+- **Debounce** is like an elevator door — each time someone steps in, the door resets its close timer. The door only closes after nobody has entered for N seconds.
+- **Throttle** is like a revolving door — it lets one person through at fixed intervals, no matter how many people are lined up.
+
+This article implements both from scratch, including leading/trailing edge variants.
 
 **Prerequisites:** [JS Foundations #3 — Closures](/articles/javascript-series/js-closures-lexical-scope)
 

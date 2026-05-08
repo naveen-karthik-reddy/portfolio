@@ -4,17 +4,27 @@
 
 ---
 
-## 1. The Illusion of Synchronous Async Code
+## 1. What `async`/`await` Actually Does
+
+An `async` function always returns a Promise — whatever you `return` becomes the resolved value. Inside, `await` pauses the function's execution until a promise settles, then unpacks its resolved value:
 
 ```js-exec
 async function fetchUser(id) {
-  const response = await fetch(`/api/users/${id}`);
-  const user = await response.json();
-  return user;
+  // await "pauses" here until the promise resolves, then gives us the value
+  const name = await Promise.resolve(`User-${id}`);
+  // The function continues with name = "User-42"
+  return `Fetched: ${name}`;
 }
+
+// The async function itself returns a Promise:
+fetchUser(42).then((result) => console.log("Result:", result));
 ```
 
-An `async` function always returns a Promise. Inside, `await` pauses execution until the promise settles — but the JavaScript thread keeps running other tasks in the meantime.
+Key points before we dig into the internals:
+- **`await` only blocks THIS function**, not the whole thread. Other code keeps running.
+- **`await` works on any thenable**, not just Promise — it calls `.then()` under the hood.
+- **`await 42` (non-promise)** just wraps it: `Promise.resolve(42)`.
+- **Errors** can be caught with `try/catch` around `await`, just like synchronous code.
 
 ---
 
@@ -85,6 +95,18 @@ const fetchUser = asyncRunner(function* (id) {
 });
 
 fetchUser(42).then((result) => console.log("Result:", result)); // "User-42 (verified)"
+
+// What happens step by step when fetchUser(42) is called:
+//
+// 1. asyncRunner returns a function; calling it creates the generator
+// 2. step(() => gen.next()) runs gen.next() → generator runs until first yield:
+//       yield Promise.resolve("User-42") → { value: Promise<"User-42">, done: false }
+// 3. Promise.resolve(result.value) wraps the yielded value → .then()
+// 4. When that promise resolves with "User-42":
+//       step(() => gen.next("User-42")) → generator resumes, name = "User-42"
+// 5. Generator hits second yield → same pattern, details = "User-42 (verified)"
+// 6. Generator hits return → { value: "User-42 (verified)", done: true }
+// 7. resolve(result.value) → the outer promise resolves with the final value
 ```
 
 ---
@@ -188,4 +210,4 @@ demo().then((sum) => console.log("Final sum:", sum));
 
 ---
 
-**Next:** [Async #6 — Generators & Iterators](/articles/javascript-series/js-generators-iterators) — `Symbol.iterator`, `yield*`, custom iterables, and range generators.
+**Next:** [Async #7 — Async Iteration](/articles/javascript-series/js-async-iteration) — `for await...of`, async generators, and streaming data patterns.

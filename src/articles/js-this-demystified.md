@@ -1,4 +1,6 @@
-No keyword confuses JavaScript developers more than `this`. It's not the function itself, not the scope, and — in regular functions — not even determined until the call site. This article covers the four binding rules, arrow functions, and every gotcha.
+No keyword confuses JavaScript developers more than `this`. Think of `this` like the pronoun **"he"** in English — it refers to a different person depending on who is speaking and in what context. When Alice says "he is tall," "he" means Bob; when Charlie says it, "he" means Dave. Similarly, `this` inside a function refers to different objects depending on *how* that function is called.
+
+This article covers the four binding rules, arrow functions, and every gotcha.
 
 **Prerequisites:** [JS Foundations #1 — Variables, Scope & Hoisting](/articles/javascript-series/js-variables-scope-hoisting)
 
@@ -25,7 +27,20 @@ showThis();
 
 ---
 
-## 2. The Four Binding Rules
+## 2. `this` at the Global Level
+
+At the very top of your script (outside any function), `this` points to the global object:
+
+```js-exec
+console.log("Global this === globalThis:", this === globalThis);
+console.log("Global this === window:", this === globalThis); // in browsers, window === globalThis
+```
+
+This is rarely useful on its own, but it explains why a standalone function call inherits global `this` in non-strict mode — the function's `this` falls back to whatever the surrounding context is.
+
+---
+
+## 3. The Four Binding Rules
 
 There are exactly four rules that determine `this`, in order of precedence:
 
@@ -37,19 +52,20 @@ When a function is called standalone, `this` defaults to:
 
 ```js-exec
 function defaultDemo() {
+  console.log("this in non-strict standalone call:", this === globalThis);
+}
+
+defaultDemo(); // true — in non-strict mode, this defaults to the global object
+
+function strictDemo() {
   "use strict";
-  console.log(this); // undefined
+  console.log("this in strict standalone call:", this); // undefined
 }
 
-defaultDemo();
-
-function nonStrictDemo() {
-  console.log(this === globalThis); // true (in non-strict mode)
-}
-
-// Calling non-strict through eval to avoid inheriting strict from the module
-// In a module, this function would be in strict mode by default
+strictDemo();
 ```
+
+**Important:** ES modules (files loaded via `<script type="module">` or bundled with Vite/Webpack) are **always in strict mode**. So in a real project, a standalone function call will have `this` as `undefined`, never the global object.
 
 ---
 
@@ -98,19 +114,21 @@ const extracted = obj.sayName; // Just the function, detached from obj
 extracted(); // undefined (or error in strict mode) — this is now global/undefined
 ```
 
-This is the most common `this` bug. Callbacks suffer from the same problem:
+This is the most common `this` bug. **Why does it happen?** When you pass a method as a callback, you're passing just the function — the object is left behind. `setTimeout` (or any API that receives a callback) calls it as a standalone function: `callback()`, not `obj.method()`. So `this` falls back to the default rule.
 
 ```js-exec
 const user = {
   name: "Naveen",
   delayedGreet() {
+    // setTimeout internally does something like: callback();
+    // Not: user.callback();
     setTimeout(function () {
-      console.log("setTimeout this.name:", this.name);
+      console.log("setTimeout this.name:", this.name); // undefined
     }, 100);
   },
 };
 
-user.delayedGreet(); // undefined — the setTimeout callback runs as a standalone call
+user.delayedGreet();
 ```
 
 The fix (before arrow functions) was explicit binding.
@@ -119,7 +137,11 @@ The fix (before arrow functions) was explicit binding.
 
 ### Rule 3: Explicit Binding — `call`, `apply`, `bind`
 
-You can force `this` to be whatever you want using these three methods:
+You can force `this` to be whatever you want using these three methods. A simple way to remember them:
+
+- **call** — **C** for **C**ommas: arguments separated by commas
+- **apply** — **A** for **A**rray: arguments passed as an array
+- **bind** — **B** for **B**orrow (or **B**ind permanently): returns a new function with `this` locked
 
 ```js-exec
 function greet(greeting, punctuation) {
@@ -183,7 +205,7 @@ What `new` actually does:
 
 ---
 
-## 3. Precedence Order — Tested on the Hardest Case
+## 4. Precedence Order — Tested on the Hardest Case
 
 The priority is: **`new` → explicit (`call`/`apply`/`bind`) → implicit → default**
 
@@ -198,10 +220,7 @@ const obj2 = { priority: "explicit" };
 obj1.show();                      // "implicit" — rule 2
 obj1.show.call(obj2);             // "explicit" — rule 3 beats rule 2
 
-const Bound = show.bind(obj1);    // rule 3
-const instance = new Bound();     // "undefined" — rule 1 wins! bind lost to new
-// Wait, what? Let's test again...
-
+// The hardest test: new vs bind — who wins?
 function ShowPriority() {
   console.log(this.name);
 }
@@ -209,14 +228,14 @@ function ShowPriority() {
 ShowPriority.prototype.name = "prototype";
 
 const BoundShow = ShowPriority.bind({ name: "explicit bind" });
-const b = new BoundShow(); // Prints "prototype" — new overrides bind!
+const b = new BoundShow(); // "prototype" — new overrides bind!
 ```
 
 When `new` is used on a bound function, `new` wins. The bound `this` is ignored in favor of the newly created object.
 
 ---
 
-## 4. Arrow Functions — The Exception to Everything
+## 5. Arrow Functions — The Exception to Everything
 
 Arrow functions **do not have their own `this`**. They inherit `this` from their enclosing lexical scope — exactly like a variable would. This is the single most important fact about arrows.
 
@@ -263,7 +282,7 @@ badIdea.greet(); // undefined — arrow as method = wrong this
 
 ---
 
-## 5. `this` in Classes
+## 6. `this` in Classes
 
 In classes, methods use implicit binding — `this` is the instance. But callbacks still lose `this` unless you bind:
 
@@ -303,7 +322,7 @@ arrowIncrement();   // ✅ 2 — arrow captures instance from constructor
 
 ---
 
-## 6. `this` in Event Handlers
+## 7. `this` in Event Handlers
 
 In DOM event handlers, `this` is the element that received the event:
 
@@ -328,7 +347,7 @@ button.addHandler(() => {
 
 ---
 
-## 7. Quick Reference — The Four Rules
+## 8. Quick Reference — The Four Rules
 
 ```js-exec
 function identify() {

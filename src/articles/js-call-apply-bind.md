@@ -28,7 +28,16 @@ boundGreet("!!");                    // Hey, I'm Naveen!!
 
 ## 2. Implementing `call()` — Step by Step
 
-The `call()` method invokes a function with a given `this` and individual arguments:
+The core trick behind `call()` is simple: **temporarily attach the function as a method on the context object, call it (so implicit binding sets `this`), then clean up.**
+
+```
+// What call(obj, ...args) does mechanically:
+1. obj[tempKey] = theFunction     // Attach
+2. obj[tempKey](...args)          // Invoke → this = obj (implicit binding)
+3. delete obj[tempKey]            // Clean up
+```
+
+Now let's build it:
 
 ```js-exec
 // Our polyfill for Function.prototype.call
@@ -59,7 +68,7 @@ show.myCall(user, "Hello"); // Hello, Naveen
 show.myCall(null, "Hi");    // Hi, undefined (globalThis)
 ```
 
-Why the `Symbol` for the key? So we don't accidentally overwrite an existing property on `context`. A `Symbol` is guaranteed unique.
+Why `Symbol` for the key? `Symbol()` creates a value guaranteed to be unique — no other property name can collide with it. If we used a plain string like `"fn"`, it could overwrite an existing property on the context object. A Symbol eliminates that risk entirely.
 
 ---
 

@@ -93,10 +93,23 @@ fetch('/api/recommendations', { priority: 'low' });
 
 ---
 
+## How Priority Tiers Work
+
+Chrome's resource scheduler uses 5 tiers: **Lowest, Low, Medium, High, Highest**. Each resource type defaults to a specific tier. `fetchpriority` bumps a resource **up or down by one tier** from its default — it doesn't set an absolute priority level. For example:
+
+- An in-viewport image is already at **Low** (or **High** on certain sites). `fetchpriority="high"` bumps it to **Medium/High**.
+- An async script defaults to **Low**. `fetchpriority="low"` drops it to **Lowest**.
+
+This is why `fetchpriority` is described as "within the same priority tier" — it's a relative adjustment, not an absolute override.
+
+## Verifying in DevTools
+
+Open DevTools → Network tab → right-click the column header → enable the **Priority** column. It shows both the **Initial** priority (what the browser assigned based on type + position) and the **Final** priority (after `fetchpriority` adjustments). This is how you confirm your hints are actually taking effect.
+
 ## What It Doesn't Do
 
 `fetchpriority` adjusts the **relative priority** within the browser's scheduler — it doesn't guarantee ordering. A `low` priority resource may still load before a `high` priority one if the latter is discovered later. Think of it as a hint to the scheduler, not a strict ordering constraint.
 
-It also doesn't replace `preload` — you still need `<link rel="preload">` to move resource discovery earlier. `fetchpriority` then ensures the preloaded resource is scheduled at the right tier.
+It also doesn't replace `preload` — you still need `<link rel="preload">` to move resource discovery earlier. `fetchpriority` then ensures the preloaded resource is scheduled at the right tier. These browser-internal priorities are what the browser maps to HTTP/2 stream priorities and HTTP/3's extensible priority scheme (see [article #15](/articles/15-http2-and-http3)).
 
 `fetchpriority="high"` on your LCP image is one of the cheapest LCP wins available — a single HTML attribute with no JavaScript required. The deprioritization side is just as useful: every non-critical resource you push down the queue is bandwidth and scheduler capacity reclaimed for what actually matters on the current page.

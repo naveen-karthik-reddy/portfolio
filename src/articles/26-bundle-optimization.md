@@ -55,6 +55,21 @@ import debounce from 'lodash/debounce'; // direct path import
 
 Libraries that don't ship ES modules (many older npm packages use CommonJS) can't be tree-shaken at all — check `bundlephobia.com` to see if a package has an ESM build.
 
+**Barrel imports can defeat tree shaking.** A "barrel" file (`index.js`) that re-exports everything from multiple modules forces the bundler to include all re-exports even if only one is used:
+
+```js
+// ❌ index.js barrel — importing any one export pulls in the entire file,
+//    which pulls in all the modules it re-exports
+export { Button } from './Button';
+export { Modal } from './Modal';
+export { Tooltip } from './Tooltip';
+
+// In your code:
+import { Button } from './components'; // ships Button, Modal, AND Tooltip
+```
+
+The fix: either avoid barrels and import directly (`import { Button } from './components/Button'`), or use a bundler plugin like `vite-plugin-barrel` to detect and warn about barrel imports that are bloating your bundle.
+
 ---
 
 ## Code Splitting: Load What You Need

@@ -1,4 +1,6 @@
-Closures are the reason inner functions "remember" variables from outer functions long after the outer function has returned. They power module patterns, memoization, once(), and almost every callback you've ever written. Understanding the memory model behind closures changes how you write JavaScript.
+Closures are the reason inner functions "remember" variables from outer functions long after the outer function has returned. **Think of a closure like a backpack** — when a function is born, it packs up all the variables it can see in its surrounding scope and carries that backpack wherever it goes, even long after the outer function has finished.
+
+They power module patterns, memoization, once(), and almost every callback you've ever written. Understanding the memory model behind closures changes how you write JavaScript.
 
 **Prerequisites:** [JS Foundations #1 — Variables & Scope](/articles/javascript-series/js-variables-scope-hoisting), [JS Foundations #2 — `this`](/articles/javascript-series/js-this-demystified)
 
@@ -7,6 +9,14 @@ Closures are the reason inner functions "remember" variables from outer function
 ## 1. What is a Closure?
 
 A closure is created when a function **retains access to variables in its outer lexical scope** even after that outer function has finished executing. In JavaScript, every function is a closure.
+
+Let's walk through what happens step by step:
+
+1. `outer()` is called — it creates a local variable `message` and defines `inner()`
+2. `inner()` is returned — but it still "remembers" `message` from `outer`'s scope
+3. `outer()` finishes — normally its variables would be destroyed, but...
+4. `inner()` still holds a reference to `message`, so the JS engine keeps it alive on the heap
+5. When `fn()` is called later, it can still access `message` as if `outer()` never ended
 
 ```js-exec
 function outer() {
@@ -231,51 +241,66 @@ console.log(double(5)); // 10
 console.log(triple(5)); // 15
 ```
 
-This is the core of **currying** and **partial application** — covered in depth in a later article.
+This is the core of [currying and partial application](/articles/javascript-series/js-currying-partial-application) — covered in depth in a later article.
 
 ---
 
-## 7. The Classic Closure Interview Question
+## 7. The Loop + `setTimeout` Closure Bug
 
-Write a function that logs 1, 2, 3 at one-second intervals:
+A common task: log 1, 2, 3 at one-second intervals. Let's see what goes wrong and why.
 
 ```js-exec
-// ❌ Wrong — setTimeout is async, loop finishes before any callback fires
-function wrongCount() {
-  for (var i = 1; i <= 3; i++) {
-    setTimeout(() => console.log("wrong:", i), i * 1000);
-  }
+// ❌ Wrong — all three callbacks reference the SAME 'i' (now 4)
+for (var i = 1; i <= 3; i++) {
+  setTimeout(() => console.log("wrong:", i), i * 500);
 }
-
-wrongCount();
-// Prints: 4, 4, 4 — all at 1s, 2s, 3s
-
-// ✅ Fix 1: let
-function fixLet() {
-  for (let i = 1; i <= 3; i++) {
-    setTimeout(() => console.log("let:", i), i * 1000);
-  }
-}
-
-setTimeout(fixLet, 3500);
-// Prints: 1, 2, 3 at 4.5s, 5.5s, 6.5s
-
-// ✅ Fix 2: IIFE
-function fixIIFE() {
-  for (var i = 1; i <= 3; i++) {
-    (function (j) {
-      setTimeout(() => console.log("IIFE:", j), j * 1000);
-    })(i);
-  }
-}
-
-setTimeout(fixIIFE, 7000);
-// Prints: 1, 2, 3
 ```
+
+The loop races through in microseconds. By the time the first `setTimeout` fires (500ms later), `i` is already 4 (the value that made the loop stop). All three callbacks see that same 4.
+
+```js-exec
+// ✅ Fix 1: 'let' gives each iteration its own 'i'
+for (let i = 1; i <= 3; i++) {
+  setTimeout(() => console.log("let fix:", i), i * 500);
+}
+```
+
+```js-exec
+// ✅ Fix 2: IIFE — capture the current value in a new scope
+for (var i = 1; i <= 3; i++) {
+  (function (j) {
+    setTimeout(() => console.log("IIFE fix:", j), j * 500);
+  })(i);
+}
+```
+
+All three approaches produce the same output. The key insight: closures don't capture **values**; they capture **variable references**. `let` solves it by creating a fresh variable per iteration. IIFE solves it by creating a fresh scope with a copy of the value.
 
 ---
 
-## 8. Closure Performance Tip
+## 8. Releasing Closures for Garbage Collection
+
+As long as a reference to the inner function exists, the closure's variables stay alive. To free that memory, set the reference to `null`:
+
+```js-exec
+let held = (function () {
+  const bigArray = new Array(1000).fill("data");
+  return function () {
+    return bigArray.length;
+  };
+})();
+
+console.log(held()); // 1000 — bigArray is alive
+
+// Now release it:
+held = null; // bigArray is now eligible for garbage collection
+```
+
+This matters when you attach closures to DOM elements that may be removed, or when you cache closures in long-lived data structures.
+
+---
+
+## 9. Closure Performance Tip
 
 Closures keep variables alive. If you capture a large object but only need a small part, you keep the entire object in memory:
 

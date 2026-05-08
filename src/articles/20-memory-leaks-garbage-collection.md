@@ -46,6 +46,8 @@ useEffect(() => {
 }, []);
 ```
 
+For Promise-based or fetch-based work, `AbortController` provides a standard cleanup pattern — it signals cancellation and lets the GC reclaim resources without waiting for the operation to finish. See [Async #9 — AbortController](/articles/javascript-series/js-abort-controller) for the full pattern.
+
 ### 2. Detached DOM Nodes
 
 A node is "detached" when it's removed from the document but still referenced by a JavaScript variable. The GC can't collect it.

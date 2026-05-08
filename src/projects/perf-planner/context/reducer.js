@@ -150,16 +150,6 @@ export function reducer(state, action) {
         ),
       };
 
-    case "LOCK_TOGGLED":
-      return {
-        ...state,
-        variations: state.variations.map((v) =>
-          v.id === payload.variationId
-            ? { ...v, locked: { ...v.locked, [payload.key]: !v.locked?.[payload.key] } }
-            : v
-        ),
-      };
-
     // ── Resources ────────────────────────────────────────────────
 
     case "RESOURCE_ADDED":

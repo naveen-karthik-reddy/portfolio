@@ -1,4 +1,8 @@
-Currying transforms a function that takes multiple arguments into a chain of functions each taking a single argument. Partial application fixes some arguments upfront and returns a function waiting for the rest. Both build on closures and are foundational to functional programming.
+Currying transforms a function that takes multiple arguments into a chain of functions each taking a single argument. Partial application fixes some arguments upfront and returns a function waiting for the rest.
+
+**Think of currying like ordering a custom sandwich.** Instead of saying "lettuce, tomato, mayo" all at once, you tell the chef one ingredient at a time. Each time you say an ingredient, they hand you back a partially-built sandwich. Only when all ingredients are specified do you get the complete sandwich. Partial application is saying "lettuce and tomato" upfront and getting back a sandwich that's just waiting for mayo.
+
+Both build on closures and are foundational to functional programming.
 
 **Prerequisites:** [JS Foundations #3 — Closures](/articles/javascript-series/js-closures-lexical-scope), [Functions #1 — call/apply/bind](/articles/javascript-series/js-call-apply-bind)
 
@@ -68,7 +72,7 @@ console.log(curriedMultiply(2)(3, 4)); // 24
 console.log(curriedMultiply(2, 3, 4)); // 24 — all at once works too
 ```
 
-The `fn.length` check uses the function's declared parameter count to know when we're done collecting.
+The `fn.length` check uses the function's declared parameter count to know when we're done collecting. Important: `fn.length` counts only the parameters **before** the first default value or rest parameter. So `(a, b, c) => {}` has length 3, but `(a, b = 1, c) => {}` has length 1, and `(...args) => {}` has length 0. For functions with rest parameters or defaults, you'll need a different stop condition (like the empty-call terminator shown in Section 3).
 
 ---
 

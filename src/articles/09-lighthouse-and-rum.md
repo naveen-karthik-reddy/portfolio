@@ -39,22 +39,48 @@ Lighthouse is an automated auditing tool built into Chrome DevTools, available a
 | First Contentful Paint (FCP) | 10% |
 | Speed Index (SI) | 10% |
 
-> Note: Lighthouse uses **Total Blocking Time (TBT)** as a lab proxy for **INP**, since INP requires real user interaction to measure.
+> **Total Blocking Time (TBT):** The sum of all time the main thread was blocked for more than 50ms, measured between FCP and TTI (Time to Interactive). If a task runs for 80ms, 30ms of it is "blocking time" (80 − 50). TBT is Lighthouse's lab proxy for INP — a high TBT means the main thread is frequently busy, which means user interactions will queue up and feel sluggish. **Speed Index (SI):** A visual completeness metric — how quickly the page content visually fills in, measured by comparing video frames over time. Lower is better.
 
 ---
 
 ## The Scoring Model
 
-Each metric is scored on a log-normal distribution. The distribution is calibrated so that a "good" metric value (the CrUX 75th percentile threshold) maps to a score of 90.
+Each metric is scored on a curve, not a straight line. The curve is calibrated so that a "good" metric value maps to a score of 90:
 
-This means:
-- Small improvements near the poor threshold produce large score gains.
-- Small improvements at the top end produce small gains.
-- An overall score of 90+ is hard to achieve because all metrics must be near their "good" thresholds simultaneously.
+| Metric | Good (score ≈ 90) | Poor (score ≈ 50) |
+|--------|-------------------|-------------------|
+| LCP | ≤ 2.5s | ≥ 4.0s |
+| TBT | ≤ 200ms | ≥ 600ms |
+| CLS | ≤ 0.1 | ≥ 0.25 |
+| FCP | ≤ 1.8s | ≥ 3.0s |
+| SI | ≤ 3.4s | ≥ 5.8s |
 
-The overall score is a weighted average of individual metric scores — not a weighted average of metric *values*.
+The curve means marginal gains work differently at different levels: going from 4.0s to 3.5s LCP gives a big score jump; going from 2.0s to 1.5s gives a tiny one. The overall score is the weighted average of these individual metric scores — not a weighted average of the raw metric *values*.
+
+In practice:
+- **0–49 (red):** At least one metric is severely poor. Priority fix needed.
+- **50–89 (orange):** Some metrics need improvement. Check the diagnostics.
+- **90–100 (green):** All metrics are near or within "good" thresholds. Hard to reach, harder to maintain.
 
 ---
+
+## Beyond the Score: Audits, Opportunities & Diagnostics
+
+Lighthouse isn't just a number. Below the Performance score, you'll find:
+
+- **Opportunities** — specific changes with estimated time savings (e.g., "Eliminate render-blocking resources — estimated savings: 0.8s"). These are your action items, ranked by impact.
+- **Diagnostics** — additional information that doesn't directly estimate savings but provides context (e.g., "Avoids enormous network payloads," "Uses passive listeners").
+- **Passed audits** — things you're already doing right. Don't skip these — they tell you what NOT to change.
+
+## Lighthouse Modes
+
+Modern Lighthouse (v11+) has three modes accessible via DevTools or the CLI:
+
+- **Navigation** — the default. Loads the page from scratch and measures everything from first byte to interactive. Use for page-load performance.
+- **Timespan** — records a period of interaction. Click around, open modals, navigate within the SPA — Lighthouse measures performance during that window. Use for interaction analysis and INP estimation.
+- **Snapshot** — captures the current state of the page without loading anything. Use for evaluating an already-loaded page's accessibility, best practices, and SEO.
+
+For SPAs, Timespan mode is essential — a cold navigation doesn't capture what users actually do on your app.
 
 ## Lighthouse's Limitations
 

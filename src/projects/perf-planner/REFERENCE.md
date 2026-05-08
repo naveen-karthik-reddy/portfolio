@@ -21,7 +21,7 @@ src/projects/perf-planner/
 │   ├── contextObject.js             ← createContext() only
 │   └── reducer.js                   ← all state mutations (all action types documented in §4)
 ├── lib/
-│   ├── calculator.js                ← CORE: computeMetrics, computeScores, computeRoadmap,
+│   ├── calculator.js                ← CORE: computeMetrics, computeScores,
 │   │                                          computeResourceWaterfall, computeWaterfall, scoreColor
 │   ├── resourceSimulator.js         ← computeResourceImpact (incremental per-resource impact)
 │   ├── lighthouseImporter.js        ← parseLighthouseReport → resources + calibration payload
@@ -50,9 +50,6 @@ src/projects/perf-planner/
 │   ├── resources/
 │   │   ├── ResourcePanel.jsx        ← left-sidebar resource list; per-resource score impact deltas
 │   │   └── ResourceDialog.jsx       ← add/edit resource modal with type-specific fields
-│   ├── roadmap/
-│   │   ├── OptimizationRoadmap.jsx  ← renders sorted suggestions; dispatches Apply/Lock
-│   │   └── RoadmapCard.jsx          ← single suggestion card: mobile gain, effort, desktop gain, metrics
 │   ├── comparison/
 │   │   ├── ComparisonMode.jsx       ← full-page side-by-side layout (2–4 variations)
 │   │   ├── ComparisonSelector.jsx   ← left sidebar: checkboxes to pick variations (grouped by page)
@@ -108,12 +105,6 @@ src/projects/perf-planner/
   pageId: string,
   name: string,
   isBaseline: boolean,     // exactly one per page; all deltas compare against this
-  locked: {                // { [suggestionKey]: true } — excluded from roadmap
-    "r:resourceId:field": true,
-    "p:cdn": true,
-    "p:ttfb": true,
-    ...
-  },
   pageMeta: {
     ttfb: number,          // ms; server response time (0–2000)
     cdn: boolean,          // reduces same-origin RTT by ~60%
@@ -273,7 +264,6 @@ src/projects/perf-planner/
 | `RESOURCE_ADDED` | `{ variationId, resource }` | Append resource |
 | `RESOURCE_UPDATED` | `{ variationId, resource }` | Replace resource by id (whole object) |
 | `RESOURCE_DELETED` | `{ variationId, resourceId }` | Remove resource |
-| `LOCK_TOGGLED` | `{ variationId, key }` | Toggle `locked[key]` |
 | `SETTINGS_LOADED` | settings object | Replace settings (initial load) |
 | `SETTINGS_UPDATED` | settings object | Replace settings |
 | `COMPARISON_OPENED` | — | `comparisonMode = true`, clear ids |
@@ -391,32 +381,6 @@ Rationale: parsing is proportional to bytes tokenised; evaluation is proportiona
 
 ---
 
-### 5.4 computeRoadmap(resources, pageMeta, locked, profile, calibration, settings) → Suggestion[]
-
-Each candidate applies a hypothetical patch, recomputes score, returns if `gain > 0` and not locked.
-Suggestions are sorted by `mobileGain` descending.
-
-**Per-resource candidates:**
-
-| Key pattern | Condition | Patch | Effort |
-|-------------|-----------|-------|--------|
-| `r:{id}:format` | image not AVIF/WebP | `imageFormat: "AVIF"` | Easy |
-| `r:{id}:loading` | JS blocking | `loading: "defer"` | Easy/Medium (3rd-party = Medium) |
-| `r:{id}:preload` | LCP not preloaded | `loading: "preload"` | Easy |
-| `r:{id}:fetchpriority` | LCP image without fetchpriority | `fetchpriority: true` | Easy |
-| `r:{id}:size` | JS >100KB | halve `sizeKB` + halve `execTimeMs` | Hard |
-| `r:{id}:size` | image >150KB | `sizeKB × 0.6` | Medium |
-| `r:{id}:inline` | critical CSS ≤30KB blocking | `inline: true` | Medium |
-
-**Page-level candidates:**
-
-| Key | Condition | Patch | Effort |
-|-----|-----------|-------|--------|
-| `p:cdn` | `!meta.cdn` | `cdn: true` | Easy |
-| `p:ttfb` | `meta.ttfb > 200` | `ttfb: 150` | Medium |
-
-Lock key stored in `variation.locked` matches suggestion key exactly.
-
 ---
 
 ## 6. Lighthouse Importer — lighthouseImporter.js
@@ -519,7 +483,7 @@ Result: scoring curves where the simulator reproduces both per-metric scores and
   "exportVersion": 4,
   "exportedAt": "ISO",
   "page": { "name", "scoringCurves", "calibration" },
-  "variations": [{ "name", "isBaseline", "locked", "pageMeta", "resources" }]
+  "variations": [{ "name", "isBaseline", "pageMeta", "resources" }]
 }
 ```
 
@@ -597,7 +561,6 @@ index.jsx
   ├── useMemo: mobileMetrics, desktopMetrics (computeMetrics ×2)
   ├── useMemo: mobileScores, desktopScores (computeScores ×2)
   ├── useMemo: baselineMobileMetrics, baselineDesktopMetrics (computeMetrics ×2; skipped when isBaseline)
-  ├── useMemo: roadmapItems (computeRoadmap; always uses PROFILES.mobile)
   ├── useMemo: tabScores (computeMetrics + computeScores per tab; always mobile)
   ├── useAutoSave(activeVariation) — 500ms debounce
   │
@@ -613,8 +576,6 @@ index.jsx
   │       ├── ScoreGauge (SVG arc)
   │       ├── MetricRow ×5 (with baseline delta pills)
   │       └── ResourceWaterfall (rows, fcpMs, lcpMs, totalMs)
-  ├── OptimizationRoadmap — receives pre-computed roadmapItems; dispatches RESOURCE_FIELD_CHANGED /
-  │                         PAGE_META_CHANGED; patchFromSuggestionKey maps key→field/value
   ├── SettingsPanel — drawer; reads/dispatches settings
   ├── PageManager — page cards; triggers calibration dialog; file import (secondary)
   │               empty state: single "Calibrate from Lighthouse" CTA + small "Import a saved session" text link
@@ -638,8 +599,6 @@ All heavy computation runs synchronously in `useMemo` in `index.jsx` or in rende
 Explicit saves also happen in:
 - `VariationTabs` / `TabContextMenu` — after rename, duplicate, set-baseline
 - `CalibrationPanel` — `savePage` + `saveVariation` immediately on apply
-- `OptimizationRoadmap` — relies on auto-save (dispatches reducer, auto-save picks it up)
-
 ---
 
 ## 14. Settings Migration
@@ -661,17 +620,7 @@ On `AppContext.jsx` init, if `settings.scoringWeights.tti != null` (old schema t
 
 ---
 
-## 16. Adding a New Roadmap Suggestion
-
-1. In `calculator.js` → `computeRoadmap()`, add `candidates.push({...})` following existing pattern
-2. Key format: `r:{resourceId}:{field}` for per-resource, `p:{name}` for page-level
-3. `patch` shape: `{ resourceId, fields: {...} }` for resource; `{ meta: {...} }` for pageMeta
-4. In `OptimizationRoadmap.jsx` → `patchFromSuggestionKey()`, add the key suffix → field mapping
-5. For page-level: add to `pageMetaTargetForKey()` as well
-
----
-
-## 17. Adding a New Phase to the Waterfall
+## 16. Adding a New Phase to the Waterfall
 
 1. Add duration field to `makeRow()` and `makeRowFromReal()` in `calculator.js` (initialize to 0)
 2. Update `endMs` calculation if the phase extends total duration
@@ -684,7 +633,7 @@ On `AppContext.jsx` init, if `settings.scoringWeights.tti != null` (old schema t
 
 ---
 
-## 18. Adding a New Resource Field
+## 17. Adding a New Resource Field
 
 1. Add with default to `DEFAULT_RESOURCE` in `defaultSettings.js`
 2. Add UI in `ResourceDialog.jsx` (guard by `type === "js"` etc. as needed)
@@ -697,7 +646,7 @@ On `AppContext.jsx` init, if `settings.scoringWeights.tti != null` (old schema t
 
 ---
 
-## 19. File Locations for Common Tasks
+## 18. File Locations for Common Tasks
 
 | Task | File |
 |------|------|
@@ -708,7 +657,6 @@ On `AppContext.jsx` init, if `settings.scoringWeights.tti != null` (old schema t
 | Change scoring thresholds | `defaultSettings.js` → `scoringCurves` |
 | Change scoring weights | `defaultSettings.js` → `scoringWeights` |
 | Change waterfall colors | `ResourceWaterfall.jsx` → `PHASE` and `TYPE_DL_COLOR` |
-| Add a new roadmap suggestion | `calculator.js` → `computeRoadmap()` + `OptimizationRoadmap.jsx` → `patchFromSuggestionKey()` |
 | Change calibration panel fields | `CalibrationPanel.jsx` + `lighthouseImporter.js` |
 | Fix Lighthouse parsing for a new LH version | `lighthouseImporter.js` |
 | Change IndexedDB schema | `db.js` → bump `DB_VERSION` + add migration block |
@@ -720,7 +668,7 @@ On `AppContext.jsx` init, if `settings.scoringWeights.tti != null` (old schema t
 
 ---
 
-## 20. Entry-Point UX Model
+## 19. Entry-Point UX Model
 
 The intended user workflow is linear:
 
@@ -740,10 +688,9 @@ The intended user workflow is linear:
 - Empty state: `"Calibrate from Lighthouse"` button (contained, primary, `size="large"`) + small text link `"Already have a session? Import a saved session"`
 - Page list header: `"Calibrate new page"` (contained) + `"Import session"` (text button, tooltip: `"Restore a previously exported session"`)
 
-**Empty state includes feature cards.** Below the primary CTA, three feature cards explain the workflow:
+**Empty state includes feature cards.** Below the primary CTA, two feature cards explain the workflow:
 1. **Import Lighthouse JSON** — upload a real report to calibrate scoring curves
 2. **Simulate What-If Changes** — adjust resources, TTFB, CDN; see live score updates
-3. **Get Optimization Roadmap** — ranked suggestions with effort estimates and predicted gains
 
 Cards use a subtle hover lift effect and staggered `fadeInUp` CSS keyframe animation (no framer-motion dependency). Cards follow existing visual patterns: `border: 1`, `borderRadius: 2.5`, `alpha()` tinted backgrounds.
 
@@ -754,4 +701,4 @@ Cards use a subtle hover lift effect and staggered `fadeInUp` CSS keyframe anima
 - Do **not** restore the `variant="outlined"` Import button at equal weight to the Calibrate button.
 - If a new entry path is added (e.g. "Start from template"), it should be treated as a secondary path (text button or link), never `variant="contained"`.
 - The tooltip on `"Import session"` must continue to explain what import does — it prevents users from confusing it with Lighthouse calibration.
-- Feature cards in the empty state should remain secondary to the primary CTA — do not add more than 3-4 cards or make them larger than the CTA button.
+- Feature cards in the empty state should remain secondary to the primary CTA — do not add more than 2-3 cards or make them larger than the CTA button.

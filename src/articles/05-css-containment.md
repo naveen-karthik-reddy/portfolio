@@ -1,4 +1,6 @@
-The browser doesn't know which parts of your page have changed unless you tell it. By default, a style change anywhere can theoretically affect everything. CSS Containment is the mechanism to break that assumption — telling the browser that a subtree is isolated, so it can skip work it would otherwise do.
+The browser doesn't know which parts of your page have changed unless you tell it. By default, a style change anywhere can theoretically affect everything — change a single element's width, and the browser may recalculate the layout of every element after it.
+
+Think of it like rooms in a house: normally, if you rearrange furniture in one room, the browser checks whether it affected all the other rooms too. CSS Containment is like putting up walls — you tell the browser "whatever happens inside this room stays in this room." The browser can then skip checking the rest of the house entirely.
 
 ---
 
@@ -56,7 +58,7 @@ There are four containment types:
 
 On a page with dozens of off-screen cards, the browser renders only the visible portion. This can reduce initial rendering time by 5–10× on content-heavy pages.
 
-**`contain-intrinsic-size`** is required alongside it. When an element is skipped, the browser needs a placeholder size to calculate scrollbar height correctly. Without it, scroll position jumps as you scroll and elements render.
+**`contain-intrinsic-size`** is required alongside it. When an element is skipped, the browser needs a placeholder size to calculate scrollbar height correctly. Without it, the scrollbar jumps erratically as elements render on scroll.
 
 ```css
 /* ❌ Missing contain-intrinsic-size — scroll bar will jump
@@ -69,6 +71,21 @@ On a page with dozens of off-screen cards, the browser renders only the visible 
 .article-card {
   content-visibility: auto;
   contain-intrinsic-size: auto 320px; /* rough estimate of card height */
+}
+```
+
+The `auto` keyword means: "use the last-known rendered size of this element, and fall back to the provided value (320px) on the very first render." Without `auto`, the element always uses the fixed placeholder — even after it's been rendered at a different size. Always prefer `auto <estimate>` over a bare `<size>` so the placeholder improves as the browser learns the real dimensions.
+
+### `content-visibility: hidden` — Preserve State, Skip Rendering
+
+There's also `content-visibility: hidden`, which behaves like `content-visibility: auto` for an always-off-screen element. Unlike `display: none`, it doesn't destroy the element's layout state — the browser skips rendering the subtree entirely but remembers its size and scroll position. This is ideal for single-page apps with hidden tabs or sections that you switch between frequently:
+
+```css
+/* ✅ Hidden tab — cheap to skip, cheap to restore.
+   display: none would destroy and rebuild layout each time. */
+.tab-panel[hidden] {
+  content-visibility: hidden;
+  contain-intrinsic-size: auto 500px;
 }
 ```
 
@@ -95,9 +112,16 @@ The property is supported in all modern browsers (Chrome 85+, Firefox 125+, Safa
 
 ## Caveats
 
-- `content-visibility: auto` elements are excluded from the browser's find-in-page results until rendered. This is a known limitation.
-- Elements with `content-visibility: auto` don't respond to intersection observations until rendered.
+- `content-visibility: auto` elements are excluded from the browser's find-in-page (Ctrl+F) results until rendered. For content-heavy pages this is usually an acceptable tradeoff — users searching for text on a page they haven't scrolled to yet is rare.
+- Screen readers may not announce content inside unrendered `content-visibility: auto` elements. Test with assistive technology if your page relies on screen-reader navigation.
+- Elements with `content-visibility: auto` don't respond to Intersection Observer callbacks until rendered.
 - Setting `contain: size` without a fixed size causes the element to collapse to zero, so always pair it with explicit dimensions.
+
+> **Browser support and graceful degradation:** `content-visibility` and `contain` are supported in Chrome 85+, Firefox 125+, Safari 18+. In older browsers, both properties are silently ignored — the page still works, just without the performance optimization. There's no downside to adding them today.
+
+## Measuring the Impact
+
+Open DevTools → Performance panel, record a page load, and look at the **Layout** and **Paint** events in the main thread row. With `content-visibility: auto` applied to off-screen sections, you should see significantly fewer layout/paint events (each event represents one rendered element). Lighthouse's "Avoid large layout shifts" and "Avoid excessive DOM size" audits also reflect containment improvements indirectly.
 
 ---
 
