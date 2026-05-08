@@ -6,7 +6,7 @@ import {
 } from "@mui/material";
 import {
   Edit, Delete, FileDownload, FileUpload, SpeedOutlined, Science,
-  CalendarTodayOutlined, LayersOutlined,
+  CalendarTodayOutlined, LayersOutlined, CheckCircleOutline,
 } from "@mui/icons-material";
 import { useTheme, alpha } from "@mui/material/styles";
 import { useApp } from "../../context/useApp.js";
@@ -20,9 +20,9 @@ function formatDate(iso) {
   return new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
 }
 
-function ScoreRing({ score, color, size = 56 }) {
+function ScoreRing({ score, color, size = 52 }) {
   const radius = size / 2;
-  const stroke = 4.5;
+  const stroke = 4;
   const nr = radius - stroke;
   const circ = nr * 2 * Math.PI;
   const offset = circ - (score / 100) * circ;
@@ -30,15 +30,32 @@ function ScoreRing({ score, color, size = 56 }) {
     <Box sx={{ position: "relative", width: size, height: size, flexShrink: 0 }}>
       <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }}>
         <circle cx={radius} cy={radius} r={nr} fill="none" stroke="currentColor"
-          strokeWidth={stroke} style={{ color: "rgba(128,128,128,0.12)" }} />
+          strokeWidth={stroke} style={{ color: "rgba(128,128,128,0.1)" }} />
         <circle cx={radius} cy={radius} r={nr} fill="none" stroke={color}
           strokeWidth={stroke} strokeDasharray={`${circ} ${circ}`}
           strokeDashoffset={offset} strokeLinecap="round"
-          style={{ transition: "stroke-dashoffset 0.65s ease", filter: `drop-shadow(0 0 4px ${color}55)` }} />
+          style={{ transition: "stroke-dashoffset 0.65s ease", filter: `drop-shadow(0 0 5px ${color}44)` }} />
       </svg>
       <Box sx={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <Typography sx={{ fontWeight: 900, fontSize: "1rem", lineHeight: 1, color }}>{score}</Typography>
+        <Typography sx={{ fontWeight: 900, fontSize: "0.95rem", lineHeight: 1, color }}>{score}</Typography>
       </Box>
+    </Box>
+  );
+}
+
+function ScorePill({ label, score, color }) {
+  return (
+    <Box sx={{
+      display: "flex", alignItems: "center", gap: 0.75,
+      px: 1.25, py: 0.4, borderRadius: 1.5,
+      bgcolor: alpha(color, 0.08), border: `1px solid ${alpha(color, 0.2)}`,
+    }}>
+      <Typography sx={{ fontSize: "0.62rem", fontWeight: 600, color: "text.secondary", letterSpacing: "0.03em" }}>
+        {label}
+      </Typography>
+      <Typography sx={{ fontSize: "0.75rem", fontWeight: 800, color, lineHeight: 1 }}>
+        {score !== null ? score : "—"}
+      </Typography>
     </Box>
   );
 }
@@ -48,13 +65,18 @@ const fadeInUp = keyframes`
   to   { opacity: 1; transform: translateY(0); }
 `;
 
+const cardAppear = keyframes`
+  from { opacity: 0; transform: scale(0.96) translateY(12px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+`;
+
 export default function PageManager({ onClose }) {
   const { state, dispatch } = useApp();
   const theme  = useTheme();
   const isDark = theme.palette.mode === "dark";
   const importRef = useRef(null);
 
-  const { pages, variations, activePageId, settings } = state;
+  const { pages, variations, settings } = state;
 
   const [renameDialog, setRenameDialog] = useState({ open: false, page: null, value: "" });
   const [deleteDialog, setDeleteDialog] = useState({ open: false, page: null });
@@ -338,123 +360,166 @@ export default function PageManager({ onClose }) {
       </Box>
 
       {/* Cards grid */}
-      <Box sx={{ flex: 1, overflowY: "auto", py: 4, px: { xs: 2, sm: 4 } }}>
-        <Box sx={{ maxWidth: 960, mx: "auto" }}>
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
-            {pages.map((page) => {
-              const pageVars   = variations.filter((v) => v.pageId === page.id);
-              const baseline   = pageVars.find((v) => v.isBaseline) ?? pageVars[0] ?? null;
+      <Box sx={{ flex: 1, overflowY: "auto", py: 4, px: { xs: 2, sm: 3 } }}>
+        <Box sx={{
+          maxWidth: 960, mx: "auto",
+          display: "grid",
+          gridTemplateColumns: { xs: "1fr", md: "1fr 1fr", lg: "1fr 1fr 1fr" },
+          gap: 2,
+        }}>
+          {pages.map((page, i) => {
+            const pageVars   = variations.filter((v) => v.pageId === page.id);
+            const baseline   = pageVars.find((v) => v.isBaseline) ?? pageVars[0] ?? null;
 
-              const pageSettings = page.scoringCurves ? { ...settings, scoringCurves: page.scoringCurves } : settings;
-              const mobileScore  = baseline ? computeScores(computeMetrics(baseline.resources ?? [], baseline.pageMeta ?? {}, PROFILES.mobile,  page.calibration), pageSettings).overall : null;
-              const desktopScore = baseline ? computeScores(computeMetrics(baseline.resources ?? [], baseline.pageMeta ?? {}, PROFILES.desktop, page.calibration), pageSettings).overall : null;
-              const col     = mobileScore  !== null ? scoreColor(mobileScore)  : "#9ca3af";
-              const deskCol = desktopScore !== null ? scoreColor(desktopScore) : "#9ca3af";
+            const pageSettings = page.scoringCurves ? { ...settings, scoringCurves: page.scoringCurves } : settings;
+            const mobileScore  = baseline ? computeScores(computeMetrics(baseline.resources ?? [], baseline.pageMeta ?? {}, PROFILES.mobile,  page.calibration), pageSettings).overall : null;
+            const desktopScore = baseline ? computeScores(computeMetrics(baseline.resources ?? [], baseline.pageMeta ?? {}, PROFILES.desktop, page.calibration), pageSettings).overall : null;
+            const col     = mobileScore  !== null ? scoreColor(mobileScore)  : "#9ca3af";
+            const deskCol = desktopScore !== null ? scoreColor(desktopScore) : "#9ca3af";
 
-              return (
-                <Paper
-                  key={page.id}
-                  elevation={0}
-                  onClick={() => handleActivate(page)}
-                  sx={{
-                    display: "flex", flexDirection: "column",
-                    width: 256, flexShrink: 0,
-                    border: "1.5px solid", borderColor: "divider",
-                    borderRadius: 3, overflow: "hidden", cursor: "pointer",
-                    bgcolor: "background.paper",
-                    transition: "transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease",
-                    boxShadow: isDark ? "0 1px 6px rgba(0,0,0,0.18)" : "0 1px 4px rgba(0,0,0,0.06)",
-                    "&:hover": {
-                      transform: "translateY(-3px)",
-                      borderColor: alpha(theme.palette.primary.main, 0.4),
-                      boxShadow: isDark ? "0 8px 28px rgba(0,0,0,0.38)" : "0 8px 28px rgba(0,0,0,0.11)",
-                    },
-                  }}
-                >
-                  {/* Score colour bar */}
-                  <Box sx={{ height: 3, flexShrink: 0, background: `linear-gradient(90deg, ${col} 0%, ${alpha(col, 0.2)} 100%)` }} />
+            const isCalibrated = !!page.calibration;
 
-                  <Box sx={{ p: 2.25, display: "flex", flexDirection: "column", flex: 1, gap: 1.75 }}>
+            return (
+              <Paper
+                key={page.id}
+                elevation={0}
+                onClick={() => handleActivate(page)}
+                sx={{
+                  display: "flex", flexDirection: "column",
+                  border: "1px solid", borderColor: "divider",
+                  borderRadius: 2.5, overflow: "hidden", cursor: "pointer",
+                  bgcolor: "background.paper",
+                  transition: "transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease",
+                  animation: `${cardAppear} 0.4s ${i * 0.06}s ease both`,
+                  boxShadow: isDark ? "0 1px 8px rgba(0,0,0,0.2)" : "0 1px 4px rgba(0,0,0,0.05)",
+                  "&:hover": {
+                    transform: "translateY(-3px)",
+                    borderColor: alpha(col, 0.4),
+                    boxShadow: isDark
+                      ? `0 10px 32px rgba(0,0,0,0.38), 0 0 0 1px ${alpha(col, 0.1)}`
+                      : `0 10px 32px rgba(0,0,0,0.09), 0 0 0 1px ${alpha(col, 0.06)}`,
+                  },
+                }}
+              >
+                {/* Accent bar */}
+                <Box sx={{
+                  height: 4, flexShrink: 0,
+                  background: `linear-gradient(90deg, ${col}, ${alpha(col, 0.3)})`,
+                }} />
 
-                    {/* Score ring + name */}
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-                      {mobileScore !== null
-                        ? <ScoreRing score={mobileScore} color={col} size={50} />
-                        : <Box sx={{ width: 50, height: 50, borderRadius: "50%", bgcolor: "action.hover", flexShrink: 0 }} />
-                      }
-                      <Box sx={{ flex: 1, minWidth: 0 }}>
-                        <Tooltip title={page.name} placement="top" disableInteractive enterDelay={500}>
-                          <Typography sx={{
-                            fontWeight: 700, fontSize: "0.87rem", lineHeight: 1.3,
-                            overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-                          }}>
-                            {page.name}
-                          </Typography>
-                        </Tooltip>
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 0.4 }}>
-                          <Typography sx={{ fontSize: "0.62rem", color: "text.disabled" }}>Mobile</Typography>
-                          <Typography sx={{ fontSize: "0.68rem", fontWeight: 800, color: col }}>{mobileScore ?? "—"}</Typography>
-                          {desktopScore !== null && <>
-                            <Typography sx={{ fontSize: "0.62rem", color: "text.disabled", ml: 0.4 }}>Desktop</Typography>
-                            <Typography sx={{ fontSize: "0.68rem", fontWeight: 800, color: deskCol }}>{desktopScore}</Typography>
-                          </>}
+                <Box sx={{ p: 2.25, display: "flex", flexDirection: "column", flex: 1, gap: 1.75 }}>
+                  {/* Name + calibration badge */}
+                  <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 1 }}>
+                    <Tooltip title={page.name} placement="top" disableInteractive enterDelay={500}>
+                      <Typography sx={{
+                        fontWeight: 800, fontSize: "0.82rem", lineHeight: 1.3, letterSpacing: "-0.01em",
+                        overflow: "hidden", textOverflow: "ellipsis",
+                        display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
+                      }}>
+                        {page.name}
+                      </Typography>
+                    </Tooltip>
+                    {isCalibrated && (
+                      <Chip
+                        icon={<CheckCircleOutline sx={{ fontSize: "11px !important" }} />}
+                        label="Calibrated"
+                        size="small"
+                        sx={{
+                          fontSize: "0.58rem", height: 20, fontWeight: 600, flexShrink: 0,
+                          bgcolor: alpha("#22c55e", 0.1), color: "#22c55e",
+                          border: `1px solid ${alpha("#22c55e", 0.25)}`,
+                          "& .MuiChip-label": { px: 0.6 },
+                          "& .MuiChip-icon": { ml: 0.4 },
+                        }}
+                      />
+                    )}
+                  </Box>
+
+                  {/* Score section */}
+                  <Box sx={{
+                    display: "flex", alignItems: "center", gap: 2,
+                    py: 1.5, px: 0.75,
+                    borderRadius: 2,
+                    bgcolor: isDark ? alpha(col, 0.04) : alpha(col, 0.03),
+                  }}>
+                    {mobileScore !== null
+                      ? <ScoreRing score={mobileScore} color={col} size={52} />
+                      : <Box sx={{
+                          width: 52, height: 52, borderRadius: "50%",
+                          bgcolor: "action.hover", flexShrink: 0,
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                        }}>
+                          <Typography sx={{ fontSize: "0.6rem", color: "text.disabled", fontWeight: 700 }}>N/A</Typography>
                         </Box>
-                      </Box>
-                    </Box>
-
-                    {/* Meta chips */}
-                    <Box sx={{ display: "flex", gap: 0.6, flexWrap: "wrap" }}>
-                      <Chip
-                        icon={<LayersOutlined sx={{ fontSize: "11px !important" }} />}
-                        label={`${pageVars.length} variation${pageVars.length !== 1 ? "s" : ""}`}
-                        size="small"
-                        sx={{ fontSize: "0.62rem", height: 20, bgcolor: "action.hover", "& .MuiChip-label": { px: 0.75 } }}
-                      />
-                      <Chip
-                        icon={<CalendarTodayOutlined sx={{ fontSize: "11px !important" }} />}
-                        label={formatDate(page.updatedAt)}
-                        size="small"
-                        sx={{ fontSize: "0.62rem", height: 20, bgcolor: "action.hover", "& .MuiChip-label": { px: 0.75 } }}
-                      />
-                    </Box>
-
-                    <Box sx={{ flex: 1 }} />
-
-                    {/* Footer: icon actions */}
-                    <Box
-                      sx={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 0.25, pt: 1.25, borderTop: "1px solid", borderColor: "divider" }}
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <Tooltip title="Recalibrate from Lighthouse" arrow>
-                        <IconButton size="small" onClick={(e) => openRecalibrate(e, page)}
-                          sx={{ color: "text.secondary", "&:hover": { color: "primary.main", bgcolor: alpha(theme.palette.primary.main, 0.08) } }}>
-                          <Science sx={{ fontSize: 15 }} />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Rename" arrow>
-                        <IconButton size="small" onClick={(e) => openRename(e, page)}
-                          sx={{ color: "text.secondary", "&:hover": { color: "primary.main", bgcolor: alpha(theme.palette.primary.main, 0.08) } }}>
-                          <Edit sx={{ fontSize: 15 }} />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Export as JSON" arrow>
-                        <IconButton size="small" onClick={(e) => handleExport(e, page)}
-                          sx={{ color: "text.secondary", "&:hover": { color: "primary.main", bgcolor: alpha(theme.palette.primary.main, 0.08) } }}>
-                          <FileDownload sx={{ fontSize: 15 }} />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Delete" arrow>
-                        <IconButton size="small" onClick={(e) => openDelete(e, page)}
-                          sx={{ color: "text.secondary", "&:hover": { color: "error.main", bgcolor: alpha(theme.palette.error.main, 0.08) } }}>
-                          <Delete sx={{ fontSize: 15 }} />
-                        </IconButton>
-                      </Tooltip>
+                    }
+                    <Box sx={{ display: "flex", flexDirection: "column", gap: 0.75, flex: 1 }}>
+                      <ScorePill label="MOBILE" score={mobileScore} color={col} />
+                      <ScorePill label="DESKTOP" score={desktopScore} color={deskCol} />
                     </Box>
                   </Box>
-                </Paper>
-              );
-            })}
-          </Box>
+
+                  {/* Meta row */}
+                  <Box sx={{ display: "flex", gap: 0.75, flexWrap: "wrap" }}>
+                    <Chip
+                      icon={<LayersOutlined sx={{ fontSize: "12px !important" }} />}
+                      label={`${pageVars.length} ${pageVars.length === 1 ? "variation" : "variations"}`}
+                      size="small"
+                      sx={{
+                        fontSize: "0.62rem", height: 22, fontWeight: 500,
+                        bgcolor: "action.hover", color: "text.secondary",
+                        "& .MuiChip-label": { px: 0.6 },
+                      }}
+                    />
+                    <Chip
+                      icon={<CalendarTodayOutlined sx={{ fontSize: "12px !important" }} />}
+                      label={formatDate(page.updatedAt)}
+                      size="small"
+                      sx={{
+                        fontSize: "0.62rem", height: 22, fontWeight: 500,
+                        bgcolor: "action.hover", color: "text.secondary",
+                        "& .MuiChip-label": { px: 0.6 },
+                      }}
+                    />
+                  </Box>
+
+                  {/* Actions */}
+                  <Box
+                    sx={{
+                      display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 0.25,
+                      pt: 1.25, mt: "auto",
+                      borderTop: "1px solid", borderColor: "divider",
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Tooltip title="Recalibrate from Lighthouse" arrow>
+                      <IconButton size="small" onClick={(e) => openRecalibrate(e, page)}
+                        sx={{ color: "text.secondary", "&:hover": { color: "primary.main", bgcolor: alpha(theme.palette.primary.main, 0.08) } }}>
+                        <Science sx={{ fontSize: 15 }} />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Rename" arrow>
+                      <IconButton size="small" onClick={(e) => openRename(e, page)}
+                        sx={{ color: "text.secondary", "&:hover": { color: "primary.main", bgcolor: alpha(theme.palette.primary.main, 0.08) } }}>
+                        <Edit sx={{ fontSize: 15 }} />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Export as JSON" arrow>
+                      <IconButton size="small" onClick={(e) => handleExport(e, page)}
+                        sx={{ color: "text.secondary", "&:hover": { color: "primary.main", bgcolor: alpha(theme.palette.primary.main, 0.08) } }}>
+                        <FileDownload sx={{ fontSize: 15 }} />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Delete" arrow>
+                      <IconButton size="small" onClick={(e) => openDelete(e, page)}
+                        sx={{ color: "text.secondary", "&:hover": { color: "error.main", bgcolor: alpha(theme.palette.error.main, 0.08) } }}>
+                        <Delete sx={{ fontSize: 15 }} />
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
+                </Box>
+              </Paper>
+            );
+          })}
         </Box>
       </Box>
     </Box>

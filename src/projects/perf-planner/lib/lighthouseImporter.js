@@ -505,7 +505,11 @@ export function parseLighthouseReport(jsonOrText) {
   };
 
   let name = "Imported Page";
-  try { name = new URL(finalUrl).host; } catch { /* keep default */ }
+  try {
+    const u = new URL(finalUrl);
+    const path = u.pathname.replace(/\/+$/, "") || "";
+    name = u.host + path;
+  } catch { /* keep default */ }
 
   // Fingerprint of the imported resource list — used by computeResourceWaterfall to
   // detect whether resources have been modified since import, so it can decide
