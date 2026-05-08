@@ -47,7 +47,7 @@ export default function ProjectsPage() {
   }
 
   return (
-    <Container maxWidth="md" sx={{ py: { xs: 5, sm: 8 }, px: { xs: 2, sm: 3 } }}>
+    <Container maxWidth="lg" sx={{ py: { xs: 5, sm: 8 }, px: { xs: 2, sm: 3 } }}>
       <ProjectsList />
     </Container>
   );
@@ -81,25 +81,31 @@ function ProjectsList() {
         </Typography>
       </motion.div>
 
-      <motion.div
+      <Box
+        component={motion.div}
         variants={staggerContainer}
         initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: "-50px" }}
-        style={{ display: "flex", flexDirection: "column", gap: "24px" }}
+        animate="visible"
+        sx={{
+          display: "grid",
+          gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+          gap: 3,
+        }}
       >
         {projectData.map((project) => (
-          <motion.div key={project.id} variants={fadeInUp}>
+          <motion.div key={project.id} variants={fadeInUp} style={{ display: "flex" }}>
             <Paper
               component={Link}
               to={`/projects/${project.id}`}
               sx={{
-                p: 3,
-                display: "block",
+                display: "flex",
+                flexDirection: "column",
                 textDecoration: "none",
                 border: "1px solid",
                 borderColor: "divider",
                 borderRadius: 2,
+                overflow: "hidden",
+                width: "100%",
                 transition: "all 0.3s",
                 "&:hover": {
                   borderColor: "primary.main",
@@ -108,46 +114,69 @@ function ProjectsList() {
                 },
               }}
             >
-              <Typography variant="h6" fontWeight={700} color="text.primary">
-                {project.name}
-              </Typography>
-
-              <Typography variant="body2" color="text.secondary" sx={{ my: 1 }}>
-                {project.excerpt}
-              </Typography>
-
-              <Box display="flex" gap={1} flexWrap="wrap" mb={1}>
-                {project.tags.map((tag) => (
-                  <Chip
-                    key={tag}
-                    label={tag}
-                    size="small"
-                    sx={{
-                      color: "primary.main",
-                      border: "1px solid",
-                      borderColor: "primary.main",
-                      bgcolor: "transparent",
-                      fontWeight: 600,
-                    }}
-                  />
-                ))}
+              {/* Accent bar + thumbnail */}
+              <Box
+                sx={{
+                  position: "relative",
+                  height: 200,
+                  overflow: "hidden",
+                  borderTop: `4px solid ${project.accent}`,
+                }}
+              >
+                <Box
+                  component="img"
+                  src={project.image}
+                  alt={project.name}
+                  loading="lazy"
+                  sx={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                    display: "block",
+                  }}
+                />
               </Box>
 
-              <Typography variant="caption" color="text.secondary">
-                {project.date}
-              </Typography>
+              {/* Card body */}
+              <Box sx={{ p: 3, display: "flex", flexDirection: "column", flex: 1 }}>
+                <Typography variant="h6" fontWeight={700} color="text.primary">
+                  {project.name}
+                </Typography>
+
+                <Typography variant="body2" color="text.secondary" sx={{ my: 1, flex: 1 }}>
+                  {project.excerpt}
+                </Typography>
+
+                <Box display="flex" gap={1} flexWrap="wrap" mb={1.5}>
+                  {project.tags.map((tag) => (
+                    <Chip
+                      key={tag}
+                      label={tag}
+                      size="small"
+                      sx={{
+                        color: "primary.main",
+                        border: "1px solid",
+                        borderColor: "primary.main",
+                        bgcolor: "transparent",
+                        fontWeight: 600,
+                      }}
+                    />
+                  ))}
+                </Box>
+
+                <Typography variant="caption" color="text.secondary">
+                  {project.date}
+                </Typography>
+              </Box>
             </Paper>
           </motion.div>
         ))}
-      </motion.div>
+      </Box>
     </Box>
   );
 }
 
 function ProjectView({ project }) {
-  const theme = useTheme();
-  const grad = `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`;
-
   const ProjectComponent = useMemo(() => {
     const moduleKey = `../projects/${project.id}/index.jsx`;
     const loader = projectModules[moduleKey];

@@ -20,7 +20,8 @@
       "Bash(dir \"c:\\\\Users\\\\LENOVO\\\\Desktop\\\\Resume\\\\naveen-portfolio\\\\\")",
       "Bash(export GEMINI_API_KEY=\"AIzaSyBDxgMY7VIRC8E_GBU4hCjyCrvzVG7xURg\")",
       "Bash(git reset *)",
-      "PowerShell(git *)"
+      "PowerShell(git *)",
+      "Bash(npx eslint *)"
     ]
   }
 }

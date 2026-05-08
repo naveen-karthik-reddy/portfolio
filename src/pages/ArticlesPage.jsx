@@ -79,6 +79,16 @@ const CATEGORY_LABELS = {
   "llm-metrics": "LLM / AI",
 };
 
+const CATEGORY_COLORS = {
+  performance: "#22c55e",
+  javascript: "#f59e0b",
+  react: "#3b82f6",
+  fundamentals: "#6b7280",
+  css: "#a855f7",
+  product: "#ec4899",
+  "llm-metrics": "#14b8a6",
+};
+
 /* ==================== ARTICLES LIST ==================== */
 
 function ArticlesList() {
@@ -239,6 +249,8 @@ function ArticlesList() {
                 borderRadius: 2,
                 transition: "all 0.3s",
                 width: "100%",
+                position: "relative",
+                overflow: "hidden",
                 "&:hover": {
                   borderColor: "primary.main",
                   transform: "translateY(-3px)",
@@ -246,6 +258,30 @@ function ArticlesList() {
                 },
               }}
             >
+              {/* Diagonal category ribbon */}
+              <Box
+                sx={{
+                  position: "absolute",
+                  bottom: 24,
+                  right: -40,
+                  transform: "rotate(-45deg)",
+                  transformOrigin: "center",
+                  width: 150,
+                  textAlign: "center",
+                  bgcolor: CATEGORY_COLORS[article.categories?.[0]] ?? "#6b7280",
+                  color: "#fff",
+                  py: 0.25,
+                  fontWeight: 700,
+                  fontSize: "0.6rem",
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  lineHeight: 1.4,
+                  zIndex: 1,
+                }}
+              >
+                {CATEGORY_LABELS[article.categories?.[0]] ?? ""}
+              </Box>
+
               <Typography variant="h6" fontWeight={700} color="text.primary" sx={{ mb: 1 }}>
                 {article.title}
               </Typography>

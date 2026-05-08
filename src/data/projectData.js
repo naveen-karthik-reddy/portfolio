@@ -4,6 +4,8 @@ export const projectData = [
     name: "Holdings Analyzer",
     date: "Apr 2026",
     excerpt: "Upload your Zerodha holdings CSV and get an instant portfolio dashboard — allocation breakdown, top gainers & losers, and a full sortable holdings table.",
+    image: "/projects/holdings-analyzer.png",
+    accent: "#2196f3",
     tags: ["React", "Recharts", "MUI", "CSV"],
     points: [
       "Parses a Zerodha KITE holdings CSV entirely in the browser — no server uploads — then fires requests to fetch dividend yields, valuation ratios, beta, analyst consensus, and 52-week ranges for every holding automatically",
@@ -17,6 +19,8 @@ export const projectData = [
     name: "Web Performance Planner",
     date: "Apr 2026",
     excerpt: "A what-if simulator for web performance. Tweak sliders and instantly see estimated Lighthouse-style Mobile & Desktop scores across multiple page variations — with IndexedDB persistence, JSON export/import, and cross-variation comparison.",
+    image: "/projects/web-performance-planner.png",
+    accent: "#ff9800",
     tags: ["React", "IndexedDB", "MUI", "Performance"],
     articleSlug: "web-performance-planner",
     points: [
