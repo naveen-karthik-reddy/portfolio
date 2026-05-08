@@ -6,7 +6,21 @@
       "Bash(node *)",
       "Bash(git add *)",
       "Bash(git commit -m ' *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(Start-Sleep -Seconds 3)",
+      "Bash(Get-Content \"C:\\\\Users\\\\LENOVO\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-LENOVO-Desktop-Resume-naveen-portfolio\\\\3987b2a3-9799-4d17-9d95-a19d75f47c90\\\\tasks\\\\bck5pb91b.output\" -Tail 15)",
+      "mcp__ide__getDiagnostics",
+      "WebFetch(domain:localhost)",
+      "Bash(sleep 4 && cat /c/Users/LENOVO/AppData/Local/Temp/claude/c--Users-LENOVO-Desktop-Resume-naveen-portfolio/3256ec36-53cb-4a04-be80-3def7087f1c1/tasks/bzrhfchpp.output)",
+      "Read(//c/Users/LENOVO/AppData/Local/Temp/claude/c--Users-LENOVO-Desktop-Resume-naveen-portfolio/3256ec36-53cb-4a04-be80-3def7087f1c1/tasks/**)",
+      "WebFetch(domain:www.framer.com)",
+      "WebFetch(domain:motion.dev)",
+      "Bash(npx kill-port *)",
+      "Bash(Select-String -Pattern \"error|Error|built\")",
+      "Bash(dir \"c:\\\\Users\\\\LENOVO\\\\Desktop\\\\Resume\\\\naveen-portfolio\\\\\")",
+      "Bash(export GEMINI_API_KEY=\"AIzaSyBDxgMY7VIRC8E_GBU4hCjyCrvzVG7xURg\")",
+      "Bash(git reset *)",
+      "PowerShell(git *)"
     ]
   }
 }

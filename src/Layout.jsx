@@ -161,6 +161,18 @@ export default function Layout() {
             h3: { fontWeight: 800, fontSize: "2rem" },
           },
           shape: { borderRadius: 12 },
+          components: {
+            MuiDialog: {
+              styleOverrides: {
+                paper: ({ theme }) => ({
+                  backgroundImage: "none",
+                  backgroundColor: theme.palette.mode === "dark"
+                    ? "#141423"
+                    : "#ffffff",
+                }),
+              },
+            },
+          },
         })
       ),
     [currentTheme, darkMode]
