@@ -6,10 +6,8 @@ import {
   Box,
   Paper,
   Chip,
-  Button,
   CircularProgress,
 } from "@mui/material";
-import { ArrowBack } from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
 import { motion } from "framer-motion";
 
@@ -165,18 +163,6 @@ function ProjectView({ project }) {
         canonical={`/projects/${project.id}`}
         keywords={project.tags}
       />
-      <Box sx={{ mb: 3 }}>
-        <Button
-          component={Link}
-          to="/projects"
-          startIcon={<ArrowBack />}
-          size="small"
-          sx={{ color: "text.secondary", "&:hover": { color: "primary.main" } }}
-        >
-          All Projects
-        </Button>
-      </Box>
-
       {ProjectComponent ? (
         <Suspense
           fallback={

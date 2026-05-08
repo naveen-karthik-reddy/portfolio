@@ -116,7 +116,7 @@ function PerfPlanner() {
   }
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", height: "calc(100vh - 130px)", minHeight: 500 }}>
+    <Box sx={{ display: "flex", flexDirection: "column", height: "calc(100vh)", minHeight: 500 }}>
       <TopBar
         onPagesOpen={() => setPageManagerOpen(true)}
         onSettingsOpen={() => setSettingsOpen(true)}
