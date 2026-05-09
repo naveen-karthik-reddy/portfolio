@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { ThemeProvider, createTheme, responsiveFontSizes } from "@mui/material/styles";
-import { Box } from "@mui/material";
+import { Box, CssBaseline } from "@mui/material";
 
 import TopNav from "./components/TopNav";
 import Footer from "./components/Footer";
@@ -172,6 +172,16 @@ export default function Layout() {
                 }),
               },
             },
+            MuiMenu: {
+              styleOverrides: {
+                paper: ({ theme }) => ({
+                  backgroundImage: "none",
+                  backgroundColor: theme.palette.mode === "dark"
+                    ? "#1a1a2e"
+                    : "#ffffff",
+                }),
+              },
+            },
           },
         })
       ),
@@ -194,6 +204,7 @@ export default function Layout() {
 
   return (
     <ThemeProvider theme={theme}>
+      <CssBaseline />
       <Box
         sx={{
           display: "flex",

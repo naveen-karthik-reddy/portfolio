@@ -44,6 +44,8 @@ The **score card** shows the overall 0–100 performance score and five metric r
 
 Each score card also contains a **resource waterfall** — a timeline showing every file your page loads as a horizontal bar, broken into the same timing phases Chrome DevTools shows (DNS, TCP, SSL, request, waiting/TTFB, download). Two vertical markers show where FCP and LCP fall across your resource timeline. When imported from Lighthouse, the waterfall uses your actual measured timings.
 
+Drop a file's size or remove it entirely and the waterfall rebuilds instantly — every bar shifts, connection pools adjust, and all five metric scores recalculate. No re-import. No re-measure. One change, immediate feedback.
+
 ---
 
 ## Comparison Mode
