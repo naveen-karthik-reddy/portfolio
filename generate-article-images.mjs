@@ -258,264 +258,283 @@ Examples:
 - "React Reconciliation"
 
 ━━━━━━━━━━━━━━━━━━
-DIAGRAM LAYOUT
+EDITORIAL ABSTRACTION SYSTEM (CRITICAL)
 ━━━━━━━━━━━━━━━━━━
 
-The diagram is the hero.
+The illustration is NOT required to visualize every piece of information from the article.
 
-It should:
-- occupy ~85–90% of the canvas
-- feel information-dense
-- remain highly readable
-- feel balanced and architectural
+The goal is:
+- clarity first
+- hierarchy first
+- readability first
+- editorial storytelling first
+
+NOT maximum information density.
+
+The image must behave like a premium editorial explainer,
+NOT a fully compressed textbook page.
+
+The system should intelligently:
+- simplify
+- compress
+- abstract
+- prioritize
+- omit secondary details
+
+when necessary.
+
+If the article contains too much information,
+DO NOT attempt to fit everything into a single image.
+
+Instead:
+- visualize only the most important concepts
+- compress secondary concepts
+- merge repetitive ideas
+- reduce low-priority labels
+- convert details into symbolic representation
+- imply complexity instead of fully rendering it
+
+The image should feel:
+- intelligent
+- distilled
+- expertly curated
+- editorially directed
+
+NOT overcrowded.
+
+━━━━━━━━━━━━━━━━━━
+INFORMATION PRIORITIZATION
+━━━━━━━━━━━━━━━━━━
+
+The layout must prioritize information using strict hierarchy.
+
+Priority order:
+
+LEVEL 1 — PRIMARY CONCEPTS
+- core pipeline
+- key architectural relationships
+- central technical insight
+- most important transitions
+
+These receive:
+- largest visual emphasis
+- highest readability
+- strongest contrast
+- most spacing
+
+LEVEL 2 — SUPPORTING CONCEPTS
+- secondary flows
+- grouped subsystems
+- supporting logic
+- contextual relationships
+
+These should be:
+- simplified
+- grouped
+- visually compressed
+
+LEVEL 3 — MICRO DETAILS
+- edge cases
+- implementation specifics
+- excessive annotations
+- low-value labels
+- repetitive steps
+
+These should:
+- be minimized heavily
+- be abstracted
+- or removed entirely
+
+DO NOT give equal visual weight to all information.
+
+━━━━━━━━━━━━━━━━━━
+READABILITY PROTECTION RULES
+━━━━━━━━━━━━━━━━━━
+
+Readability is MORE important than completeness.
+
+NEVER allow:
+- tiny unreadable text
+- crowded labels
+- overlapping connectors
+- compressed panels
+- dense microscopic annotations
+- excessive diagram fragmentation
+
+Minimum typography rules:
+- absolute minimum text size: 16px
+- preferred text size: 18–24px
+- major labels: 24–36px
+
+If content cannot fit at readable sizes:
+REMOVE INFORMATION.
+
+Do NOT scale typography down to force more content.
+
+Whitespace is allowed.
+Breathing room is premium.
+
+━━━━━━━━━━━━━━━━━━
+CONTENT BUDGET SYSTEM
+━━━━━━━━━━━━━━━━━━
+
+The image must obey a strict visual complexity budget.
+
+Maximum recommended:
+- 3–5 primary sections
+- 6–10 major nodes
+- 1 dominant flow direction
+- 2 hierarchy levels maximum
+- limited annotation density
+
+Avoid:
+- deeply nested systems
+- giant multi-directional flow webs
+- excessive branching
+- over-annotated diagrams
+- large quantities of small text
+
+When article complexity increases:
+SIMPLIFY the visualization.
+
+Do NOT increase diagram density infinitely.
+
+━━━━━━━━━━━━━━━━━━
+ADAPTIVE SIMPLIFICATION
+━━━━━━━━━━━━━━━━━━
+
+When the article is highly technical:
+
+DO:
+- summarize visually
+- compress repeated patterns
+- represent systems symbolically
+- merge related concepts
+- show only the core mechanism
+- imply sophistication through structure
+
+DO NOT:
+- illustrate every sentence
+- map every paragraph
+- render every implementation detail
+- create textbook-level density
+
+The illustration should communicate:
+the essence of the topic,
+not the entire article.
+
+━━━━━━━━━━━━━━━━━━
+EDITORIAL COMPOSITION
+━━━━━━━━━━━━━━━━━━
+
+The composition should feel like:
+a curated magazine spread.
+
+NOT:
+a crowded technical whiteboard.
 
 Use:
-- multi-step flows
-- layered systems
-- grouped sections
-- directional relationships
-- structured pipelines
-- hierarchy visualization
-- nested blocks
-- organized information density
+- strong focal points
+- large readable sections
+- deliberate empty space
+- clean directional movement
+- obvious hierarchy
 
-The image should instantly communicate:
-"This explains something technically sophisticated."
+The eye should immediately understand:
+1. what the topic is
+2. where to look first
+3. how the system flows
 
-━━━━━━━━━━━━━━━━━━
-PANELS & SURFACES
-━━━━━━━━━━━━━━━━━━
-
-Panels should feel:
-- architectural
-- engineered
-- editorial
-- premium
-- structured
-
-Use layered surfaces:
-- warm ivory
-- soft stone
-- restrained charcoal
-- muted gold accents
-
-Panel fills may include:
-- #fbf8f1
-- #ece7da
-- #26231d
-
-Borders:
-- thin and precise
-- warm gray or muted gold
-- restrained contrast
-- crisp edge definition
-
-Depth:
-- subtle anchored shadows
-- matte surfaces
-- controlled material separation
-
-Avoid:
-- glow
-- bloom
-- glassmorphism
-- blurry haze
-- neon edges
-- floating light effects
+Avoid chaotic scanning patterns.
 
 ━━━━━━━━━━━━━━━━━━
-CONNECTORS & FLOW
+VISUAL RESTRAINT
 ━━━━━━━━━━━━━━━━━━
 
-Connectors should feel:
-- engineered
-- precise
-- clean
-- restrained
+Sophistication comes from:
+- restraint
+- hierarchy
+- spacing
+- composition
+- confidence
 
-Primary flows:
-- muted gold
-- charcoal
+NOT from maximum detail.
 
-Secondary flows:
-- warm gray
-- softer contrast
-
-Arrows:
-- sharp
-- architectural
+The best images should feel:
+- distilled
 - intentional
+- calm
+- architectural
+- readable at a glance
 
-Avoid:
-- glowing connectors
-- sci-fi energy lines
-- visual clutter
+Even highly technical subjects must remain:
+clean,
+elegant,
+and visually breathable.
 
 ━━━━━━━━━━━━━━━━━━
 TEXT INSIDE DIAGRAM
 ━━━━━━━━━━━━━━━━━━
 
-Typography should feel:
-- editorial
-- compact
-- precise
-- premium
+Text should be minimal and highly curated.
 
-Use:
-- Rich Charcoal        #1f1f1c
-- Warm Slate           #4b4b45
-- Muted Gold           #c59b2d
-- Soft Ivory           #fbf8f1
-
-Reserve stronger contrast ONLY for:
-- critical labels
-- important transitions
-- primary flow emphasis
-
-Typography styling:
-- 13–16px
-- medium or bold
-- crisp
-- sharp
-- highly readable
+Prefer:
+- short labels
+- compressed terminology
+- symbolic naming
+- concise phrases
 
 Avoid:
-- oversized typography
-- decorative fonts
-- low-contrast text
-- thin lightweight text
+- paragraphs
+- long explanations
+- sentence-heavy panels
+- excessive annotations
 
-━━━━━━━━━━━━━━━━━━
-COLOR SYSTEM
-━━━━━━━━━━━━━━━━━━
+Every text element must justify its existence.
 
-BACKGROUND
-- Warm Editorial White   #f6f3eb
-
-PRIMARY TEXT
-- Rich Charcoal          #1f1f1c
-
-SECONDARY TEXT
-- Warm Slate             #4b4b45
-
-SURFACES
-- Soft Ivory             #fbf8f1
-- Warm Stone             #ece7da
-- Deep Charcoal          #26231d
-
-BORDERS & ACCENTS
-- Soft Gold              #c8a95b
-- Muted Gold             #c59b2d
-- Deep Bronze            #7a5a12
-
-STATUS COLORS
-- Emerald                #059669
-- Crimson                #be123c
-
-Rules:
-- maintain restrained elegance
-- avoid rainbow palettes
-- avoid neon saturation
-- avoid visual noise
-- avoid overusing gold
-
-━━━━━━━━━━━━━━━━━━
-LIGHTING DISCIPLINE
-━━━━━━━━━━━━━━━━━━
-
-Lighting must remain highly restrained.
-
-Use:
-- crisp edge definition
-- subtle hierarchy
-- localized emphasis only
-- matte material rendering
-
-Avoid:
-- bloom
-- cinematic glow
-- haze
-- fog
-- dreamy lighting
-- atmospheric diffusion
-
-Dark surfaces should remain confidently dark.
-Bright accents should feel intentional.
-
-━━━━━━━━━━━━━━━━━━
-LAYOUT CONSISTENCY
-━━━━━━━━━━━━━━━━━━
-
-The image should behave like a reusable editorial cover template.
-
-ONLY the central diagram/content changes.
-
-The following must remain visually stable across all generations:
-- border system
-- footer branding
-- corner detailing
-- outer spacing
-- overall framing composition
-- typography hierarchy
-- badge positioning
-
-Maintain strong template consistency.
+If a label is not essential:
+remove it.
 
 ━━━━━━━━━━━━━━━━━━
 COMPOSITION
 ━━━━━━━━━━━━━━━━━━
 
 - aspect ratio: 16:9
-- padding: 40–56px
+- padding: 48–72px
 - balanced spacing
-- minimal wasted space
+- strong whitespace discipline
 - centered composition
-- strong hierarchy
+- strong focal hierarchy
+- obvious visual flow
+- premium editorial breathing room
 
-The final artwork should feel:
-- expensive
-- precise
-- editorial
-- engineered
-- modern
-- highly intentional
+The image should feel:
+- curated
+- architectural
+- readable
+- premium
+- intelligently simplified
 
-━━━━━━━━━━━━━━━━━━
-STRICTLY AVOID
-━━━━━━━━━━━━━━━━━━
-
-- giant titles
-- oversized typography
-- cyberpunk aesthetics
-- neon colors
-- excessive glow
-- fantasy styling
-- decorative glitter
-- stock illustration feel
-- comic styling
-- random floating objects
-- giant empty areas
-- blurry rendering
-- generic AI infographic aesthetics
-- equal emphasis everywhere
-- noisy composition
+NOT overcrowded.
 
 ━━━━━━━━━━━━━━━━━━
-FINAL ART DIRECTION
+FINAL QUALITY CHECK (MANDATORY)
 ━━━━━━━━━━━━━━━━━━
 
-The image should feel expensive BEFORE it feels informative.
+Before finalizing the image, verify:
 
-Prioritize:
-- editorial precision
-- material contrast
-- sharp hierarchy
-- restrained sophistication
-- architectural composition
-- premium readability
+- Is the image readable at normal viewing size?
+- Is there clear hierarchy?
+- Is there sufficient whitespace?
+- Are major concepts instantly recognizable?
+- Is typography comfortably readable?
+- Does the image feel curated instead of overloaded?
+- Would this still look premium as a website cover image?
+- Could someone understand the core idea within 3 seconds?
 
-The final result should feel like:
-"A luxury editorial systems visualization crafted for elite developer education."
+If the answer is NO:
+reduce complexity.
+
 `;
 
 const GEN_CONFIG = {
