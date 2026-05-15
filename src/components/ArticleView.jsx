@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, lazy, Suspense } from "react";
+import React, { useState, useEffect, useMemo, useRef, lazy, Suspense } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import {
   Typography,
@@ -55,6 +55,7 @@ SyntaxHighlighter.registerLanguage("yaml", yaml);
 
 import { articlesData } from "../data/articlesData";
 import Seo from "./Seo";
+import ArticleAudioPlayer from "./ArticleAudioPlayer";
 
 /* Lazy-load RunableCodeBlock — CodeMirror is heavy, only load when an article uses js-exec blocks */
 const RunableCodeBlock = lazy(() => import("./RunableCodeBlock"));
@@ -85,6 +86,19 @@ function childrenToText(children) {
   return React.Children.toArray(children)
     .map((c) => (typeof c === "string" ? c : ""))
     .join("");
+}
+
+function extractTextFromChildren(children) {
+  return React.Children.toArray(children)
+    .map((child) => {
+      if (typeof child === "string") return child;
+      if (React.isValidElement(child) && child.props.children)
+        return extractTextFromChildren(child.props.children);
+      return "";
+    })
+    .join("")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function parseHeadings(markdown) {
@@ -509,6 +523,7 @@ export default function ArticleView({ article }) {
   const [copied, setCopied] = useState(false);
   const [lightbox, setLightbox] = useState(null); // null | { src, alt }
   const [content, setContent] = useState("");
+  const audioPlayerRef = useRef(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -531,6 +546,7 @@ export default function ArticleView({ article }) {
         <Typography
           id={id}
           variant="h2"
+          onClick={() => audioPlayerRef.current?.startFromText(extractTextFromChildren(children))}
           sx={{
             fontWeight: 800,
             mt: 5,
@@ -540,6 +556,7 @@ export default function ArticleView({ article }) {
             WebkitTextFillColor: "transparent",
             scrollMarginTop: "80px",
             lineHeight: 1.25,
+            cursor: "pointer",
           }}
         >
           {children}
@@ -553,12 +570,14 @@ export default function ArticleView({ article }) {
         <Typography
           id={id}
           variant="h3"
+          onClick={() => audioPlayerRef.current?.startFromText(extractTextFromChildren(children))}
           sx={{
             fontWeight: 700,
             mt: 4,
             mb: 1.5,
             color: "primary.main",
             scrollMarginTop: "80px",
+            cursor: "pointer",
           }}
         >
           {children}
@@ -572,12 +591,14 @@ export default function ArticleView({ article }) {
         <Typography
           id={id}
           variant="h4"
+          onClick={() => audioPlayerRef.current?.startFromText(extractTextFromChildren(children))}
           sx={{
             fontWeight: 600,
             mt: 3,
             mb: 1,
             color: "text.primary",
             scrollMarginTop: "80px",
+            cursor: "pointer",
           }}
         >
           {children}
@@ -586,10 +607,29 @@ export default function ArticleView({ article }) {
     },
 
     p({ children }) {
+      const text = extractTextFromChildren(children);
       return (
         <Typography
           variant="body1"
-          sx={{ lineHeight: 1.9, mb: 2, color: "text.primary" }}
+          onClick={() => {
+            if (window.getSelection().toString()) return;
+            audioPlayerRef.current?.startFromText(text);
+          }}
+          sx={{
+            lineHeight: 1.9,
+            mb: 2,
+            color: "text.primary",
+            cursor: "pointer",
+            ml: "-14px",
+            pl: "12px",
+            borderLeft: "2px solid transparent",
+            borderRadius: "0 4px 4px 0",
+            transition: "border-color 0.2s, background-color 0.2s",
+            "&:hover": {
+              borderLeftColor: "primary.main",
+              bgcolor: isDark ? "rgba(255,255,255,0.025)" : "rgba(0,0,0,0.025)",
+            },
+          }}
         >
           {children}
         </Typography>
@@ -1016,7 +1056,9 @@ export default function ArticleView({ article }) {
               ))}
             </Box>
 
-            <Divider sx={{ mb: 5 }} />
+            <Divider sx={{ mb: 3 }} />
+
+            <ArticleAudioPlayer ref={audioPlayerRef} markdownContent={content} />
 
             <Box className="no-print" sx={{ display: { xs: "block", lg: "none" } }}>
               <TableOfContents headings={headings} grad={grad} />

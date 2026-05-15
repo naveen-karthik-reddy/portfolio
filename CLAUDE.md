@@ -72,6 +72,16 @@ This is a single-page React portfolio site deployed to GitHub Pages at `naveen-k
 
 Keep section numbers in REFERENCE.md stable — add new sections at the end if needed.
 
+## Skills
+
+This project has custom skills in `.claude/skills/` that automate multi-step workflows.
+
+### `/create-article`
+
+Creates a complete article end-to-end: writes markdown, registers in articlesData.js, generates the PNG cover image, converts to WebP, and adds cross-references. Only asks for slug + article type — everything else is automatic.
+
+See `.claude/skills/create-article.md` for the full workflow.
+
 ## ESLint note
 
 `no-unused-vars` ignores variables matching `/^[A-Z_]/` — uppercase components imported but not directly called won't error.

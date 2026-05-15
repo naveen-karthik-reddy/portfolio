@@ -1,4 +1,4 @@
-Page load speed often comes down to one question: how much work does the browser have to finish before it can show the user anything? That sequence of work is the **Critical Rendering Path (CRP)** — fetch HTML, parse it, fetch and parse all blocking stylesheets, execute blocking scripts, build the render tree, run layout, paint. Everything on that list is a potential bottleneck.
+Page load speed often comes down to one question: how much work does the browser have to finish before it can show the user anything? That sequence of work is the **Critical Rendering Path (CRP)** — fetch HTML, [parse](/articles/what-is-parsing) it, fetch and parse all blocking stylesheets, execute blocking scripts, build the render tree, run layout, [paint](/articles/what-is-rendering). Everything on that list is a potential bottleneck.
 
 The shorter and lighter this path, the faster the first paint. Almost every technique used to improve perceived load speed — inlining CSS, deferring scripts, eliminating render-blocking resources — is aimed at shortening the CRP.
 
@@ -48,7 +48,7 @@ Other options: minimise stylesheet size, remove unused rules, split by route.
 
 ## Why JavaScript Blocks the Parser
 
-When the parser encounters a `<script>` tag (without `async` or `defer`), it:
+When the [parser](/articles/what-is-parsing) encounters a `<script>` tag (without `async` or `defer`), it:
 
 1. Stops parsing HTML.
 2. Fetches the script (if external).

@@ -14,7 +14,7 @@ The browser performs six distinct steps to go from raw HTML bytes to pixels on s
 
 The browser's HTML parser reads the document byte by byte and builds the **[Document Object Model (DOM)](/articles/what-is-dom)** — a tree of nodes representing every element, attribute, and text content on the page. Think of a tree like a family tree: one root element (`<html>`) with children branching below it (`<head>`, `<body>`), each with their own children, and so on.
 
-Parsing is **incremental**: the browser doesn't wait for the full document before it starts building the DOM. It works through the stream and emits nodes as it goes. This is why placing `<script>` tags at the bottom of `<body>` matters — a blocking script encountered mid-parse halts the entire process.
+[Parsing](/articles/what-is-parsing) is **incremental**: the browser doesn't wait for the full document before it starts building the DOM. It works through the stream and emits nodes as it goes. This is why placing `<script>` tags at the bottom of `<body>` matters — a blocking script encountered mid-parse halts the entire process.
 
 ```html
 <!-- ❌ Blocks parsing — browser stops here, fetches and runs the script,
@@ -196,7 +196,7 @@ When a frame misses its deadline, the user sees a dropped frame — or "jank". T
 
 ---
 
-Once this pipeline clicks, the reasoning behind most performance advice becomes obvious. Deferring scripts protects step 1. Inlining critical CSS shortens step 2. Sticking to `transform` for animations keeps steps 4 and 5 out of the equation entirely. The pipeline is the model — everything else is just applying it.
+Once this pipeline clicks, the reasoning behind most performance advice becomes obvious. Deferring scripts protects [parsing](/articles/what-is-parsing) (steps 1–2). Inlining critical CSS shortens step 2. Sticking to `transform` for animations keeps [rendering](/articles/what-is-rendering) (steps 4–5) out of the equation entirely. The pipeline is the model — everything else is just applying it.
 
 ---
 

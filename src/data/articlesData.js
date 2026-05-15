@@ -908,6 +908,24 @@ export const articlesData = [
     tags: ["Browser", "Performance", "Fundamentals"],
     categories: ["performance", "fundamentals"],
   },
+  {
+    id: "what-is-parsing",
+    image: "what-is-parsing.webp",
+    title: "What is Parsing?",
+    excerpt: "Parsing converts raw HTML and CSS text into the DOM and CSSOM trees the browser needs before it can render anything. It's the gateway to every pixel on screen.",
+    readTime: "5 min read",
+    tags: ["Browser", "Performance", "Fundamentals"],
+    categories: ["performance", "fundamentals"],
+  },
+  {
+    id: "what-is-rendering",
+    image: "what-is-rendering.webp",
+    title: "What is Rendering?",
+    excerpt: "Rendering is everything after parsing — building the Render Tree, calculating Layout, Painting, and Compositing to turn the DOM and CSSOM into pixels on screen.",
+    readTime: "5 min read",
+    tags: ["Browser", "Performance", "Fundamentals"],
+    categories: ["performance", "fundamentals"],
+  },
 
   /* ═══════════════════════════════════════════════════════════════
      Glossary — JavaScript & Runtime

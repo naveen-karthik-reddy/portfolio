@@ -21,7 +21,11 @@
       "Bash(export GEMINI_API_KEY=\"AIzaSyBDxgMY7VIRC8E_GBU4hCjyCrvzVG7xURg\")",
       "Bash(git reset *)",
       "PowerShell(git *)",
-      "Bash(npx eslint *)"
+      "Bash(npx eslint *)",
+      "Bash(git commit *)",
+      "Bash(node *)",
+      "PowerShell(Get-WmiObject *)",
+      "PowerShell(New-Item *)"
     ]
   }
 }
