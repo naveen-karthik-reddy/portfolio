@@ -11,7 +11,7 @@ import {
 } from "@mui/material";
 import { PlayArrow, Pause, Stop, VolumeUp } from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
-import { markdownToPlainText } from "../utils/markdownToPlainText";
+import { markdownToPlainText, markdownToBlocks } from "../utils/markdownToPlainText";
 
 const RATES = [0.75, 1, 1.25, 1.5, 2];
 const AVG_WPM = 150;
@@ -61,7 +61,7 @@ function splitIntoChunks(text) {
   return chunks.filter(Boolean);
 }
 
-const ArticleAudioPlayer = forwardRef(function ArticleAudioPlayer({ markdownContent }, ref) {
+const ArticleAudioPlayer = forwardRef(function ArticleAudioPlayer({ markdownContent, onBlockChange }, ref) {
   const theme = useTheme();
   const [status, setStatus] = useState("idle"); // 'idle' | 'playing' | 'paused'
   const [progress, setProgress] = useState(0);
@@ -81,7 +81,11 @@ const ArticleAudioPlayer = forwardRef(function ArticleAudioPlayer({ markdownCont
   // Each startFrom call gets a new generation; stale callbacks ignore themselves.
   const generationRef = useRef(0);
 
+
+  const activeBlockIdxRef = useRef(-1);
+
   const plainText = useMemo(() => markdownToPlainText(markdownContent), [markdownContent]);
+  const blocks = useMemo(() => markdownToBlocks(markdownContent), [markdownContent]);
   const totalWords = useMemo(() => plainText.split(/\s+/).filter(Boolean).length, [plainText]);
   const estimatedMins = useMemo(() => Math.ceil(totalWords / AVG_WPM), [totalWords]);
 
@@ -118,7 +122,9 @@ const ArticleAudioPlayer = forwardRef(function ArticleAudioPlayer({ markdownCont
     charIndexRef.current = 0;
     charOffsetRef.current = 0;
     userPausedRef.current = false;
-  }, [plainText]);
+    activeBlockIdxRef.current = -1;
+    onBlockChange?.(-1, null);
+  }, [plainText]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => () => { if (window.speechSynthesis) window.speechSynthesis.cancel(); }, []);
 
@@ -139,26 +145,51 @@ const ArticleAudioPlayer = forwardRef(function ArticleAudioPlayer({ markdownCont
 
     charOffsetRef.current = charOffset;
 
+    // Immediately reflect the starting position
+    const total = text.length;
+    if (total > 0) setProgress(Math.min((charOffset / total) * 100, 100));
+
     const chunks = splitIntoChunks(remainingText);
 
-    // Build cumulative char offset for each chunk (within remainingText)
+    // Exact position of each chunk within remainingText
     const chunkOffsets = [];
-    let acc = 0;
+    let searchFrom = 0;
     for (const chunk of chunks) {
-      chunkOffsets.push(acc);
-      acc += chunk.length + 1; // +1 for the newline between paragraphs
+      const pos = remainingText.indexOf(chunk, searchFrom);
+      const offset = pos >= 0 ? pos : searchFrom;
+      chunkOffsets.push(offset);
+      searchFrom = offset + chunk.length;
     }
 
-    chunks.forEach((chunk, idx) => {
-      const utterance = new SpeechSynthesisUtterance(chunk);
+    // Block index for each chunk (pre-computed, stable)
+    const chunkBlockIdxs = chunks.map((_, i) => {
+      const absStart = charOffset + chunkOffsets[i];
+      return blocks.findIndex((b, j) => {
+        const nextStart = j + 1 < blocks.length ? blocks[j + 1].start : Infinity;
+        return absStart >= b.start && absStart < nextStart;
+      });
+    });
+
+    // Speak one chunk at a time — fixes Chrome's bug where onstart/onend don't
+    // fire reliably when all utterances are queued at once in a loop.
+    function speakChunk(idx) {
+      if (generationRef.current !== gen || idx >= chunks.length) return;
+
+      // Update highlight synchronously before speaking this chunk
+      const blockIdx = chunkBlockIdxs[idx];
+      if (blockIdx !== -1 && blockIdx !== activeBlockIdxRef.current) {
+        activeBlockIdxRef.current = blockIdx;
+        onBlockChange?.(blockIdx, blocks[blockIdx]?.text);
+      }
+
+      const utterance = new SpeechSynthesisUtterance(chunks[idx]);
       utterance.rate = rateRef.current;
       if (voiceRef.current) utterance.voice = voiceRef.current;
 
       utterance.onboundary = (e) => {
         if (generationRef.current !== gen || e.name !== "word") return;
-        const absChar = charOffsetRef.current + chunkOffsets[idx] + e.charIndex;
+        const absChar = charOffset + chunkOffsets[idx] + e.charIndex;
         charIndexRef.current = absChar;
-        const total = text.length;
         setProgress(total > 0 ? Math.min((absChar / total) * 100, 100) : 0);
         const charsLeft = Math.max(0, total - absChar);
         const wordsLeft = Math.ceil(charsLeft / AVG_CHARS_PER_WORD);
@@ -166,20 +197,31 @@ const ArticleAudioPlayer = forwardRef(function ArticleAudioPlayer({ markdownCont
         setTimeLeft(secsLeft < 60 ? `${secsLeft}s left` : `${Math.ceil(secsLeft / 60)} min left`);
       };
 
-      if (idx === chunks.length - 1) {
-        utterance.onend = () => {
-          if (generationRef.current !== gen) return;
+      utterance.onend = () => {
+        if (generationRef.current !== gen) return;
+        if (idx < chunks.length - 1) {
+          speakChunk(idx + 1);
+        } else {
           setStatus("idle");
           setProgress(100);
           setTimeLeft("");
           charIndexRef.current = 0;
           charOffsetRef.current = 0;
-        };
-      }
+          activeBlockIdxRef.current = -1;
+          onBlockChange?.(-1, null);
+        }
+      };
 
       window.speechSynthesis.speak(utterance);
-    });
+    }
 
+    // Highlight the starting block immediately, then begin speech
+    const startBlockIdx = chunkBlockIdxs[0] ?? -1;
+    if (startBlockIdx !== -1) {
+      activeBlockIdxRef.current = startBlockIdx;
+      onBlockChange?.(startBlockIdx, blocks[startBlockIdx]?.text);
+    }
+    speakChunk(0);
     setStatus("playing");
     userPausedRef.current = false;
   }
@@ -189,13 +231,33 @@ const ArticleAudioPlayer = forwardRef(function ArticleAudioPlayer({ markdownCont
       if (!window.speechSynthesis) return;
       const text = textRef.current;
       if (!text) return;
+
+      // Primary: substring search on the plain text (handles most paragraphs)
       const normalized = paragraphText.replace(/\s+/g, " ").trim();
-      let idx = -1;
+      let charOffset = -1;
       for (let len = Math.min(80, normalized.length); len >= 15; len -= 10) {
-        idx = text.indexOf(normalized.slice(0, len));
-        if (idx !== -1) break;
+        const i = text.indexOf(normalized.slice(0, len));
+        if (i !== -1) { charOffset = i; break; }
       }
-      startFrom(Math.max(0, idx));
+
+      // Fallback: normalized prefix-score match across blocks.
+      // Handles paragraphs where inline code was stripped from the plain text.
+      if (charOffset === -1 && blocks.length > 0) {
+        const norm = (s) =>
+          s.toLowerCase().replace(/[^a-z0-9 ]/g, "").replace(/\s+/g, " ").trim();
+        const needle = norm(paragraphText);
+        let bestIdx = -1, bestScore = 0;
+        for (let i = 0; i < blocks.length; i++) {
+          const bn = norm(blocks[i].text);
+          const cap = Math.min(needle.length, bn.length, 50);
+          let sc = 0;
+          while (sc < cap && needle[sc] === bn[sc]) sc++;
+          if (sc > bestScore) { bestScore = sc; bestIdx = i; }
+        }
+        if (bestIdx !== -1) charOffset = blocks[bestIdx].start;
+      }
+
+      if (charOffset >= 0) startFrom(charOffset);
     },
   }));
 
@@ -224,6 +286,8 @@ const ArticleAudioPlayer = forwardRef(function ArticleAudioPlayer({ markdownCont
     charIndexRef.current = 0;
     charOffsetRef.current = 0;
     userPausedRef.current = false;
+    activeBlockIdxRef.current = -1;
+    onBlockChange?.(-1, null);
   }
 
   function handleRateChange(e) {

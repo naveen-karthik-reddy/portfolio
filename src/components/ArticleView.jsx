@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef, lazy, Suspense } from "react";
+import React, { useState, useEffect, useMemo, useRef, useCallback, lazy, Suspense } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import {
   Typography,
@@ -524,6 +524,48 @@ export default function ArticleView({ article }) {
   const [lightbox, setLightbox] = useState(null); // null | { src, alt }
   const [content, setContent] = useState("");
   const audioPlayerRef = useRef(null);
+  const articleBodyRef = useRef(null);
+
+  const handleBlockChange = useCallback((blockIdx, blockText) => {
+    const body = articleBodyRef.current;
+    if (!body) return;
+    body.querySelectorAll(".audio-reading").forEach((el) => el.classList.remove("audio-reading"));
+    if (blockIdx < 0 || !blockText) return;
+
+    const els = body.querySelectorAll(".article-block");
+    if (!els.length) return;
+
+    const norm = (s) =>
+      s.toLowerCase().replace(/[^a-z0-9]/g, " ").replace(/\s+/g, " ").trim();
+
+    const target = norm(blockText);
+    const needle = target.slice(0, 50);
+    if (!needle) return;
+
+    // Prefer the element whose text contains the needle closest to its start.
+    // Using "includes" (not prefix-match) handles paragraphs that begin with
+    // inline code, which markdownToPlainText strips from the block text.
+    let bestEl = null, bestPos = Infinity;
+    for (let i = 0; i < els.length; i++) {
+      const elText = norm(els[i].textContent);
+      const pos = elText.indexOf(needle);
+      if (pos !== -1 && pos < bestPos) { bestPos = pos; bestEl = els[i]; }
+    }
+
+    // Fallback: longest common prefix (catches cases where needle wasn't found)
+    if (!bestEl) {
+      let bestScore = 0;
+      for (let i = 0; i < els.length; i++) {
+        const elText = norm(els[i].textContent);
+        let sc = 0;
+        const cap = Math.min(target.length, elText.length, 50);
+        while (sc < cap && target[sc] === elText[sc]) sc++;
+        if (sc > bestScore) { bestScore = sc; bestEl = els[i]; }
+      }
+    }
+
+    if (bestEl) bestEl.classList.add("audio-reading");
+  }, []);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -545,6 +587,7 @@ export default function ArticleView({ article }) {
       return (
         <Typography
           id={id}
+          className="article-block"
           variant="h2"
           onClick={() => audioPlayerRef.current?.startFromText(extractTextFromChildren(children))}
           sx={{
@@ -569,6 +612,7 @@ export default function ArticleView({ article }) {
       return (
         <Typography
           id={id}
+          className="article-block"
           variant="h3"
           onClick={() => audioPlayerRef.current?.startFromText(extractTextFromChildren(children))}
           sx={{
@@ -590,6 +634,7 @@ export default function ArticleView({ article }) {
       return (
         <Typography
           id={id}
+          className="article-block"
           variant="h4"
           onClick={() => audioPlayerRef.current?.startFromText(extractTextFromChildren(children))}
           sx={{
@@ -610,6 +655,7 @@ export default function ArticleView({ article }) {
       const text = extractTextFromChildren(children);
       return (
         <Typography
+          className="article-block"
           variant="body1"
           onClick={() => {
             if (window.getSelection().toString()) return;
@@ -936,6 +982,16 @@ export default function ArticleView({ article }) {
           * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         }
       `} />
+      <GlobalStyles
+        styles={{
+          ".audio-reading": {
+            backgroundColor: `${isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.045)"} !important`,
+            boxShadow: `inset 3px 0 0 ${theme.palette.primary.main} !important`,
+            borderRadius: "0 6px 6px 0 !important",
+            transition: "background-color 0.35s ease, box-shadow 0.35s ease !important",
+          },
+        }}
+      />
 
       <div className="no-print">
         <ReadingProgress grad={grad} />
@@ -1058,7 +1114,7 @@ export default function ArticleView({ article }) {
 
             <Divider sx={{ mb: 3 }} />
 
-            <ArticleAudioPlayer ref={audioPlayerRef} markdownContent={content} />
+            <ArticleAudioPlayer ref={audioPlayerRef} markdownContent={content} onBlockChange={handleBlockChange} />
 
             <Box className="no-print" sx={{ display: { xs: "block", lg: "none" } }}>
               <TableOfContents headings={headings} grad={grad} />
@@ -1090,7 +1146,7 @@ export default function ArticleView({ article }) {
               )}
             </Dialog>
 
-            <Box component="article" sx={{ "& > *:first-of-type": { mt: 0 } }}>
+            <Box ref={articleBodyRef} component="article" sx={{ "& > *:first-of-type": { mt: 0 } }}>
               <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>{content}</ReactMarkdown>
             </Box>
 

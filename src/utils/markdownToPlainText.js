@@ -1,3 +1,20 @@
+export function markdownToBlocks(markdown) {
+  const plain = markdownToPlainText(markdown);
+  // Split with a capturing group so we keep the separators for accurate char positions
+  const parts = plain.split(/(\n{2,})/);
+  const blocks = [];
+  let pos = 0;
+  for (let i = 0; i < parts.length; i++) {
+    const chunk = parts[i];
+    if (i % 2 === 0) {
+      const text = chunk.trim();
+      if (text) blocks.push({ text, start: pos, end: pos + chunk.length });
+    }
+    pos += chunk.length;
+  }
+  return blocks;
+}
+
 export function markdownToPlainText(markdown) {
   if (!markdown) return '';
   return markdown
