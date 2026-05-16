@@ -26,6 +26,9 @@ dist-ssr
 # GitHub Pages
 .gh-pages
 
+# Claude local settings (may contain API keys)
+.claude/settings.local.json
+
 # Environment variables
 .env
 .env.local
