@@ -27,6 +27,7 @@ import { useTheme } from "@mui/material/styles";
 import { motion } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
 import { PrismLight as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark, oneLight } from "react-syntax-highlighter/dist/esm/styles/prism";
 
@@ -975,6 +976,7 @@ export default function ArticleView({ article }) {
         }}
       />
       <GlobalStyles styles={`
+        details summary { cursor: pointer; }
         @media print {
           .no-print { display: none !important; }
           header { display: none !important; }
@@ -1147,7 +1149,7 @@ export default function ArticleView({ article }) {
             </Dialog>
 
             <Box ref={articleBodyRef} component="article" sx={{ "& > *:first-of-type": { mt: 0 } }}>
-              <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>{content}</ReactMarkdown>
+              <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} components={components}>{content}</ReactMarkdown>
             </Box>
 
             <div className="no-print">
