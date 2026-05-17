@@ -4,10 +4,14 @@ import { useTheme } from "@mui/material/styles";
 import CodeMirror from "@uiw/react-codemirror";
 import { javascript } from "@codemirror/lang-javascript";
 
+// Survives remounts caused by theme changes (components useMemo recomputes → ReactMarkdown
+// unmounts/remounts pre blocks). Cleared on page reload, so original code always shows on refresh.
+const editCache = new Map();
+
 export default function RunableCodeBlock({ code }) {
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
-  const [editedCode, setEditedCode] = useState(code);
+  const [editedCode, setEditedCode] = useState(() => editCache.get(code) ?? code);
   const [output, setOutput] = useState([]);
   const [isRunning, setIsRunning] = useState(false);
   const timerIds = useRef([]);
@@ -32,7 +36,6 @@ export default function RunableCodeBlock({ code }) {
         .join(" ");
       setOutput((prev) => {
         const next = [...prev, { type, text }];
-        // scroll output panel to bottom after state update
         requestAnimationFrame(() => {
           if (outputRef.current) {
             outputRef.current.scrollTop = outputRef.current.scrollHeight;
@@ -93,8 +96,14 @@ export default function RunableCodeBlock({ code }) {
     }
   }, [editedCode, stop]);
 
+  const handleChange = useCallback((val) => {
+    editCache.set(code, val);
+    setEditedCode(val);
+  }, [code]);
+
   const reset = useCallback(() => {
     stop();
+    editCache.delete(code);
     setEditedCode(code);
     setOutput([]);
   }, [code, stop]);
@@ -167,7 +176,7 @@ export default function RunableCodeBlock({ code }) {
       {/* Code area — always editable CodeMirror */}
       <CodeMirror
         value={editedCode}
-        onChange={setEditedCode}
+        onChange={handleChange}
         extensions={[javascript()]}
         theme={isDark ? "dark" : "light"}
         basicSetup={{
