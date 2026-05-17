@@ -207,6 +207,6 @@ figma - get_metadata (MCP)(fileKey: "26FE6n6l1KYh6y5oKIrDs3", nodeId: "3539:1671
 
 # Claude Interpretation from Figma MCP Tool Data
 
-![Claude + Figma MCP — Design Context output](claude-figma-mcp-integration1.webp)
+![Claude + Figma MCP — Design Context output](claude-figma-mcp-integration1.png)
 
-![Claude + Figma MCP — Node Structure & Metadata](claude-figma-mcp-integration2.webp)
+![Claude + Figma MCP — Node Structure & Metadata](claude-figma-mcp-integration2.png)
