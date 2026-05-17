@@ -351,7 +351,6 @@ export const articlesData = [
   },
   {
     id: "js-data-types",
-    image: "js-data-types.webp",
     title: "JS Foundations #9 — Data Types & Type Checking",
     excerpt: "JavaScript's 8 types, typeof quirks (null, arrays), instanceof prototype chain walk, Object.prototype.toString.call, and the reliable type-checking toolkit for every built-in type.",
     readTime: "10 min read",
@@ -359,8 +358,15 @@ export const articlesData = [
     categories: ["javascript"],
   },
   {
+    id: "js-type-checking",
+    title: "Type Checking Quick Reference",
+    excerpt: "The right way to check every JavaScript type — typeof for primitives, Array.isArray for arrays, instanceof for built-ins, and Object.prototype.toString for everything else.",
+    readTime: "4 min read",
+    tags: ["JavaScript", "Fundamentals", "Types", "typeof"],
+    categories: ["javascript"],
+  },
+  {
     id: "js-numbers-math",
-    image: "js-numbers-math.webp",
     title: "JS Foundations #10 — Numbers & Math",
     excerpt: "IEEE 754 floating point, NaN, Infinity, +0/-0, Number.isNaN vs isNaN, Number.isFinite, and every Math method you'll reach for — with the traps interviewers test.",
     readTime: "8 min read",
@@ -369,7 +375,6 @@ export const articlesData = [
   },
   {
     id: "js-string-methods",
-    image: "js-string-methods.webp",
     title: "JS Foundations #11 — String Methods Reference",
     excerpt: "Every string method used in interviews: split, slice, replace, indexOf, includes, trim, toUpperCase, padStart, and more — with runnable examples for each.",
     readTime: "10 min read",
@@ -378,7 +383,6 @@ export const articlesData = [
   },
   {
     id: "js-regex-basics",
-    image: "js-regex-basics.webp",
     title: "JS Foundations #12 — Regular Expressions",
     excerpt: "Regex syntax, flags, test/exec/match/replace, character classes, quantifiers, anchors, capturing groups, lookahead, and the common patterns used in interview problems.",
     readTime: "10 min read",
@@ -387,7 +391,6 @@ export const articlesData = [
   },
   {
     id: "js-date-time",
-    image: "js-date-time.webp",
     title: "JS Foundations #13 — Date & Time",
     excerpt: "Date constructor (beware month is 0-based), getTime, Date.now, formatting with toISOString/toLocaleDateString, date arithmetic, and performance.now for high-res timing.",
     readTime: "7 min read",
@@ -396,7 +399,6 @@ export const articlesData = [
   },
   {
     id: "js-error-patterns",
-    image: "js-error-patterns.webp",
     title: "Error Handling #2 — AggregateError, Error-First Callbacks & Promise Errors",
     excerpt: "AggregateError for Promise.any, error-first callback convention, custom error hierarchies, error recovery in .catch(), Error.cause chaining, and unhandled rejection handling.",
     readTime: "9 min read",
@@ -454,7 +456,6 @@ export const articlesData = [
   },
   {
     id: "js-array-methods-reference",
-    image: "js-array-methods-reference.webp",
     title: "Arrays #3 — Array Methods Usage Reference",
     excerpt: "Every array method organized by purpose: add/remove, slice, search, transform, sort, iterate. Practical runnable examples for all 30+ methods — not a polyfill, a usage guide.",
     readTime: "12 min read",
@@ -499,7 +500,6 @@ export const articlesData = [
   },
   {
     id: "js-object-methods",
-    image: "js-object-methods.webp",
     title: "Data #2.5 — Object Methods & Utilities",
     excerpt: "Object.keys, values, entries, fromEntries, assign, create, freeze, seal, defineProperty, hasOwnProperty, toString.call — every Object.* method with runnable examples.",
     readTime: "10 min read",
@@ -606,7 +606,6 @@ export const articlesData = [
   },
   {
     id: "js-map",
-    image: "js-map.webp",
     title: "Data #3a — Map in JavaScript",
     excerpt: "Map is the true key-value store — any type as key, insertion-ordered iteration, O(1) lookups. Practical guide with patterns for frequency counters, caches, event registries, and data merging.",
     readTime: "10 min read",
@@ -615,7 +614,6 @@ export const articlesData = [
   },
   {
     id: "js-set",
-    image: "js-set.webp",
     title: "Data #3b — Set in JavaScript",
     excerpt: "Set stores unique values with O(1) membership checks. Practical guide with patterns for deduplication, visited tracking, set operations (union/intersection/difference), and circular reference detection.",
     readTime: "9 min read",
@@ -727,7 +725,6 @@ export const articlesData = [
   },
   {
     id: "js-classes-practical",
-    image: "js-classes-practical.webp",
     title: "Classes — Practical Guide",
     excerpt: "Class syntax, constructor, getters/setters, static methods, extends/super, private fields (#), this binding gotchas, and common patterns (Builder, Registry, EventEmitter) — a practical companion to the desugaring article.",
     readTime: "10 min read",
@@ -874,7 +871,6 @@ export const articlesData = [
      ═══════════════════════════════════════════════════════════════ */
   {
     id: "js-dom-basics",
-    image: "js-dom-basics.webp",
     title: "DOM Basics — Element Selection, Traversal & Styles",
     excerpt: "querySelector, getElementById, tagName, classList, children, parentElement, getComputedStyle vs element.style, createElement, appendChild, remove — the DOM toolkit every frontend interview assumes you know.",
     readTime: "9 min read",
@@ -941,7 +937,6 @@ export const articlesData = [
      ═══════════════════════════════════════════════════════════════ */
   {
     id: "js-interview-call-apply-bind",
-    image: "js-interview-call-apply-bind.webp",
     title: "Interview #1 — Implement call(), apply() & bind() from Scratch",
     excerpt: "Implementing call, apply, and bind is one of the most common JS interview questions. Here's how each one borrows this, and how to write polyfills that pass every edge case.",
     readTime: "12 min read",
@@ -950,7 +945,6 @@ export const articlesData = [
   },
   {
     id: "js-interview-map-filter-reduce",
-    image: "js-interview-map-filter-reduce.webp",
     title: "Interview #2 — Implement map(), filter() & reduce() from Scratch",
     excerpt: "These three polyfills appear in almost every frontend interview. Build each one from scratch — handling the callback signature, thisArg, sparse arrays, and the reduce initialValue edge case.",
     readTime: "12 min read",
@@ -959,7 +953,6 @@ export const articlesData = [
   },
   {
     id: "js-interview-make-counter",
-    image: "js-interview-make-counter.webp",
     title: "Interview #3 — Make Counter: The Classic Closure Question",
     excerpt: "makeCounter is the canonical closure interview question. Start with a simple increment counter, then build the full version with reset, increment, decrement, and getValue methods.",
     readTime: "8 min read",
@@ -968,7 +961,6 @@ export const articlesData = [
   },
   {
     id: "js-interview-once",
-    image: "js-interview-once.webp",
     title: "Interview #4 — Implement once() — A Function That Runs At Most Once",
     excerpt: "once() wraps a function so it can only execute on the first call. Every subsequent call returns the cached result. It's a single-closure problem with a few tricky edge cases.",
     readTime: "7 min read",
@@ -977,7 +969,6 @@ export const articlesData = [
   },
   {
     id: "js-interview-type-utilities",
-    image: "js-interview-type-utilities.webp",
     title: "Interview #5 — Type Utilities: typeof, instanceof & Custom Type Checks",
     excerpt: "Type checking in JavaScript is a minefield of quirks. Build a complete set of isString, isNumber, isArray, isNull, isPlainObject utilities using typeof, instanceof, and Object.prototype.toString.",
     readTime: "8 min read",
@@ -986,7 +977,6 @@ export const articlesData = [
   },
   {
     id: "js-interview-get",
-    image: "js-interview-get.webp",
     title: "Interview #6 — Implement Lodash's _.get() for Safe Nested Access",
     excerpt: "_.get(obj, 'a.b.c', defaultValue) safely drills into nested objects without throwing. Implement it supporting dot notation, bracket notation, and a fallback default value.",
     readTime: "7 min read",
@@ -995,7 +985,6 @@ export const articlesData = [
   },
   {
     id: "js-interview-sleep",
-    image: "js-interview-sleep.webp",
     title: "Interview #7 — Implement sleep() — Pausing Execution with Promises",
     excerpt: "sleep(ms) pauses async execution for a given number of milliseconds. It's a one-liner that tests whether you understand how Promise resolution and await work together.",
     readTime: "5 min read",
@@ -1004,7 +993,6 @@ export const articlesData = [
   },
   {
     id: "js-interview-debounce",
-    image: "js-interview-debounce.webp",
     title: "Interview #8 — Implement debounce() with cancel() and flush()",
     excerpt: "Debounce delays execution until calls stop. Build trailing-edge debounce first, then add leading edge, cancel(), and flush() — covering every variant interviewers ask for.",
     readTime: "14 min read",
@@ -1013,7 +1001,6 @@ export const articlesData = [
   },
   {
     id: "js-interview-throttle",
-    image: "js-interview-throttle.webp",
     title: "Interview #9 — Implement throttle() with Trailing Edge",
     excerpt: "Throttle guarantees a function runs at most once per interval. Build leading-edge throttle, then add a trailing-edge call to ensure the last invocation always fires.",
     readTime: "12 min read",
@@ -1022,7 +1009,6 @@ export const articlesData = [
   },
   {
     id: "js-interview-memoize",
-    image: "js-interview-memoize.webp",
     title: "Interview #10 — Implement memoize() with Custom Key Resolver",
     excerpt: "Memoize caches a function's results keyed by its arguments. Build memoize for single-arg functions, then extend it with a resolver for multi-arg and object-key caching.",
     readTime: "10 min read",
@@ -1031,7 +1017,6 @@ export const articlesData = [
   },
   {
     id: "js-interview-curry",
-    image: "js-interview-curry.webp",
     title: "Interview #11 — Implement curry() — Fixed Arity and Variadic",
     excerpt: "curry(fn) transforms f(a, b, c) into f(a)(b)(c). Build the fixed-arity version using fn.length, then the variadic version that collects args until called with no arguments.",
     readTime: "12 min read",
@@ -1040,7 +1025,6 @@ export const articlesData = [
   },
   {
     id: "js-interview-flatten",
-    image: "js-interview-flatten.webp",
     title: "Interview #12 — Implement Array flatten() with Depth Control",
     excerpt: "Flatten an array recursively to a single level, or to a specified depth. Three approaches — recursive, iterative with a stack, and reduce-based — each with different trade-offs.",
     readTime: "10 min read",
@@ -1049,7 +1033,6 @@ export const articlesData = [
   },
   {
     id: "js-interview-deep-clone",
-    image: "js-interview-deep-clone.webp",
     title: "Interview #13 — Implement deepClone() for JSON-Serializable Values",
     excerpt: "Deep clone a value containing objects, arrays, strings, numbers, null, and booleans — without JSON.stringify. Build it with recursion, handling every JSON-serializable type correctly.",
     readTime: "11 min read",
@@ -1058,7 +1041,6 @@ export const articlesData = [
   },
   {
     id: "js-interview-deep-equal",
-    image: "js-interview-deep-equal.webp",
     title: "Interview #14 — Implement deepEqual() for Structural Comparison",
     excerpt: "deepEqual checks if two values have the same structure and values, not the same reference. Handle primitives, arrays, plain objects, null, NaN, and the +0/-0 edge case.",
     readTime: "11 min read",
@@ -1067,7 +1049,6 @@ export const articlesData = [
   },
   {
     id: "js-interview-deep-omit",
-    image: "js-interview-deep-omit.webp",
     title: "Interview #15 — Implement deepOmit() — Remove Keys from Nested Objects",
     excerpt: "deepOmit(obj, keys) removes specified keys at every level of a nested object or array. Build it with recursion handling both object and array nodes.",
     readTime: "9 min read",
@@ -1076,7 +1057,6 @@ export const articlesData = [
   },
   {
     id: "js-interview-squash-object",
-    image: "js-interview-squash-object.webp",
     title: "Interview #16 — Implement squash() — Flatten Nested Objects to Dot Paths",
     excerpt: "squash({ a: { b: { c: 1 } } }) returns { 'a.b.c': 1 }. Build it with recursion, handle arrays with bracket notation, and optionally implement the reverse (unsquash).",
     readTime: "10 min read",
@@ -1085,7 +1065,6 @@ export const articlesData = [
   },
   {
     id: "js-interview-json-stringify",
-    image: "js-interview-json-stringify.webp",
     title: "Interview #17 — Implement a Simplified JSON.stringify()",
     excerpt: "Build a JSON.stringify that handles all JSON-serializable types: strings, numbers, booleans, null, arrays, and objects. Understand what the real implementation skips (undefined, functions, symbols).",
     readTime: "11 min read",
@@ -1094,7 +1073,6 @@ export const articlesData = [
   },
   {
     id: "js-interview-promise-combinators",
-    image: "js-interview-promise-combinators.webp",
     title: "Interview #18 — Implement Promise.all, race, any & allSettled",
     excerpt: "Four combinators, four different resolution strategies. Implement each from scratch — understanding exactly when each resolves, when it rejects, and what shape the result takes.",
     readTime: "14 min read",
@@ -1103,7 +1081,6 @@ export const articlesData = [
   },
   {
     id: "js-interview-promisify",
-    image: "js-interview-promisify.webp",
     title: "Interview #19 — Implement promisify() — Convert Callbacks to Promises",
     excerpt: "promisify wraps a Node.js-style error-first callback function and returns a Promise-based version. Build the base version, then extend it to let the original function override the resolved value.",
     readTime: "10 min read",
@@ -1112,7 +1089,6 @@ export const articlesData = [
   },
   {
     id: "js-interview-promise-timeout",
-    image: "js-interview-promise-timeout.webp",
     title: "Interview #20 — Implement promiseTimeout() — Race a Promise Against a Deadline",
     excerpt: "promiseTimeout(promise, ms) rejects with a timeout error if the promise doesn't settle within the given time. This is a direct application of Promise.race with a timer.",
     readTime: "8 min read",
@@ -1121,7 +1097,6 @@ export const articlesData = [
   },
   {
     id: "js-interview-map-async",
-    image: "js-interview-map-async.webp",
     title: "Interview #21 — Implement mapAsync() and mapAsyncLimit()",
     excerpt: "mapAsync runs an async mapping function over an array. mapAsyncLimit adds a concurrency cap — never more than N requests in flight at once. The second is the real interview question.",
     readTime: "12 min read",
@@ -1130,7 +1105,6 @@ export const articlesData = [
   },
   {
     id: "js-interview-event-emitter",
-    image: "js-interview-event-emitter.webp",
     title: "Interview #22 — Implement an EventEmitter with on, off, emit & once",
     excerpt: "Build an EventEmitter class from scratch. Version I uses a listener array. Version II returns a subscription object with an unsubscribe() method — the pattern used in modern event systems.",
     readTime: "12 min read",
@@ -1139,7 +1113,6 @@ export const articlesData = [
   },
   {
     id: "js-interview-classnames",
-    image: "js-interview-classnames.webp",
     title: "Interview #23 — Implement classnames() — Conditional CSS Class Joining",
     excerpt: "classnames(a, b, { active: true, hidden: false }) joins truthy class names into a single string. Handle strings, numbers, arrays, objects, and nested arrays — the real library handles all of them.",
     readTime: "9 min read",
@@ -1148,7 +1121,6 @@ export const articlesData = [
   },
   {
     id: "js-interview-dom-traversal",
-    image: "js-interview-dom-traversal.webp",
     title: "Interview #24 — Implement getElementsByClassName, TagName & Style",
     excerpt: "Three classic DOM traversal questions in one. Each requires a recursive tree walk — the logic is the same, only the match condition changes. Master the pattern once, apply it three times.",
     readTime: "11 min read",
@@ -1157,7 +1129,6 @@ export const articlesData = [
   },
   {
     id: "js-interview-data-merging",
-    image: "js-interview-data-merging.webp",
     title: "Interview #25 — Implement Data Merging — Combine Rows by User",
     excerpt: "Given an array of user activity rows where one user can appear multiple times, merge them into one row per user. This is a reduce-into-a-Map problem with careful field merging logic.",
     readTime: "9 min read",
@@ -1166,7 +1137,6 @@ export const articlesData = [
   },
   {
     id: "js-interview-count-by",
-    image: "js-interview-count-by.webp",
     title: "Interview #26 — Implement countBy() — Group and Count Array Elements",
     excerpt: "countBy(array, fn) groups array elements by the result of a function and returns a count of how many fall into each group. It's a single reduce call — the challenge is getting the shape right.",
     readTime: "7 min read",
@@ -1175,7 +1145,6 @@ export const articlesData = [
   },
   {
     id: "js-interview-list-format",
-    image: "js-interview-list-format.webp",
     title: "Interview #27 — Implement listFormat() — Human-Readable List Strings",
     excerpt: "listFormat(['a', 'b', 'c']) → 'a, b, and c'. Handle 0, 1, 2, and 3+ items differently, support custom conjunctions, and match the behavior of Intl.ListFormat.",
     readTime: "7 min read",
@@ -1184,7 +1153,6 @@ export const articlesData = [
   },
   {
     id: "js-interview-deep-clone-circular",
-    image: "js-interview-deep-clone-circular.webp",
     title: "Interview #28 — Deep Clone with Circular Reference Handling",
     excerpt: "The base deep clone breaks on circular references. Solve it with a WeakMap that tracks already-cloned objects and returns the clone instead of recursing infinitely.",
     readTime: "11 min read",
@@ -1193,7 +1161,6 @@ export const articlesData = [
   },
   {
     id: "js-interview-curry-variadic",
-    image: "js-interview-curry-variadic.webp",
     title: "Interview #29 — Variadic curry() — Call with Any Number of Args",
     excerpt: "The hardest curry variant: transform f(a, b, c, d) so it can be called as f(a)(b, c)(d) — any number of arguments at each step, accumulating until enough args are collected.",
     readTime: "12 min read",
@@ -1202,7 +1169,6 @@ export const articlesData = [
   },
   {
     id: "js-interview-data-selection",
-    image: "js-interview-data-selection.webp",
     title: "Interview #30 — Implement a Data Selection / Filter Engine",
     excerpt: "Build a filter function that takes an array of rows and a criteria object, returning only rows that match all conditions. Support exact match, range filters, and multi-value filters — like a tiny in-memory query engine.",
     readTime: "13 min read",
