@@ -2,6 +2,26 @@
 
 ---
 
+## What is `promisify()`?
+
+`promisify(fn)` converts a **callback-based function** into a **Promise-based function**. Specifically, it targets Node.js-style error-first callbacks where the function signature is `fn(arg, (err, result) => {})`. The returned function takes the same arguments (minus the callback) and returns a Promise that resolves with `result` or rejects with `err`.
+
+This is the **callback-to-Promise adapter pattern**. Before Promises and `async/await` became standard, the entire Node.js ecosystem used error-first callbacks — `fs.readFile(path, (err, data) => {})`, `db.query(sql, (err, rows) => {})`, etc. `promisify` bridges that legacy world to modern async code.
+
+Node.js ships with `util.promisify()` for exactly this purpose, but interviewers want to see you build it from scratch because it tests:
+1. **Understanding the error-first callback convention** — `(err, result)` where the first argument signals failure
+2. **Dynamic function wrapping** — returning a function with `...args` that internally calls the original with an added callback
+3. **Promise construction** — creating a Promise that resolves/rejects based on the callback's parameters
+
+Real-world use cases:
+- Wrapping legacy Node.js APIs: `const readFile = promisify(fs.readFile); await readFile("data.json")`
+- Adapting third-party callback-based SDKs to modern async patterns
+- Building async middleware that bridges old and new code styles during migration
+
+The interview often extends to version II: the original function can return a value that overrides the callback result (a pattern seen in some libraries). This tests whether you can handle the edge case where both the return value and the callback compete to settle the Promise.
+
+---
+
 ## The Problem
 
 > "Implement `promisify(fn)` that takes a function following the Node.js error-first callback convention `fn(arg, (err, result) => {})` and returns a function that returns a Promise."

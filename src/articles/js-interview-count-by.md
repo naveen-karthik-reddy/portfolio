@@ -2,6 +2,24 @@
 
 ---
 
+## What is `countBy()`?
+
+`countBy(array, fn)` groups elements by the result of a key function and returns an object mapping each key to the **count** of elements that produced it. For `[1, 2, 3, 4, 5]` with `fn = n => n % 2 === 0 ? "even" : "odd"`, the result is `{ even: 2, odd: 3 }`.
+
+It's a single `reduce` call with an accumulator object. For each element, compute the key via `fn(element)`, then increment `acc[key]` (initializing to 0 if it doesn't exist). The entire function is a 3-line reduce.
+
+This is a special case of the more general `groupBy` pattern — instead of collecting elements into arrays (`{ even: [2, 4], odd: [1, 3, 5] }`), you only keep the count. The count-only version is simpler because you don't need to manage arrays, just increment numbers.
+
+Real-world use cases:
+- **Vote tallying** — `countBy(votes, v => v.candidate)` to get per-candidate totals
+- **Histogram bins** — `countBy(data, d => Math.floor(d / 10) * 10)` to bucket numeric data into ranges
+- **Error categorization** — `countBy(errors, e => e.code)` to find the most frequent error type
+- **Feature flags** — `countBy(users, u => u.variant)` to verify A/B test distribution
+
+The interview tests `reduce` mechanics, the `(acc[key] || 0) + 1` initialization pattern, and whether you can transform a general grouping problem into a counting-specific solution.
+
+---
+
 ## The Problem
 
 > "Implement `countBy(array, fn)` that returns an object where each key is the result of calling `fn` on an element, and each value is the number of elements that produced that key."

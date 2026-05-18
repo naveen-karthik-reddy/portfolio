@@ -50,6 +50,20 @@ This is a single-page React portfolio site deployed to GitHub Pages at `naveen-k
 
 **Deployment**: `vite.config.js` sets `base: '/'` for root domain. Change to `'/portfolio'` for GitHub Pages subdirectory deployment.
 
+## Articles reference maintenance rule
+
+`articles.md` in the project root is the single source of truth for all articles.
+**Update it whenever you touch `src/articles/` or `src/data/articlesData.js`.** Specifically:
+
+- Added a new article → append a full section to `articles.md` (metadata table, excerpt, sections, external links) and add it to the Table of Contents under the correct group
+- Removed an article → delete its section from `articles.md` and its TOC entry
+- Changed an article's title, excerpt, tags, readTime, or categories → update the metadata table row(s)
+- Changed the body of a `.md` article file → update the **Sections** list and **External Links** list for that article
+- Reordered articles in `articlesData.js` → update the **Previous** / **Next** fields for the affected articles and their neighbours
+- Changed an article's slug/id → update the anchor, URL, TOC entry, and any **Previous**/**Next** references that point to it
+
+The prev/next order matches the array order in `articlesData.js`.
+
 ## Perf-Planner maintenance rule
 
 `src/projects/perf-planner/REFERENCE.md` is the single source of truth for the perf-planner project.

@@ -4,6 +4,23 @@ The hardest curry variant: transform `f(a, b, c, d)` so it accepts any number of
 
 ---
 
+## What is Variadic `curry()`?
+
+Variadic `curry(fn)` is the generalization of the fixed-arity curry from Interview #11. Instead of requiring exactly one argument per call — `curried(a)(b)(c)` — the variadic version accepts any number of arguments at each call: `curried(a, b)(c)`, `curried(a)(b, c)`, or even `curried(a, b, c)`. It invokes `fn` as soon as the total accumulated arguments reaches or exceeds `fn.length`.
+
+The core mechanism is the same as fixed-arity curry: **recursive argument accumulation** with `fn.length` as the termination condition. The difference is that each call collects `...args` (any number) rather than a single argument, and all collected args are spread onto the accumulator.
+
+The termination condition `totalArgs.length >= fn.length` is what makes this "variadic" — you can provide arguments in any-sized batches. Once the total meets or exceeds the function's declared parameter count, the function executes. Excess arguments beyond `fn.length` are still passed through (matching native behavior).
+
+Real-world use cases:
+- **Flexible partial application** — `const greetHello = curry(greet)("Hello")` then later `greetHello("Alice")` or `greetHello("Bob")`
+- **Configuration pipelines** — pre-configure a function with config in one call, then pass the data in another: `const configured = curry(process)(config); configured(data)`
+- **Event handlers** — `const handler = curry(handleEvent)(eventType)(metadata)` then attach `handler(payload)` to the actual event
+
+The variadic version is the one that matches how Lodash's `_.curry` works and is the version most useful in practice. The fixed-arity version is primarily an interview stepping stone.
+
+---
+
 ## The Problem
 
 > "Implement `curry(fn)` where the curried function can be called with any number of arguments at each step. It should invoke `fn` as soon as the total accumulated arguments reaches or exceeds `fn.length`."

@@ -4,6 +4,29 @@
 
 ---
 
+## What is `deepClone()`?
+
+`deepClone(value)` creates a **structurally identical copy** of a value where no nested reference is shared with the original. Mutating the copy at any level has zero effect on the original — they're completely independent.
+
+This is different from a shallow copy (`{ ...obj }` or `Object.assign`), which only copies the top level. Nested objects and arrays are still shared references in a shallow copy. Changing `shallow.b.c` also changes `original.b.c` because `b` is the same object. `deepClone` recreates `b`, `c`, and everything below them.
+
+The implementation is a **recursive tree copy**. At each node:
+- Primitives (strings, numbers, booleans, `null`) are returned as-is — they're already copied by value
+- Arrays spawn new arrays, each element recursively cloned
+- Objects spawn new objects, each value recursively cloned
+
+The critical JavaScript-specific trap: `typeof null === "object"`. Without an explicit `null` check, the recursion would try `Object.keys(null)` and throw. Interviewers test for this specifically — it's the `null`-typeof gotcha in a practical context.
+
+Real-world use cases:
+- **State management** — creating immutable state snapshots (Redux requires you never mutate state; deep cloning ensures it)
+- **Undo/redo** — store a deep copy of the document before each change so you can revert
+- **Form drafts** — clone initial form values so you can compare "dirty" vs "pristine" state
+- **Passing data across boundaries** — clone an object before handing it to third-party code that might mutate it
+
+The interview starts with JSON-serializable types and escalates to handling `Date`, `RegExp`, `Map`, `Set`, and circular references — each requiring its own branch in the recursion.
+
+---
+
 ## The Problem
 
 > "Implement `deepClone(value)` that returns a deep copy. It should handle objects, arrays, strings, numbers, booleans, and `null`. No `JSON.parse(JSON.stringify(x))`."

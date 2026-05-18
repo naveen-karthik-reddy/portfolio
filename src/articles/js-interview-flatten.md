@@ -4,6 +4,23 @@
 
 ---
 
+## What is `flatten()`?
+
+`flatten(arr)` takes a nested array like `[1, [2, [3, 4]]]` and returns a single-level array `[1, 2, 3, 4]`. Each element is checked: if it's an array, recurse into it; otherwise, push it directly to the result. The native equivalent is `Array.prototype.flat(depth)`.
+
+The core operation is a **tree walk** over a nested list structure. At each position, you either descend deeper (if you hit another array) or emit a leaf value. The result preserves the relative ordering of elements — flattening is a depth-first traversal, not a breadth-first one.
+
+The depth-limited variant (`flatten(arr, depth)`) adds a counter that decrements each time you descend. When `depth === 0`, stop recursing and push the array itself as-is. This mirrors the native `arr.flat(depth)` behavior where `arr.flat(1)` flattens one level, `arr.flat(2)` flattens two, and `arr.flat(Infinity)` flattens entirely.
+
+Real-world use cases:
+- **API responses** — flattening a nested list of categories (each containing sub-items) into a single array for rendering
+- **Tree flattening** — converting hierarchical data (comments with replies, folder structures) into a flat list for searching or sorting
+- **Adjacency cleanup** — removing one level of nesting from `[resultSet]` when the outer array is a wrapper
+
+The interview tests recursion with a natural base case (non-array element). The depth-controlled variant tests parameter threading. The iterative variant (using an explicit stack) tests your ability to convert recursion to iteration — a classic follow-up.
+
+---
+
 ## The Problem
 
 > "Implement `flatten(arr)` that takes a nested array and returns a flat array with all nested arrays unwound."

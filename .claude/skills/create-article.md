@@ -134,7 +134,46 @@ This creates `public/articles/images/<slug>.webp` alongside the `.png`.
 
 ---
 
-## Step 6 — Add cross-references (if applicable)
+## Step 6 — Update articles.md
+
+File: `articles.md` (project root)
+
+Add a new section for the article following the existing format:
+
+```markdown
+<a name="article-<slug>"></a>
+
+## Article: <title>
+
+| Field | Value |
+|-------|-------|
+| **ID / Slug** | `<slug>` |
+| **URL** | `/articles/<slug>` |
+| **Series / Category** | <categories> |
+| **Tags** | <tags> |
+| **Read Time** | <readTime> |
+| **Previous** | `<prev_id>` — <prev_title> |
+| **Next** | `<next_id>` — <next_title> |
+
+**Excerpt:** <excerpt>
+
+**Sections:**
+- <H2 section 1>
+- <H2 section 2>
+- ...
+
+**External Links:**
+- [link text](url)
+- ...
+
+---
+```
+
+Also add the article to the Table of Contents under the correct group.
+
+---
+
+## Step 7 — Add cross-references (if applicable)
 
 If this new article is a glossary entry that existing performance/javascript articles should link to, update those markdown files to add inline links. For example:
 
@@ -145,7 +184,7 @@ Don't overdo it — one or two natural inline links per related article is enoug
 
 ---
 
-## Step 7 — Tell the user
+## Step 8 — Tell the user
 
 Print a brief summary:
 
@@ -155,6 +194,7 @@ Done. Created:
   public/articles/images/<slug>.png
   public/articles/images/<slug>.webp
   Updated src/data/articlesData.js
+  Updated articles.md
   [If applicable] Added cross-references in <files>
 
 Run `npm run dev` to preview.

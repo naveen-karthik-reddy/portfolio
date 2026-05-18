@@ -2,6 +2,29 @@
 
 ---
 
+## What is `deepOmit()`?
+
+`deepOmit(obj, keys)` returns a new object with the specified keys stripped out at **every level of nesting**. If you omit `"password"` from a user object, it removes `password` at the top level, inside nested `profile` objects, and within objects inside arrays — recursively, exhaustively.
+
+This is distinct from the shallow delete (`delete obj.key` or destructuring) which only operates on the top level. `deepOmit` walks the entire structure and prunes matching keys everywhere.
+
+The implementation is a pre-order tree traversal that reconstructs the structure as it goes:
+- **Plain objects** — copy all entries except the omitted keys, recursively processing each value
+- **Arrays** — recursively process each element (arrays can contain objects with the targeted keys)
+- **Primitives** — returned as-is (they can't have keys to omit)
+
+The subtlety that interviewers test: arrays are objects too, but you shouldn't filter array elements by key name — you should recurse into each element and omit keys *within* any nested objects inside the array.
+
+Real-world use cases:
+- **Sanitizing sensitive data** — strip `password`, `token`, `ssn` from API responses before logging or sending to the client
+- **API response trimming** — remove internal fields (`__typename`, `__v`, `internalId`) from deeply nested GraphQL or MongoDB results
+- **Form submission cleanup** — omit UI-only keys (`isEditing`, `selected`) from form data before POST
+- **Data export** — remove circular reference markers or computed fields before serialization
+
+This is a tree-map problem disguised as a utility function. It tests whether you can think recursively about structure transformation — applying the same operation at every level of an arbitrarily nested value.
+
+---
+
 ## The Problem
 
 > "Implement `deepOmit(obj, keys)` that returns a new object with the given keys removed from every level of nesting. If a value is an array, apply deep omit to each element."

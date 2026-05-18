@@ -4,6 +4,28 @@
 
 ---
 
+## What is `deepEqual()`?
+
+`deepEqual(a, b)` performs **structural comparison** — it checks whether two values have the same shape and contents, regardless of whether they're the same object in memory. Unlike `===` (which compares references for objects), `deepEqual` recursively descends into nested structures and compares every leaf value.
+
+This is the comparison counterpart to `deepClone`: one creates independent copies, the other verifies they're semantically identical. Both walk the same tree with the same recursion pattern.
+
+The JavaScript-specific edge cases make this more nuanced than it looks:
+- **`NaN`** — `NaN === NaN` is `false` (the only value not equal to itself). You need a special check: two `NaN` values are structurally equal.
+- **`+0` and `-0`** — `+0 === -0` is `true`, but `1 / +0 !== 1 / -0` (Infinity vs -Infinity). Most implementations treat them as equal.
+- **`typeof null === "object"`** — comparing `null` to `{}` must return `false`, not throw from trying to recurse into `null`.
+- **Arrays vs objects** — `[]` and `{}` have the same `typeof`, but one should compare by index and the other by key set.
+
+Real-world use cases:
+- **Should component re-render?** — compare previous and next props/state deeply
+- **Test assertions** — `expect(result).toEqual(expected)` in Jest is deep equality
+- **Change detection** — diff two config objects or API responses to find what changed
+- **Caching** — check if a cached result is still valid by comparing the input to the original
+
+The interview tests recursion fundamentals plus two or three "did you know about this JavaScript quirk?" moments. Handling `NaN`, `null`, and array-vs-object branching cleanly is what separates a passing answer from a thorough one.
+
+---
+
 ## The Problem
 
 > "Implement `deepEqual(a, b)` that returns `true` if `a` and `b` have the same structure and values, and `false` otherwise. It should work for primitives, arrays, and plain objects."

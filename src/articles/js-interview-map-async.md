@@ -4,6 +4,22 @@
 
 ---
 
+## What is `mapAsync()`?
+
+`mapAsync(array, asyncFn)` is the async equivalent of `Array.prototype.map`. It applies an async function to every element and returns a Promise that resolves with the results array, preserving input order. The simple version is `Promise.all(array.map(asyncFn))` — but the real interview question is `mapAsyncLimit`.
+
+`mapAsyncLimit(array, limit, asyncFn)` adds **concurrency control**: it ensures at most `limit` async operations run simultaneously. This is the **concurrency pool pattern** — you have N items to process but only K workers, and you need to keep all K workers saturated until the queue is drained.
+
+This is a fundamental async pattern that appears everywhere:
+- **API rate limiting** — never send more than 3 concurrent requests to a rate-limited endpoint
+- **File processing** — process a directory of 10,000 files with at most 50 concurrent `fs.readFile` calls to avoid exhausting file descriptors
+- **Browser resource limits** — browsers cap concurrent requests to the same origin (typically 6); `mapAsyncLimit` lets you control your own concurrency below that
+- **Database connection pools** — run queries with concurrency matching your pool size to maximize throughput without queuing
+
+The implementation is more involved than `mapAsync`. You need an active count tracker, a result array with index-based assignment, and a dispatch loop that launches new work as slots free up. The standard approach is either a manual loop with `.then()` chaining or an async generator that pulls from a queue.
+
+---
+
 ## The Problem
 
 > "Implement `mapAsync(array, asyncFn)` that applies an async function to every element and returns a promise resolving with the results array."

@@ -4,6 +4,22 @@ Currying transforms `f(a, b, c)` into `f(a)(b)(c)`. It's the canonical functiona
 
 ---
 
+## What is `curry()`?
+
+`curry(fn)` transforms a function that takes multiple arguments at once — `fn(a, b, c)` — into a sequence of functions that each take one argument: `curried(a)(b)(c)`. The transformed function doesn't execute `fn` until enough arguments have been collected.
+
+The mechanism is **recursive argument accumulation**. Each call collects new arguments. If the total collected matches or exceeds `fn.length` (the number of declared parameters), `fn` is called with all collected arguments. Otherwise, a new function is returned that will collect more arguments.
+
+This isn't just an academic exercise. Currying enables:
+- **Partial application** — pre-fill some arguments and pass the rest later: `const fetchUsers = curry(fetch)(baseURL)("users")`; then `fetchUsers({ limit: 10 })`
+- **Function composition** — curried functions naturally compose because they all take a single argument
+- **Point-free style** — `items.map(curry(add)(5))` instead of `items.map(x => add(5, x))`
+- **Dependency injection** — pre-configure a function with a logger, DB connection, or config, then pass the simplified version downstream
+
+The interview typically asks two versions: **fixed-arity** curry (one argument per call) and **variadic** curry (any number of arguments per call). Both test recursion, closures, and the use of `fn.length` as the termination condition.
+
+---
+
 ## The Problem
 
 **Curry I (fixed arity):**

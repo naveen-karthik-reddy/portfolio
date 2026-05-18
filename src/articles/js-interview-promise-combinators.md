@@ -4,6 +4,21 @@
 
 ---
 
+## What are Promise Combinators?
+
+Promise combinators are static methods on the `Promise` constructor that take an array of promises and return a single promise whose fate depends on how the input promises settle. Each combinator has a different rule for when it resolves and when it rejects.
+
+- **`Promise.all(promises)`** — resolves when **all** resolve, with an array of results in input order. Rejects immediately if **any one** rejects (short-circuit on first rejection). Use it for parallel independent work where all results are needed.
+- **`Promise.race(promises)`** — settles with the **first** promise to settle (resolve or reject). "First past the post" — winner takes all. Use it for timeouts and "fastest response wins" scenarios.
+- **`Promise.allSettled(promises)`** — resolves when **all** settle (resolve or reject), with an array of `{ status, value/reason }` objects. **Never rejects.** Use it when you want results from every promise regardless of failure.
+- **`Promise.any(promises)`** — resolves when **any one** resolves (short-circuit on first success). Rejects only when **all** reject, with an `AggregateError`. Use it for "first successful response from multiple sources" scenarios.
+
+The implementation of each follows the same pattern: return a `new Promise`, iterate inputs, attach `.then`/`.catch` to each, track counts, and resolve/reject when the combinator's rule is met. The key differences are in **which settlement triggers what** and **what shape the result takes**.
+
+The interview tests whether you understand these four distinct settlement strategies, the edge cases for empty arrays (each combinator behaves differently), and the use of `Promise.resolve()` to normalize non-promise values. Implementing all four in one session is a common async marathon question.
+
+---
+
 ## The Problem
 
 > "Implement `myPromiseAll(promises)`, `myPromiseRace(promises)`, `myPromiseAllSettled(promises)`, and `myPromiseAny(promises)` — all four from scratch."

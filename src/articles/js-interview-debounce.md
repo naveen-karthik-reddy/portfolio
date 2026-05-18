@@ -4,6 +4,24 @@ Debounce is the most commonly requested timing utility in frontend interviews. T
 
 ---
 
+## What is `debounce()`?
+
+`debounce(fn, delay)` returns a function that delays invoking `fn` until `delay` milliseconds have passed **since the last invocation**. If the returned function is called again before the timer fires, the previous timer is reset. Only when calls stop long enough does `fn` actually execute — with the most recent arguments.
+
+Think of an elevator door: every time someone steps in, the door re-opens and the timer resets. The elevator only leaves when no one has stepped in for N seconds.
+
+This is the **timer-reset pattern**. Every call clears the previous timer (`clearTimeout`) and starts a fresh one (`setTimeout`). The function never executes during a burst — only at the trailing edge, once the burst ends.
+
+Real-world use cases:
+- **Search-as-you-type (typeahead)** — don't hit the server on every keystroke; wait until the user stops typing for 300ms
+- **Window resize handlers** — recalculate layout only after the user finishes resizing, not 60 times per second
+- **Form auto-save** — persist draft data after the user pauses editing, not on every field change
+- **Button double-click prevention** — with the `leading` option, fire immediately on the first click and ignore subsequent rapid clicks
+
+Interviewers escalate by asking for `leading` edge (fire on the first call, not the last), `cancel()` (clear a pending timer), and `flush()` (immediately invoke the pending function). These test timer management, `this` context preservation, and state cleanup — not just the basic pattern.
+
+---
+
 ## The Problem
 
 > "Implement `debounce(fn, delay)` — a function that delays invoking `fn` until after `delay` milliseconds have elapsed since the last invocation. Only the last call in a burst should execute."

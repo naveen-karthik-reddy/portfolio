@@ -4,6 +4,20 @@ Implementing `call`, `apply`, and `bind` from scratch is one of the most common 
 
 ---
 
+## What are `call()`, `apply()`, and `bind()`?
+
+These three methods let you explicitly control what `this` refers to when a function executes. By default, `this` is determined by how a function is called (the "implicit binding" rule) — but `call`, `apply`, and `bind` override that.
+
+- **`call(thisArg, ...args)`** — invokes the function immediately with `this` set to `thisArg` and arguments passed individually.
+- **`apply(thisArg, argsArray)`** — same as `call`, but arguments are passed as an array (or array-like object).
+- **`bind(thisArg, ...args)`** — does NOT invoke the function. It returns a new function with `this` permanently bound to `thisArg`, with optional partial application of arguments.
+
+These are foundational because many higher-level patterns (function borrowing, partial application, method delegation) are built on them. In modern code, arrow functions and the `...spread` operator handle some of these use cases, but `bind` is still essential for event handlers and callback binding.
+
+The core mechanic behind all three is the **temporary property trick**: attach the function as a property on the context object, call it as `obj.fn()`, then remove the property. Implicit binding handles the rest.
+
+---
+
 ## The Problem
 
 Interviewers will ask some variation of:

@@ -2,6 +2,28 @@ A data selection engine takes an array of rows and a criteria object, returning 
 
 ---
 
+## What is a Data Selection Engine?
+
+A data selection (or filter) engine takes an array of rows and a criteria object, and returns only the rows that satisfy **all** conditions. It's a miniature in-memory query engine — the kind that powers ORM filters, dashboard filters, and search UIs.
+
+The criteria object defines conditions as key-value pairs. Each value's type determines the comparison strategy:
+- **Scalar** (string, number, boolean) → exact match: `row[key] === value`
+- **Range object** `{ min, max }` → `row[key] >= min && row[key] <= max` (either bound can be absent for one-sided ranges)
+- **Set membership** `{ in: [...] }` → `array.includes(row[key])`
+- **Negation** `{ ne: value }` → `row[key] !== value`
+
+All conditions are combined with **AND logic** — a row must pass every condition to be included. The implementation dispatches each condition to the appropriate comparison function based on the value's shape (`.min`/`.max` → range; `.in` → set; `.ne` → negation; otherwise → exact match).
+
+Real-world use cases:
+- **Dashboard filters** — a table with columns for status, date, and category, filtered by user-selected criteria
+- **REST API query params** — `GET /users?status=active&age[min]=18&age[max]=65&role[in]=admin,moderator` translates directly to this pattern
+- **Search UIs** — building faceted search where each facet adds a condition to the criteria object
+- **Test data selection** — `filterRows(testData, { scenario: "error", code: { in: [400, 500] } })` to find relevant test fixtures
+
+The interview tests condition dispatching (type-checking the criteria value to choose the comparison), composability (AND chaining), and the ability to design an extensible filter model where new condition types can be added without restructuring the engine.
+
+---
+
 ## The Problem
 
 > "Implement `filterRows(rows, criteria)` that filters an array of objects based on a criteria object. Support:

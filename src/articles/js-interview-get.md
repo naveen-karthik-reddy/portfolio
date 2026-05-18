@@ -2,6 +2,20 @@
 
 ---
 
+## What is `get()`?
+
+`get(obj, path, defaultValue)` is Lodash's safe nested access utility. Instead of writing `obj.a && obj.a.b && obj.a.b.c` (which is verbose) or `obj.a.b.c` (which throws if any intermediate key is missing), you write `get(obj, "a.b.c", "fallback")` — read the path, return the value if it exists, or return `defaultValue` if anything along the way is `null` or `undefined`.
+
+The problem it solves is **defensive traversal**: navigating objects where the shape is uncertain (API responses, config objects, optional nested structures) without littering the code with guard checks. The native optional chaining `obj?.a?.b?.c` handles many cases now, but `get()` gives you programmatic path control — the path can be a dynamic string built at runtime.
+
+The interview tests two skills in one question:
+1. **Path parsing** — converting a string like `"a[0].b.c"` into individual keys `["a", "0", "b", "c"]`, handling both dot and bracket notation
+2. **Safe traversal** — walking the object key by key, returning early if any step is nullish instead of throwing
+
+The key detail interviewers look for: checking `current == null` **before** accessing `current[key]`. Without that check, drilling into a null intermediate value throws a `TypeError` — exactly what `get()` is meant to prevent.
+
+---
+
 ## The Problem
 
 > "Implement `get(obj, path, defaultValue)` that safely retrieves a nested value from an object using a dot-notation path string. If any part of the path doesn't exist, return the default value instead of throwing."

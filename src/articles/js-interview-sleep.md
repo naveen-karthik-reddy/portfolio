@@ -2,6 +2,22 @@
 
 ---
 
+## What is `sleep()`?
+
+`sleep(ms)` is a utility that returns a Promise resolving after `ms` milliseconds. It lets you pause execution inside an `async` function with `await sleep(1000)` — something JavaScript doesn't natively support (unlike Python's `time.sleep()` or Java's `Thread.sleep()`).
+
+Under the hood, `sleep` wraps `setTimeout` in a Promise constructor. The returned Promise resolves when the timer fires, and `await` suspends the async function until that happens. This is the canonical example of "promisifying" a callback-based API — converting a timer API into a Promise-based one.
+
+Common real-world uses:
+- **Rate-limiting** — space out API calls in a loop: `for (const item of items) { await process(item); await sleep(200); }`
+- **UI delays** — keep a loading spinner visible for at least 500ms to avoid flicker
+- **Yielding to the event loop** — `await sleep(0)` defers execution to the next macrotask, letting the browser process pending UI updates or user input before continuing
+- **Testing timeout behavior** — simulate network delays or race conditions in tests
+
+The interview starts with the one-liner `new Promise(resolve => setTimeout(resolve, ms))` and escalates quickly: "Make it cancellable with an `AbortSignal`" and "What does `await sleep(0)` actually do?" These follow-ups test whether you understand the Promise constructor, macrotask scheduling, and cleanup patterns.
+
+---
+
 ## The Problem
 
 > "Implement `sleep(ms)` that returns a Promise that resolves after `ms` milliseconds. Show how to use it with `async/await`."

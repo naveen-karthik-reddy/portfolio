@@ -4,6 +4,24 @@ Memoize caches a function's return values keyed by its arguments. The base versi
 
 ---
 
+## What is `memoize()`?
+
+`memoize(fn)` returns a wrapped version of `fn` that **caches return values by input arguments**. The first call with a given argument set runs `fn` and stores the result; every subsequent call with the same arguments returns the cached value instantly, skipping `fn` entirely.
+
+This is the canonical **time-for-space trade-off**: you burn memory to avoid re-computation. It's only worth doing when `fn` is expensive (heavy computation, network calls) and called repeatedly with the same inputs.
+
+The core mechanic is a closure with a cache (usually a `Map` or plain object). On each call, serialize the arguments into a cache key, check if the result exists, and return it if so. Otherwise, call `fn`, store the result, and return it.
+
+Real-world use cases:
+- **Expensive calculations** — Fibonacci, factorial, or any recursive math with overlapping subproblems
+- **Derived data** — computing `fullName` from `firstName` + `lastName` in a component that re-renders often
+- **Selector functions** in state management (Redux's `createSelector` is memoization)
+- **Parsing** — memoize `JSON.parse()` or template compilation by input string
+
+The interview escalates with a **custom key resolver**: when `fn` takes multiple arguments or object arguments, the default cache key (`arguments[0]`) isn't enough. You need a `resolver` function that maps `(...args)` to a unique cache key. This tests whether you understand cache key design and can generalize from a single-argument cache to arbitrary signatures.
+
+---
+
 ## The Problem
 
 > "Implement `memoize(fn)` that returns a memoized version of `fn`. The memoized function should cache results by argument and return the cached value on subsequent calls with the same argument."

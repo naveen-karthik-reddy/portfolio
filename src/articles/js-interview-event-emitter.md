@@ -4,6 +4,26 @@ An `EventEmitter` is a pub-sub pattern with `on`, `off`, `emit`, and `once`. Ver
 
 ---
 
+## What is an EventEmitter?
+
+An `EventEmitter` is the **publish-subscribe (pub-sub) pattern** implemented as a class with four core methods: `on`, `off`, `emit`, and `once`. It lets objects communicate without directly referencing each other — listeners register interest in named events, and emitters broadcast events to whoever is listening.
+
+This is the decoupling pattern that powers nearly every event-driven system:
+- **DOM events** — `element.addEventListener("click", handler)` is the same pattern
+- **Node.js core** — `EventEmitter` is a built-in module; streams, servers, and process objects all extend it
+- **State management** — Redux, MobX, and Zustand all use pub-sub internally to notify subscribers of state changes
+- **Micro-frontends / plugins** — independent modules communicate through a shared event bus without importing each other
+
+The data structure is straightforward: a map from event name to an array of listener callbacks. The subtle behaviors that interviewers test:
+- **`on(event, listener)`** — registers a listener; multiple listeners for the same event are called in registration order
+- **`emit(event, ...args)`** — synchronously calls each registered listener with the provided arguments
+- **`off(event, listener)`** — removes a specific listener; removing during `emit` shouldn't skip other listeners
+- **`once(event, listener)`** — registers a listener that auto-removes after its first invocation (implemented by wrapping the listener with `on` + self-removing wrapper)
+
+The upgrade path to version II is returning a **subscription object** with an `unsubscribe()` method instead of using `off(event, listener)`. This is the modern pattern (RxJS, React's `useEffect` cleanup) because the subscriber doesn't need to remember both the event name and the listener reference — they just call `.unsubscribe()`.
+
+---
+
 ## The Problem
 
 > "Implement an `EventEmitter` class with four methods: `on(event, listener)`, `off(event, listener)`, `emit(event, ...args)`, and `once(event, listener)`."

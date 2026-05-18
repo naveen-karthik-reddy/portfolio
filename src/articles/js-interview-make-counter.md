@@ -4,6 +4,18 @@
 
 ---
 
+## What is `makeCounter()`?
+
+`makeCounter()` is the simplest possible demonstration of **closures** — the mechanism by which an inner function retains access to variables from its enclosing scope, even after that scope has finished executing. Understanding this question means understanding closures, period.
+
+When you call `makeCounter()`, it creates a local variable (typically `count`) and returns a function. That returned function "closes over" `count` — meaning it holds a live reference to the variable, not a frozen copy. Each subsequent call mutates the same `count`, and no outside code can touch it. This is the **module pattern** in microcosm: private state exposed through a public API.
+
+The interview usually escalates from the simple one-function version to an object with multiple methods (`increment`, `decrement`, `reset`, `getValue`), all sharing the same closed-over state. The key realization: every call to `makeCounter()` spawns an **independent** closure with its own private `count`. Two counters never interfere.
+
+Closures power virtually every modern JS pattern — event handlers, memoization, currying, debouncing, and the entire React hooks model. If you can explain `makeCounter`, you can explain all of them.
+
+---
+
 ## The Problem
 
 **Version I:**

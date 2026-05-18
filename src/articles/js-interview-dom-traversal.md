@@ -2,12 +2,27 @@ DOM traversal questions are the same recursive tree walk applied three different
 
 ---
 
-## The Problem
+## What is DOM Traversal?
 
-> "Implement three functions that work like native DOM methods (but without using them):
-> 1. `getElementsByClassName(root, className)` — find all descendants with the given class
-> 2. `getElementsByTagName(root, tagName)` — find all descendants with the given tag
-> 3. `getElementsByStyle(root, property, value)` — find all descendants where a computed style matches"
+DOM traversal is the act of walking the DOM tree to find elements matching certain criteria — by class name, tag name, or computed style. The browser provides native methods like `getElementsByClassName()` and `querySelectorAll()`, but implementing them from scratch tests whether you understand tree recursion and DOM APIs.
+
+The DOM is a tree where each node has children (`.children`) and siblings (`.nextElementSibling`). Traversing it means starting at a root element and recursively visiting every descendant, checking each against your match criteria. The standard approach is **depth-first search (DFS)**: dive deep into the first child, then its first child, etc., backtracking when you hit a leaf.
+
+The three functions are the same DFS algorithm applied to different predicates:
+- **`getElementsByClassName(root, className)`** — check `element.classList.contains(className)`
+- **`getElementsByTagName(root, tagName)`** — check `element.tagName === tagName.toUpperCase()`
+- **`getElementsByStyle(root, property, value)`** — check `getComputedStyle(element)[property] === value`
+
+The edge cases interviewers look for: the root element itself should be checked (not just descendants), text nodes and comment nodes should be skipped, and recursion must handle deeply nested structures without stack overflow (though in practice, the DOM is rarely deep enough for this to matter).
+
+Real-world use:
+- **Polyfills** — implementing `getElementsByClassName` for older browsers before it was universally supported
+- **Custom selectors** — building a CSS selector engine for a testing framework or scraper
+- **Accessibility audits** — walking the DOM to find elements missing ARIA attributes or with specific computed styles
+
+---
+
+## The Problem
 
 ---
 

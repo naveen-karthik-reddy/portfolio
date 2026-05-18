@@ -2,6 +2,27 @@
 
 ---
 
+## What is `classnames()`?
+
+`classnames(...args)` is a utility that joins truthy CSS class names into a single space-separated string. It's the npm package `classnames` (used by React, Next.js, and virtually every component library) implemented from scratch.
+
+The function accepts a **mixed-type variadic input** — strings, numbers, objects, arrays, and nested combinations of all of them:
+- **Strings and numbers** — included as-is if truthy (numbers are converted to strings)
+- **Objects** — keys with truthy values are included: `{ "btn-primary": true, "btn-disabled": false }` → `"btn-primary"`
+- **Arrays** — recursively flattened; each element is processed according to its type
+- **Falsy values** — `null`, `undefined`, `false`, `0`, `""` are silently skipped
+
+The core challenge is handling the **heterogeneous input** cleanly. You can't assume a uniform type — the function must inspect each argument, branch by type, and recurse into arrays and objects. The result is a flat string of class names joined by spaces.
+
+Real-world use cases:
+- **Conditional styling** — `classnames("btn", isPrimary && "btn-primary", isDisabled && "btn-disabled")` — falsy values are automatically filtered out, so you don't get `"btn false undefined"` in your rendered HTML
+- **Component libraries** — every React component with variant props uses this pattern to build the final `className` string
+- **Template rendering** — server-side templates that need to build CSS class strings from conditional logic
+
+The interview tests recursion with mixed types, falsy value filtering, and the ability to write a clean polymorphic function that handles 4+ input shapes with a single recursive loop.
+
+---
+
 ## The Problem
 
 > "Implement `classnames(...args)` that takes any number of arguments (strings, numbers, objects, arrays) and returns a single string of truthy class names joined by spaces."

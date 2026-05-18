@@ -4,6 +4,22 @@
 
 ---
 
+## What is `once()`?
+
+`once(fn)` is a higher-order function that wraps another function and returns a version that executes **at most one time**. The first call runs `fn` and caches the result; every subsequent call returns the cached result without invoking `fn` again.
+
+This is a **call-limiting pattern**, not a caching pattern. You're not memoizing by input — you're memoizing by the fact of having been called. The arguments on subsequent calls are irrelevant; you always get back the first result.
+
+Real-world use cases:
+- **Singleton initialization** — `const initApp = once(() => { setupEventListeners(); loadConfig(); })` ensures setup runs exactly once, no matter how many times it's triggered
+- **One-time event handlers** — a click handler that should fire the first time and become a no-op after
+- **Lazy computation** — defer an expensive calculation until first access, then cache forever
+- **Payment/submission buttons** — prevent double-submission by wrapping the submit handler in `once()`
+
+The implementation is a single closure with two variables: a `called` flag and a `result` cache. The only nuance is forwarding `this` so the wrapped function sees the caller's context. The interviewer will often extend this to `limit(fn, n)` — generalizing from "at most once" to "at most N times."
+
+---
+
 ## The Problem
 
 > "Implement `once(fn)` — a function that takes another function and returns a new function. The returned function calls `fn` only on the first invocation and returns the same result for all subsequent calls."

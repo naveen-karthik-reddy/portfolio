@@ -4,6 +4,26 @@ Throttle guarantees a function runs at most once per interval, no matter how man
 
 ---
 
+## What is `throttle()`?
+
+`throttle(fn, interval)` returns a function that guarantees `fn` runs **at most once per `interval` milliseconds**, no matter how frequently the returned function is called. Unlike debounce (which waits for silence), throttle gives you regular, evenly-spaced execution during a burst.
+
+Think of a game's frame rate capped at 60 FPS — it doesn't matter if your monitor refreshes faster; the game won't render more than 60 times per second. Similarly, `throttle(scrollHandler, 100)` ensures your scroll logic fires at most 10 times per second, even if the browser fires scroll events 100 times per second.
+
+The key distinction from debounce:
+- **Debounce** → "wait until you stop, then fire once" (trailing edge, timer resets on each call)
+- **Throttle** → "fire immediately, then ignore for the cooldown period" (leading edge with a lock)
+
+Real-world use cases:
+- **Scroll events** — update a progress bar or lazy-load images during continuous scrolling
+- **Resize events** — recalculate layout at a steady cadence instead of every pixel change
+- **Game loops / animations** — cap physics updates or network sync at a fixed rate
+- **Rate-limiting API calls** — ensure you never exceed N requests per second regardless of user activity
+
+The base implementation is a lock flag with `setTimeout`. The interviewer escalates to the trailing-edge variant: if a call arrives during the cooldown, it should be deferred and fire at the end of the interval. This variant tests whether you understand the subtle interplay between the lock, the timer, and the stored `this`/arguments.
+
+---
+
 ## The Problem
 
 > "Implement `throttle(fn, interval)` — a function that ensures `fn` is called at most once every `interval` milliseconds. If calls arrive during the cooldown, they should be ignored."

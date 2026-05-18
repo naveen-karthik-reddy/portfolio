@@ -2,6 +2,28 @@
 
 ---
 
+## What is Data Merging?
+
+Data merging (or "group-and-merge") combines multiple rows that share a common key into a single consolidated row. Given an array of user activity records where the same user appears in multiple rows, you produce one row per user with merged fields.
+
+This is a **reduce-into-a-Map** pattern with a field-level merge strategy. The grouping key is typically a field like `userId`. For each field in the grouped rows, you need a rule:
+- **Arrays** → concatenate all values into a single array
+- **Numbers** → sum them
+- **Strings / scalars** → keep the first occurrence's value (or the last, depending on the spec)
+- **Nested objects** → recursively merge
+
+The implementation is a two-phase pipeline: first, group rows by key using a `Map` or plain object. Second, for each group, iterate over all fields and apply the merge strategy per type. This is the same pattern used in SQL `GROUP BY` with aggregate functions, implemented in application code.
+
+Real-world use cases:
+- **ETL pipelines** — merging user sessions, purchase events, or log entries into summary records
+- **API response aggregation** — combining paginated API results where the same entity appears across pages
+- **Dashboard data** — merging metrics from multiple sources into a unified per-user view
+- **Data import** — deduplicating and merging CSV or spreadsheet rows before inserting into a database
+
+The interview tests `reduce` fluency, `Map` usage for grouping, type-checking for field merge logic, and the ability to handle arrays of objects with heterogeneous field types.
+
+---
+
 ## The Problem
 
 > "Given an array of rows where each row has a `userId` and various fields, merge rows with the same `userId` into a single row. Fields should be merged according to their type: arrays get concatenated, numbers get summed, and scalars keep the first value."

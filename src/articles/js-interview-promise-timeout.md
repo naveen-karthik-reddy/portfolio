@@ -2,6 +2,22 @@
 
 ---
 
+## What is `promiseTimeout()`?
+
+`promiseTimeout(promise, ms)` races a promise against a timer. If the input promise settles within `ms` milliseconds, its result is used. If it doesn't, the returned promise rejects with a timeout error. It's a deadline enforcement pattern — "get me this result, but don't make me wait forever."
+
+The mechanism is straightforward: create a timer promise that rejects after `ms`, then race it against the input. `Promise.race` is the natural fit — the first to settle wins. But there's a cleanup concern: if the input promise settles first, the timer keeps running (a dangling `setTimeout`). The thorough implementation clears the timer on early settlement.
+
+Real-world use cases:
+- **Fetch with timeout** — the native `fetch` API has no built-in timeout. `promiseTimeout(fetch(url), 5000)` adds one
+- **API gateways** — enforce SLAs by rejecting requests that take longer than N seconds
+- **User-facing loading states** — show a "taking longer than expected" message after 3 seconds, even if the request eventually succeeds
+- **Health checks** — `promiseTimeout(ping(service), 2000)` ensures liveness probes fail fast
+
+The interviewer will often ask for the higher-order version: `withTimeout(fn, ms)` that wraps any async function so every call is automatically time-limited. This tests whether you can generalize from a one-shot timeout to a reusable decorator.
+
+---
+
 ## The Problem
 
 > "Implement `promiseTimeout(promise, ms)` that returns a promise. If `promise` settles within `ms` milliseconds, return its result. If it doesn't, reject with a timeout error."

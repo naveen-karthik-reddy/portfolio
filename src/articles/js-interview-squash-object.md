@@ -4,6 +4,29 @@
 
 ---
 
+## What is `squash()`?
+
+`squash(obj)` converts a deeply nested object into a flat, single-level object where each key is a dot-notation path to the original value. For example, `{ a: { b: { c: 1 } } }` becomes `{ "a.b.c": 1 }`. Arrays use bracket notation: `{ users: [{ name: "Alice" }] }` becomes `{ "users[0].name": "Alice" }`.
+
+This is the reverse of `unflatten` / `unsquash`, which takes a flat dot-path object and reconstructs the nested hierarchy. Together they form a serialization/deserialization pair.
+
+The implementation is a recursive depth-first walk. At each level:
+- **Primitive or null** — set the accumulated path key to this value
+- **Plain object** — recurse into each entry, appending `.key` to the accumulated path
+- **Array** — recurse into each element, appending `[index]` to the path
+
+The accumulator is a path string that grows as you descend, and you only write to the result object at leaf nodes.
+
+Real-world use cases:
+- **Form libraries** — convert nested form state into flat `{ "user.name": "Alice" }` for validation or submission
+- **URL query params** — flatten a config object into query parameters: `filter[status]=active&filter[date]=today`
+- **Database updates** — MongoDB and Firebase use dot-notation for updating nested fields without overwriting siblings
+- **Diffing** — compare two nested objects by flattening both and doing a shallow diff on the flat versions
+
+The interviewer will typically ask for `unsquash()` as the reverse operation. Building both tests whether you can think in both directions — encoding a hierarchy into paths and decoding paths back into a hierarchy.
+
+---
+
 ## The Problem
 
 > "Implement `squash(obj)` that converts a nested object into a flat object with dot-separated keys. Handle both objects and arrays (arrays use bracket notation)."

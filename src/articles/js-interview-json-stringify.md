@@ -4,6 +4,23 @@
 
 ---
 
+## What is `JSON.stringify()`?
+
+`JSON.stringify(value)` converts a JavaScript value into a JSON-formatted string. It's the standard serialization format for web APIs, config files, and data interchange. The native implementation handles primitives, arrays, objects, and has specific rules for what gets skipped or transformed.
+
+Building it from scratch is a **recursive tree serializer** — you walk the value, emit the correct JSON syntax at each node, and handle edge cases the native implementation defines:
+- **Primitives** — strings get double-quoted and escaped; numbers and booleans emit directly; `null` emits `"null"`
+- **Arrays** — emit `[...]` with recursively serialized elements
+- **Objects** — emit `{...}` with quoted keys and recursively serialized values
+- **Non-JSON values** — `undefined`, functions, and `Symbol` keys/values are **skipped** (not emitted) in objects and replaced with `null` in arrays
+- **Circular references** — must be detected and rejected (throws `TypeError` in native)
+
+The interview tests whether you can handle all these branches correctly. The key edge cases: string escaping (`"`, `\`, newlines, etc.), distinguishing arrays from plain objects, detecting cycles with a `WeakMap`/`Set`, and knowing what JSON considers valid vs. invalid.
+
+Real-world use cases go far beyond building your own serializer. Understanding how `JSON.stringify` works internally helps you debug serialization bugs, understand why certain values disappear from API payloads, and know when to reach for alternatives like `structuredClone` or custom serializers.
+
+---
+
 ## The Problem
 
 > "Implement `myJSONStringify(value)` that returns a JSON string. It should handle: `null`, booleans, numbers, strings, arrays, and plain objects. Skip `undefined`, functions, and `Symbol` values. Detect circular references."

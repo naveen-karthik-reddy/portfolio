@@ -4,6 +4,18 @@
 
 ---
 
+## What are `map()`, `filter()`, and `reduce()`?
+
+These are the three foundational higher-order array methods. Each takes a callback and iterates over the array — what differs is what they return and when the callback is invoked.
+
+- **`map(callback)`** — transforms each element and returns a **new array of the same length**. Every element goes through the callback; the result array mirrors the input structure. Use it when you want to change shape or type: `users.map(u => u.name)`.
+- **`filter(callback)`** — returns a **new array containing only elements where the callback returned a truthy value**. The result array is the same shape but possibly shorter. Use it to remove unwanted items: `numbers.filter(n => n > 0)`.
+- **`reduce(callback, initialValue)`** — **accumulates the array into a single value**. It's the most general of the three — both `map` and `filter` can be implemented with `reduce`. The callback receives an accumulator and each element, and the accumulator carries state across iterations. Use it for sums, grouping, flattening, or any operation that collapses an array.
+
+What makes these three interview staples is that they test array iteration mechanics: sparse array holes, the optional `thisArg` parameter, and the fact that the callback receives `(element, index, array)`. Building them from scratch proves you understand iteration protocols, not just the API surface.
+
+---
+
 ## The Problem
 
 > "Implement `Array.prototype.myMap`, `myFilter`, and `myReduce` from scratch. Each must match the native method's behavior: callback signature, `thisArg`, and sparse array handling."

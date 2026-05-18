@@ -2,6 +2,32 @@
 
 ---
 
+## What is `listFormat()`?
+
+`listFormat(array, options)` converts an array into a **human-readable list string** following natural language conventions. Three items becomes `"a, b, and c"`, two items becomes `"a and b"`, one item is just the item itself, and an empty array returns `""`.
+
+The formatting logic depends entirely on the array length, making this a **branch-by-length** problem rather than a loop or recursion problem:
+- **0 items** → empty string
+- **1 item** → the item as-is
+- **2 items** → `"item1 {conjunction} item2"` (e.g., `"a and b"`)
+- **3+ items** → `"item1, item2, ... {conjunction} lastItem"` (e.g., `"a, b, and c"`)
+
+The options typically include:
+- **`conjunction`** — the joining word (default: `"and"`, but could be `"or"` for alternatives)
+- **`oxfordComma`** — whether to include the comma before the conjunction in 3+ item lists (`"a, b, and c"` vs `"a, b and c"`)
+
+This is the JavaScript equivalent of Python's `", ".join()` with an Oxford comma and a conjunction for the last element. The native `Intl.ListFormat` API handles this with locale awareness, but interviewers want to see the manual implementation.
+
+Real-world use cases:
+- **UI notifications** — "Alice, Bob, and 3 others liked your post"
+- **Error messages** — "The following fields are required: name, email, and password"
+- **Breadcrumbs** — formatting a path array for display
+- **Email templates** — "Your meeting with Alice, Bob, and Carol has been confirmed"
+
+The interview tests string manipulation, edge case handling for each of the 4 length categories, and whether you think about the Oxford comma option unprompted.
+
+---
+
 ## The Problem
 
 > "Implement `listFormat(array, options)` that returns a human-readable string:

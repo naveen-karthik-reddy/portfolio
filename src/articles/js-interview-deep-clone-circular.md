@@ -4,6 +4,29 @@
 
 ---
 
+## What is Circular Reference Handling in `deepClone()`?
+
+The basic `deepClone` from Interview #13 fails catastrophically on circular references. If `obj.self = obj`, the recursion enters an infinite loop and eventually overflows the call stack. Solving this means tracking which objects have already been cloned and, when you encounter one again, returning the existing clone instead of recursing.
+
+The data structure for this is a **`WeakMap` from original → clone**. Before cloning an object, check if it's already in the map. If so, return the cached clone (this is what breaks the cycle). If not, create a new clone, **store it in the map immediately** (before recursing into children), then recursively clone the children.
+
+The `WeakMap` is specifically chosen over `Map` because:
+- It holds **weak references** — if the original object is garbage collected, the WeakMap entry is automatically removed
+- It avoids memory leaks in long-lived clone operations
+- It's the same data structure the native `structuredClone` uses internally for this purpose
+
+Once the cycle-breaking mechanism is in place, the interviewer typically extends the question to handle non-JSON types:
+- **`Date`** → `new Date(value.getTime())`
+- **`RegExp`** → `new RegExp(value.source, value.flags)`
+- **`Map`** → `new Map(Array.from(value.entries()).map(([k, v]) => [deepClone(k, seen), deepClone(v, seen)]))`
+- **`Set`** → `new Set(Array.from(value).map(v => deepClone(v, seen)))`
+
+Each type requires its own branch in the recursion, with the `WeakMap` tracker threaded through all of them.
+
+Real-world use: circular references are common in DOM trees (`parentNode`/`childNodes`), graph data structures (adjacency lists), and state management (parent/child entity relationships). Any general-purpose clone utility must handle them.
+
+---
+
 ## The Problem
 
 > "Your `deepClone` from earlier handles plain objects and arrays. Now extend it to handle:

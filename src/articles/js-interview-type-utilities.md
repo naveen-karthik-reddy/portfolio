@@ -2,6 +2,20 @@ Type checking in JavaScript is a minefield. `typeof null === "object"`, `NaN` ha
 
 ---
 
+## What are Type Utilities?
+
+Type-checking utilities (`isString`, `isNumber`, `isArray`, `isPlainObject`, etc.) are helpers that reliably determine what kind of value you're dealing with. JavaScript ships with three type-checking primitives — `typeof`, `instanceof`, and `Object.prototype.toString.call()` — and each has specific blind spots you need to know.
+
+- **`typeof`** is fast and works for primitives, but has the infamous bug: `typeof null === "object"`. It also can't distinguish arrays from plain objects.
+- **`instanceof`** checks the prototype chain and handles custom classes, but breaks across execution contexts (iframes, different realms) because each realm has its own copy of built-in constructors.
+- **`Object.prototype.toString.call(value)`** returns `[object Type]` — the most reliable check for built-in types (`[object Array]`, `[object Date]`, etc.) and the basis for most library-grade type checking.
+
+The hardest utility is `isPlainObject` — distinguishing a plain `{}` from instances of `Date`, `RegExp`, `Map`, or custom classes. This requires inspecting the prototype chain: a plain object's immediate prototype is either `Object.prototype` or `null` (for `Object.create(null)`).
+
+These utilities are foundational. Every library (Lodash, Ramda, etc.) ships its own set, and interviewers use them to test whether you understand JavaScript's type system quirks rather than just the API surface.
+
+---
+
 ## The Problem
 
 > "Implement a set of type-checking utilities: `isString`, `isNumber`, `isBoolean`, `isNull`, `isUndefined`, `isArray`, `isObject`, `isFunction`, and `isPlainObject`. Each should return `true` only for the type it claims to check."
