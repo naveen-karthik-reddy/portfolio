@@ -20,8 +20,8 @@ export function markdownToPlainText(markdown) {
   return markdown
     // Remove fenced code blocks (don't read code aloud)
     .replace(/```[\s\S]*?```/g, ' ')
-    // Remove inline code
-    .replace(/`[^`\n]*`/g, ' ')
+    // Preserve inline code text — backticks are formatting, the terms are critical
+    .replace(/`([^`\n]+)`/g, '$1')
     // Remove images
     .replace(/!\[.*?\]\(.*?\)/g, '')
     // Convert links to text only
@@ -39,8 +39,12 @@ export function markdownToPlainText(markdown) {
     // Remove list markers
     .replace(/^\s*[-*+]\s+/gm, '')
     .replace(/^\s*\d+\.\s+/gm, '')
+    // Remove HTML comments
+    .replace(/<!--[\s\S]*?-->/g, '')
     // Remove HTML tags
     .replace(/<[^>]+>/g, '')
+    // Remove strikethrough markers
+    .replace(/~~([^~]+)~~/g, '$1')
     // Collapse excess whitespace
     .replace(/\n{3,}/g, '\n\n')
     .trim();

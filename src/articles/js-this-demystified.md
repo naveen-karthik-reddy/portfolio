@@ -1,3 +1,5 @@
+**`this`** is a special keyword that refers to the object a function is currently operating on — its value is decided at *call time*, not at the time the function is written.
+
 No keyword confuses JavaScript developers more than `this`. Think of `this` like the pronoun **"he"** in English — it refers to a different person depending on who is speaking and in what context. When Alice says "he is tall," "he" means Bob; when Charlie says it, "he" means Dave. Similarly, `this` inside a function refers to different objects depending on *how* that function is called.
 
 This article covers the four binding rules, arrow functions, and every gotcha.
@@ -42,7 +44,12 @@ This is rarely useful on its own, but it explains why a standalone function call
 
 ## 3. The Four Binding Rules
 
-There are exactly four rules that determine `this`, in order of precedence:
+There are exactly four rules that determine `this`, in order of precedence. Before diving in, here's what the terms *implicit* and *explicit* mean in this context:
+
+| Term | Meaning |
+|---|---|
+| **Implicit** | You don't say which object `this` should be — JavaScript *infers* it from how the function is called |
+| **Explicit** | You *directly state* which object `this` should be, using `call`, `apply`, or `bind` |
 
 ### Rule 1: Default Binding (lowest priority)
 
@@ -70,6 +77,8 @@ strictDemo();
 ---
 
 ### Rule 2: Implicit Binding
+
+Called *implicit* because you never tell JavaScript which object `this` should be — it *implies* it from the call site by looking at what's to the left of the dot.
 
 When a function is called as a **method of an object**, `this` points to that object — the one directly before the dot.
 
@@ -136,6 +145,8 @@ The fix (before arrow functions) was explicit binding.
 ---
 
 ### Rule 3: Explicit Binding — `call`, `apply`, `bind`
+
+Called *explicit* because you *explicitly* tell JavaScript which object `this` should be — you pass it directly via `call`, `apply`, or `bind` instead of leaving it to inference.
 
 You can force `this` to be whatever you want using these three methods. A simple way to remember them:
 

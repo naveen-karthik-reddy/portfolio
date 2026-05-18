@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo, forwardRef, useImperativeHandle } from "react";
+import { createPortal } from "react-dom";
 import {
   Box,
   Paper,
@@ -317,143 +318,255 @@ const ArticleAudioPlayer = forwardRef(function ArticleAudioPlayer({ markdownCont
   };
 
   return (
-    <Paper
-      role="region"
-      aria-label="Article audio player"
-      className="no-print"
-      elevation={0}
-      sx={{
-        px: 2,
-        py: 1.25,
-        mb: 4,
-        border: "1px solid",
-        borderColor: isActive ? "primary.main" : "divider",
-        borderRadius: 2,
-        transition: "border-color 0.3s",
-      }}
-    >
-      {/* Row 1 — playback controls */}
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, flexWrap: "wrap" }}>
-        <VolumeUp
-          sx={{
-            color: isActive ? "primary.main" : "text.disabled",
-            fontSize: 18,
-            transition: "color 0.3s",
-            flexShrink: 0,
-          }}
-        />
-
-        <Tooltip
-          title={status === "playing" ? "Pause" : status === "paused" ? "Resume" : "Listen to article"}
-          arrow
-        >
-          <IconButton
-            onClick={handlePlayPause}
-            size="small"
-            aria-label={status === "playing" ? "Pause" : "Play article"}
+    <>
+      {/* Inline player */}
+      <Paper
+        role="region"
+        aria-label="Article audio player"
+        className="no-print"
+        elevation={0}
+        sx={{
+          px: 2,
+          py: 1.25,
+          mb: 4,
+          border: "1px solid",
+          borderColor: isActive ? "primary.main" : "divider",
+          borderRadius: 2,
+          transition: "border-color 0.3s",
+        }}
+      >
+        {/* Row 1 — playback controls */}
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, flexWrap: "wrap" }}>
+          <VolumeUp
             sx={{
-              color: "primary.main",
-              border: "1px solid",
-              borderColor: "primary.main",
-              borderRadius: 1.5,
-              p: 0.5,
-              "&:hover": { bgcolor: "primary.main", color: "background.paper" },
-              transition: "all 0.2s",
+              color: isActive ? "primary.main" : "text.disabled",
+              fontSize: 18,
+              transition: "color 0.3s",
+              flexShrink: 0,
             }}
-          >
-            {status === "playing" ? <Pause sx={{ fontSize: 16 }} /> : <PlayArrow sx={{ fontSize: 16 }} />}
-          </IconButton>
-        </Tooltip>
+          />
 
-        {isActive && (
-          <Tooltip title="Stop" arrow>
+          <Tooltip
+            title={status === "playing" ? "Pause" : status === "paused" ? "Resume" : "Listen to article"}
+            arrow
+          >
             <IconButton
-              onClick={handleStop}
+              onClick={handlePlayPause}
               size="small"
-              aria-label="Stop"
+              aria-label={status === "playing" ? "Pause" : "Play article"}
               sx={{
-                color: "text.secondary",
+                color: "primary.main",
                 border: "1px solid",
-                borderColor: "divider",
+                borderColor: "primary.main",
                 borderRadius: 1.5,
                 p: 0.5,
-                "&:hover": { borderColor: "text.secondary", color: "text.primary" },
+                "&:hover": { bgcolor: "primary.main", color: "background.paper" },
                 transition: "all 0.2s",
               }}
             >
-              <Stop sx={{ fontSize: 16 }} />
+              {status === "playing" ? <Pause sx={{ fontSize: 16 }} /> : <PlayArrow sx={{ fontSize: 16 }} />}
             </IconButton>
           </Tooltip>
-        )}
 
-        <Box sx={{ flex: 1, minWidth: 80 }}>
-          <LinearProgress
-            variant="determinate"
-            value={progress}
-            sx={{
-              height: 3,
-              borderRadius: 2,
-              bgcolor: "divider",
-              "& .MuiLinearProgress-bar": { background: grad, borderRadius: 2 },
-            }}
-          />
-        </Box>
+          {isActive && (
+            <Tooltip title="Stop" arrow>
+              <IconButton
+                onClick={handleStop}
+                size="small"
+                aria-label="Stop"
+                sx={{
+                  color: "text.secondary",
+                  border: "1px solid",
+                  borderColor: "divider",
+                  borderRadius: 1.5,
+                  p: 0.5,
+                  "&:hover": { borderColor: "text.secondary", color: "text.primary" },
+                  transition: "all 0.2s",
+                }}
+              >
+                <Stop sx={{ fontSize: 16 }} />
+              </IconButton>
+            </Tooltip>
+          )}
 
-        <Typography
-          variant="caption"
-          color="text.secondary"
-          sx={{ fontSize: "0.72rem", whiteSpace: "nowrap", flexShrink: 0 }}
-        >
-          {timeLeft || (status === "idle" ? `~${estimatedMins} min` : "")}
-        </Typography>
+          <Box sx={{ flex: 1, minWidth: 80 }}>
+            <LinearProgress
+              variant="determinate"
+              value={progress}
+              sx={{
+                height: 3,
+                borderRadius: 2,
+                bgcolor: "divider",
+                "& .MuiLinearProgress-bar": { background: grad, borderRadius: 2 },
+              }}
+            />
+          </Box>
 
-        <Select
-          value={rate}
-          onChange={handleRateChange}
-          size="small"
-          variant="outlined"
-          aria-label="Playback speed"
-          sx={selectSx}
-        >
-          {RATES.map((r) => (
-            <MenuItem key={r} value={r} sx={{ fontSize: "0.8rem" }}>
-              {r}×
-            </MenuItem>
-          ))}
-        </Select>
-      </Box>
-
-      {/* Row 2 — voice selector */}
-      {voices.length > 0 && (
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1 }}>
-          <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.72rem", flexShrink: 0 }}>
-            Voice
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={{ fontSize: "0.72rem", whiteSpace: "nowrap", flexShrink: 0 }}
+          >
+            {timeLeft || (status === "idle" ? `~${estimatedMins} min` : "")}
           </Typography>
+
           <Select
-            value={selectedVoiceName}
-            onChange={handleVoiceChange}
+            value={rate}
+            onChange={handleRateChange}
             size="small"
             variant="outlined"
-            aria-label="Select voice"
-            sx={{ ...selectSx, maxWidth: 260 }}
+            aria-label="Playback speed"
+            sx={selectSx}
           >
-            {voices.map((v) => (
-              <MenuItem key={v.name} value={v.name} sx={{ fontSize: "0.8rem" }}>
-                {voiceLabel(v)}
-                {/natural|neural|enhanced/i.test(v.name) && (
-                  <Box
-                    component="span"
-                    sx={{ ml: 0.75, fontSize: "0.65rem", color: "primary.main", fontWeight: 700 }}
-                  >
-                    HD
-                  </Box>
-                )}
+            {RATES.map((r) => (
+              <MenuItem key={r} value={r} sx={{ fontSize: "0.8rem" }}>
+                {r}×
               </MenuItem>
             ))}
           </Select>
         </Box>
+
+        {/* Row 2 — voice selector */}
+        {voices.length > 0 && (
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1 }}>
+            <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.72rem", flexShrink: 0 }}>
+              Voice
+            </Typography>
+            <Select
+              value={selectedVoiceName}
+              onChange={handleVoiceChange}
+              size="small"
+              variant="outlined"
+              aria-label="Select voice"
+              sx={{ ...selectSx, maxWidth: 260 }}
+            >
+              {voices.map((v) => (
+                <MenuItem key={v.name} value={v.name} sx={{ fontSize: "0.8rem" }}>
+                  {voiceLabel(v)}
+                  {/natural|neural|enhanced/i.test(v.name) && (
+                    <Box
+                      component="span"
+                      sx={{ ml: 0.75, fontSize: "0.65rem", color: "primary.main", fontWeight: 700 }}
+                    >
+                      HD
+                    </Box>
+                  )}
+                </MenuItem>
+              ))}
+            </Select>
+          </Box>
+        )}
+      </Paper>
+
+      {/* Floating mini-player — visible when audio is active, portalled to body to escape Framer Motion transform containment */}
+      {isActive && createPortal(
+        <Paper
+          role="region"
+          aria-label="Floating audio controls"
+          className="no-print"
+          elevation={6}
+          sx={{
+            position: "fixed",
+            bottom: 16,
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 1250,
+            px: 2,
+            py: 1,
+            borderRadius: 3,
+            border: "1px solid",
+            borderColor: "primary.main",
+            bgcolor: theme.palette.mode === "dark" ? "rgba(20, 20, 40, 0.95)" : "rgba(255, 255, 255, 0.95)",
+            backdropFilter: "blur(12px)",
+            boxShadow: theme.palette.mode === "dark"
+              ? "0 4px 24px rgba(0,0,0,0.5)"
+              : "0 4px 24px rgba(0,0,0,0.12)",
+            maxWidth: 520,
+            width: "calc(100vw - 32px)",
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+            <Tooltip
+              title={status === "playing" ? "Pause" : "Resume"}
+              arrow
+            >
+              <IconButton
+                onClick={handlePlayPause}
+                size="small"
+                aria-label={status === "playing" ? "Pause" : "Resume"}
+                sx={{
+                  color: "primary.main",
+                  border: "1px solid",
+                  borderColor: "primary.main",
+                  borderRadius: 1.5,
+                  p: 0.5,
+                  "&:hover": { bgcolor: "primary.main", color: "background.paper" },
+                  transition: "all 0.2s",
+                }}
+              >
+                {status === "playing" ? <Pause sx={{ fontSize: 16 }} /> : <PlayArrow sx={{ fontSize: 16 }} />}
+              </IconButton>
+            </Tooltip>
+
+            <Tooltip title="Stop" arrow>
+              <IconButton
+                onClick={handleStop}
+                size="small"
+                aria-label="Stop"
+                sx={{
+                  color: "text.secondary",
+                  border: "1px solid",
+                  borderColor: "divider",
+                  borderRadius: 1.5,
+                  p: 0.5,
+                  "&:hover": { borderColor: "text.secondary", color: "text.primary" },
+                  transition: "all 0.2s",
+                }}
+              >
+                <Stop sx={{ fontSize: 16 }} />
+              </IconButton>
+            </Tooltip>
+
+            <Box sx={{ flex: 1, minWidth: 60 }}>
+              <LinearProgress
+                variant="determinate"
+                value={progress}
+                sx={{
+                  height: 3,
+                  borderRadius: 2,
+                  bgcolor: "divider",
+                  "& .MuiLinearProgress-bar": { background: grad, borderRadius: 2 },
+                }}
+              />
+            </Box>
+
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ fontSize: "0.72rem", whiteSpace: "nowrap", flexShrink: 0 }}
+            >
+              {timeLeft}
+            </Typography>
+
+            <Select
+              value={rate}
+              onChange={handleRateChange}
+              size="small"
+              variant="outlined"
+              aria-label="Playback speed"
+              sx={selectSx}
+            >
+              {RATES.map((r) => (
+                <MenuItem key={r} value={r} sx={{ fontSize: "0.8rem" }}>
+                  {r}×
+                </MenuItem>
+              ))}
+            </Select>
+          </Box>
+        </Paper>,
+        document.body
       )}
-    </Paper>
+    </>
   );
 });
 

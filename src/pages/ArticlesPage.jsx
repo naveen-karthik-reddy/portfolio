@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useMemo, useState } from "react";
+import React, { lazy, Suspense, useMemo, useState, useEffect } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import {
   Typography,
@@ -97,8 +97,14 @@ function ArticlesList() {
   const [searchParams, setSearchParams] = useSearchParams();
   const activeCategory = searchParams.get("category") || null;
 
-  /* ── local state for search ── */
+  /* ── local state for search (debounced) ── */
+  const [searchInput, setSearchInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+
+  useEffect(() => {
+    const timer = setTimeout(() => setSearchQuery(searchInput), 250);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
 
   const setActiveCategory = (cat) => {
     if (cat) setSearchParams({ category: cat });
@@ -107,9 +113,19 @@ function ArticlesList() {
 
   const allCategories = Object.keys(CATEGORY_LABELS);
 
+  /* ── pre-built search index: one lowercased string per article ── */
+  const searchIndex = useMemo(
+    () =>
+      articlesData.map((a) => ({
+        article: a,
+        searchText: [a.title, a.excerpt, ...a.tags].join(" ").toLowerCase(),
+      })),
+    []
+  );
+
   /* ── filter + sort ── */
   const filtered = useMemo(() => {
-    let result = [...articlesData];
+    let result = searchIndex.map(({ article }) => article);
 
     /* Category */
     if (activeCategory) {
@@ -119,12 +135,14 @@ function ArticlesList() {
     /* Search — match title, excerpt, and tags (case-insensitive) */
     if (searchQuery.trim()) {
       const q = searchQuery.trim().toLowerCase();
-      result = result.filter(
-        (a) =>
-          a.title.toLowerCase().includes(q) ||
-          a.excerpt.toLowerCase().includes(q) ||
-          a.tags.some((t) => t.toLowerCase().includes(q))
-      );
+      result = searchIndex
+        .filter(({ searchText }) => searchText.includes(q))
+        .map(({ article }) => article);
+
+      /* Also apply category filter if active */
+      if (activeCategory) {
+        result = result.filter((a) => a.categories?.includes(activeCategory));
+      }
 
       /* Rank: title matches first, then excerpt/tag-only matches */
       result.sort((a, b) => {
@@ -176,8 +194,8 @@ function ArticlesList() {
           <TextField
             size="small"
             placeholder="Search articles..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
             sx={{ minWidth: 260 }}
             slotProps={{
               input: {
@@ -186,9 +204,9 @@ function ArticlesList() {
                     <Search fontSize="small" color="action" />
                   </InputAdornment>
                 ),
-                endAdornment: searchQuery ? (
+                endAdornment: searchInput ? (
                   <InputAdornment position="end">
-                    <IconButton size="small" onClick={() => setSearchQuery("")}>
+                    <IconButton size="small" onClick={() => { setSearchInput(""); setSearchQuery(""); }}>
                       <Clear fontSize="small" />
                     </IconButton>
                   </InputAdornment>
