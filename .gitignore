@@ -35,5 +35,12 @@ out
 .env
 .env.local
 
-# Large generated images (keep only WebP versions in repo)
+# Source PNGs and generated responsive variants (built by CI resize script)
 public/articles/images/*.png
+public/articles/images/*-320w.webp
+public/articles/images/*-400w.webp
+public/articles/images/*-640w.webp
+public/articles/images/*-800w.webp
+public/articles/images/*-1200w.webp
+public/articles/images/*-1536w.webp
+public/articles/images/*-1920w.webp
