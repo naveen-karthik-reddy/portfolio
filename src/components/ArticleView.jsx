@@ -569,7 +569,7 @@ export default function ArticleView({ article }) {
   }, []);
 
   useEffect(() => {
-    window.scrollTo(0, 0);
+    window.scrollTo({ top: 0, behavior: "instant" });
     const loader = markdownFiles[`../articles/${article.id}.md`];
     if (loader) loader().then((text) => setContent(text ?? ""));
   }, [article.id]);
