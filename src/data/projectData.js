@@ -21,7 +21,7 @@ export const projectData = [
     excerpt: "A what-if simulator for web performance. Tweak sliders and instantly see estimated Lighthouse-style Mobile & Desktop scores across multiple page variations — with IndexedDB persistence, JSON export/import, and cross-variation comparison.",
     image: "/projects/web-performance-planner.png",
     accent: "#ff9800",
-    tags: ["React", "IndexedDB", "MUI", "Performance"],
+    tags: ["React", "IndexedDB", "MUI", "Web Performance Planner", "Lighthouse Simulator"],
     articleSlug: "web-performance-planner",
     points: [
       "Imports a real Lighthouse JSON report and fits simulation curves to match the measured score exactly — every what-if change is a calibrated, deterministic prediction against your actual page, not a generic estimate",

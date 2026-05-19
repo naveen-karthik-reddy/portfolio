@@ -18,6 +18,10 @@ export default function Seo({
       <title>{fullTitle}</title>
       <meta name="description" content={description} />
       <meta name="robots" content="index, follow" />
+      <meta name="author" content={author} />
+      {keywords?.length > 0 && (
+        <meta name="keywords" content={keywords.join(", ")} />
+      )}
       <link rel="canonical" href={canonicalUrl} />
 
       {/* Open Graph */}

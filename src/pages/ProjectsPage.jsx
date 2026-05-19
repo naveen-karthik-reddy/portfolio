@@ -184,6 +184,18 @@ function ProjectView({ project }) {
     return lazy(loader);
   }, [project.id]);
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: project.name,
+    description: project.excerpt,
+    author: { "@type": "Person", name: "Naveen Karthik", url: "https://naveenkarthik.com" },
+    url: `https://naveenkarthik.com/projects/${project.id}`,
+    applicationCategory: "DeveloperApplication",
+    keywords: project.tags.join(", "),
+    datePublished: project.date,
+  };
+
   return (
     <motion.div initial="hidden" animate="visible" variants={fadeInUp}>
       <Seo
@@ -191,6 +203,10 @@ function ProjectView({ project }) {
         description={project.excerpt}
         canonical={`/projects/${project.id}`}
         keywords={project.tags}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       {ProjectComponent ? (
         <Suspense
