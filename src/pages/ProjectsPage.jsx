@@ -35,7 +35,8 @@ const staggerContainer = {
 };
 
 export default function ProjectsPage() {
-  const { slug } = useParams();
+  const { slug: rawSlug } = useParams();
+  const slug = rawSlug ? rawSlug.replace(/\/$/, "") : null;
   const project = slug ? projectData.find((p) => p.id === slug) : null;
 
   if (project) {
