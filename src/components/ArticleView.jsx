@@ -1131,7 +1131,10 @@ export default function ArticleView({ article }) {
                   component="img"
                   src={`/articles/images/${article.image}`}
                   alt={article.title}
-                  sx={{ width: "100%", display: "block", transition: "transform 0.2s", "&:hover": { transform: "scale(1.01)" } }}
+                  width={1536}
+                  height={864}
+                  fetchPriority="high"
+                  sx={{ width: "100%", height: "auto", display: "block", transition: "transform 0.2s", "&:hover": { transform: "scale(1.01)" } }}
                 />
               </Box>
             )}
