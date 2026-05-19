@@ -1,5 +1,7 @@
+'use client';
 import React, { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   AppBar,
   Toolbar,
@@ -49,13 +51,13 @@ export default function TopNav({
   setCurrentTheme,
   scrollToSection,
 }) {
-  const location = useLocation();
+  const pathname = usePathname();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [themeAnchor, setThemeAnchor] = useState(null);
 
-  const isLanding = location.pathname === "/";
-  const isArticlesActive = location.pathname.startsWith("/articles");
-  const isProjectsActive = location.pathname.startsWith("/projects");
+  const isLanding = pathname === "/";
+  const isArticlesActive = pathname.startsWith("/articles");
+  const isProjectsActive = pathname.startsWith("/projects");
 
   const handleSection = (id) => {
     setDrawerOpen(false);
@@ -86,7 +88,7 @@ export default function TopNav({
         ) : (
           <Typography
             component={Link}
-            to="/"
+            href="/"
             sx={{ fontWeight: 800, color: "text.primary", textDecoration: "none" }}
           >
             {portfolioData.name}
@@ -95,7 +97,6 @@ export default function TopNav({
 
         {/* ── Desktop right side ── */}
         <Box sx={{ display: { xs: "none", md: "flex" }, alignItems: "center", gap: 0.5 }}>
-          {/* Section links — landing page only */}
           {isLanding && SECTION_IDS.map((id) => (
             <Typography
               key={id}
@@ -106,15 +107,13 @@ export default function TopNav({
             </Typography>
           ))}
 
-          {/* Articles + Projects — all pages */}
-          <Typography component={Link} to="/articles" sx={navLinkSx(isArticlesActive)}>
+          <Typography component={Link} href="/articles" sx={navLinkSx(isArticlesActive)}>
             ARTICLES
           </Typography>
-          <Typography component={Link} to="/projects" sx={navLinkSx(isProjectsActive)}>
+          <Typography component={Link} href="/projects" sx={navLinkSx(isProjectsActive)}>
             PROJECTS
           </Typography>
 
-          {/* Social icons — landing page only */}
           {isLanding && <>
             <IconButton href={portfolioData.links.linkedin} target="_blank" size="small" sx={{ color: "text.secondary", ml: 1 }}>
               <LinkedIn fontSize="small" />
@@ -127,7 +126,6 @@ export default function TopNav({
             </IconButton>
           </>}
 
-          {/* Theme + dark mode */}
           <IconButton onClick={(e) => setThemeAnchor(e.currentTarget)} size="small" sx={{ color: "text.secondary" }}>
             <Palette fontSize="small" />
           </IconButton>
@@ -136,7 +134,7 @@ export default function TopNav({
           </IconButton>
         </Box>
 
-        {/* ── Mobile: hamburger only ── */}
+        {/* ── Mobile: hamburger ── */}
         <IconButton
           onClick={() => setDrawerOpen(true)}
           sx={{ display: { xs: "flex", md: "none" }, color: "text.primary" }}
@@ -171,7 +169,6 @@ export default function TopNav({
         <Divider />
 
         <List disablePadding sx={{ flex: 1 }}>
-          {/* Section links — landing page only */}
           {isLanding && SECTION_IDS.map((id) => (
             <ListItem key={id} disablePadding>
               <ListItemButton onClick={() => handleSection(id)}>
@@ -185,13 +182,12 @@ export default function TopNav({
 
           {isLanding && <Divider sx={{ my: 1 }} />}
 
-          {/* Articles + Projects — always */}
           {[
-            { label: "ARTICLES", to: "/articles", active: isArticlesActive },
-            { label: "PROJECTS", to: "/projects", active: isProjectsActive },
-          ].map(({ label, to, active }) => (
-            <ListItem key={to} disablePadding>
-              <ListItemButton component={Link} to={to} onClick={() => setDrawerOpen(false)}>
+            { label: "ARTICLES", href: "/articles", active: isArticlesActive },
+            { label: "PROJECTS", href: "/projects", active: isProjectsActive },
+          ].map(({ label, href, active }) => (
+            <ListItem key={href} disablePadding>
+              <ListItemButton component={Link} href={href} onClick={() => setDrawerOpen(false)}>
                 <ListItemText
                   primary={label}
                   primaryTypographyProps={{ fontSize: "0.85rem", fontWeight: 700, letterSpacing: "0.08em", color: active ? "primary.main" : "text.secondary" }}
@@ -203,7 +199,6 @@ export default function TopNav({
 
         <Divider />
 
-        {/* Social (landing only) + theme controls */}
         <Box sx={{ p: 2, display: "flex", alignItems: "center", gap: 0.5 }}>
           {isLanding && <>
             <IconButton href={portfolioData.links.linkedin} target="_blank" size="small" sx={{ color: "text.secondary" }}>
@@ -226,7 +221,6 @@ export default function TopNav({
         </Box>
       </Drawer>
 
-      {/* Theme picker menu */}
       <Menu
         anchorEl={themeAnchor}
         open={Boolean(themeAnchor)}

@@ -1,5 +1,6 @@
+'use client';
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import {
   Typography,
   Container,
@@ -7,6 +8,7 @@ import {
   Paper,
   List,
   ListItem,
+  ListItemButton,
   ListItemText,
   Collapse,
   Chip,
@@ -25,7 +27,7 @@ import {
 import { useTheme } from "@mui/material/styles";
 import { motion } from "framer-motion";
 
-import profileImage from "./assets/profilePick.jpeg";
+const profileImage = "/profilePick.jpeg";
 import Seo from "./components/Seo";
 
 /* DATA */
@@ -262,8 +264,7 @@ export default function App() {
                   },
                 }}
               >
-                <ListItem
-                  button
+                <ListItemButton
                   onClick={() => toggleOpen(`exp${i}`)}
                   sx={{
                     p: 3,
@@ -277,6 +278,7 @@ export default function App() {
                         {exp.role}
                       </Typography>
                     }
+                    secondaryTypographyProps={{ component: "div" }}
                     secondary={
                       <Box>
                         <Typography
@@ -311,7 +313,7 @@ export default function App() {
                   >
                     <ExpandMore />
                   </motion.div>
-                </ListItem>
+                </ListItemButton>
 
                 <Collapse in={open[`exp${i}`]} timeout="auto" unmountOnExit>
                   <Box sx={{ px: 3, pb: 3, pt: 1 }}>
@@ -380,78 +382,76 @@ export default function App() {
         <motion.div variants={staggerContainer} initial="hidden" animate="visible">
           {projectData.map((proj, i) => (
             <motion.div key={i} variants={fadeInUp}>
-              <Card
-                component={Link}
-                to={`/projects/${proj.id}`}
-                sx={{
-                  mb: 3,
-                  display: "block",
-                  textDecoration: "none",
-                  border: "1px solid",
-                  borderColor: "divider",
-                  borderRadius: 2,
-                  transition: "all 0.4s",
-                  "&:hover": {
-                    transform: "translateY(-4px)",
-                    boxShadow: 2,
-                    borderColor: "primary.main",
-                  },
-                }}
-              >
-                <CardContent sx={{ p: 3 }}>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "flex-start",
-                      mb: 2,
-                    }}
-                  >
-                    <Typography variant="h6" sx={{ fontWeight: 700, color: "primary.main" }}>
-                      {proj.name}
-                    </Typography>
-                    <Chip
-                      label={proj.date}
-                      size="small"
+              <Link href={`/projects/${proj.id}`} style={{ textDecoration: "none", display: "block" }}>
+                <Card
+                  sx={{
+                    mb: 3,
+                    border: "1px solid",
+                    borderColor: "divider",
+                    borderRadius: 2,
+                    transition: "all 0.4s",
+                    "&:hover": {
+                      transform: "translateY(-4px)",
+                      boxShadow: 2,
+                      borderColor: "primary.main",
+                    },
+                  }}
+                >
+                  <CardContent sx={{ p: 3 }}>
+                    <Box
                       sx={{
-                        color: "primary.main",
-                        border: "1px solid",
-                        borderColor: "primary.main",
-                        bgcolor: "transparent",
-                        fontWeight: 600,
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "flex-start",
+                        mb: 2,
                       }}
-                    />
-                  </Box>
-                  <List dense>
-                    {proj.points.map((p, j) => (
-                      <ListItem
-                        key={j}
+                    >
+                      <Typography variant="h6" sx={{ fontWeight: 700, color: "primary.main" }}>
+                        {proj.name}
+                      </Typography>
+                      <Chip
+                        label={proj.date}
+                        size="small"
                         sx={{
-                          py: 0.5,
-                          alignItems: "flex-start",
-                          "&::before": {
-                            content: '"▹"',
-                            color: "primary.main",
-                            fontWeight: "bold",
-                            fontSize: "1.2rem",
-                            mr: 1.5,
-                            mt: 0.3,
-                            flexShrink: 0,
-                          },
+                          color: "primary.main",
+                          border: "1px solid",
+                          borderColor: "primary.main",
+                          bgcolor: "transparent",
+                          fontWeight: 600,
                         }}
-                      >
-                        <ListItemText
-                          primary={
-                            <Typography variant="body2" sx={{ lineHeight: 1.7 }}>
-                              {p}
-                            </Typography>
-                          }
-                        />
-                      </ListItem>
-                    ))}
-                  </List>
-                </CardContent>
-              </Card>
+                      />
+                    </Box>
+                    <List dense>
+                      {proj.points.map((p, j) => (
+                        <ListItem
+                          key={j}
+                          sx={{
+                            py: 0.5,
+                            alignItems: "flex-start",
+                            "&::before": {
+                              content: '"▹"',
+                              color: "primary.main",
+                              fontWeight: "bold",
+                              fontSize: "1.2rem",
+                              mr: 1.5,
+                              mt: 0.3,
+                              flexShrink: 0,
+                            },
+                          }}
+                        >
+                          <ListItemText
+                            primary={
+                              <Typography variant="body2" sx={{ lineHeight: 1.7 }}>
+                                {p}
+                              </Typography>
+                            }
+                          />
+                        </ListItem>
+                      ))}
+                    </List>
+                  </CardContent>
+                </Card>
+              </Link>
             </motion.div>
           ))}
         </motion.div>
@@ -459,7 +459,7 @@ export default function App() {
         <Box sx={{ textAlign: "center", mt: 2 }}>
           <Button
             component={Link}
-            to="/projects"
+            href="/projects"
             variant="outlined"
             sx={{
               borderColor: "primary.main",

@@ -1,3 +1,4 @@
+'use client';
 import React, { useState, useEffect, useRef, useMemo, forwardRef, useImperativeHandle } from "react";
 import { createPortal } from "react-dom";
 import {
@@ -70,7 +71,7 @@ const ArticleAudioPlayer = forwardRef(function ArticleAudioPlayer({ markdownCont
   const [timeLeft, setTimeLeft] = useState("");
   const [voices, setVoices] = useState([]);
   const [selectedVoiceName, setSelectedVoiceName] = useState(
-    () => localStorage.getItem(VOICE_STORAGE_KEY) ?? ""
+    () => (typeof localStorage !== 'undefined' ? localStorage.getItem(VOICE_STORAGE_KEY) ?? "" : "")
   );
 
   const charIndexRef = useRef(0);

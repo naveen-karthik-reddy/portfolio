@@ -1,8 +1,11 @@
+'use client';
 import React, { useState, useEffect, useMemo, useRef, useCallback, lazy, Suspense } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   Typography,
   Box,
+  Container,
   Paper,
   Chip,
   Divider,
@@ -24,55 +27,20 @@ import {
   Close,
 } from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
-import { motion } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
-import { PrismLight as SyntaxHighlighter } from "react-syntax-highlighter";
-import { oneDark, oneLight } from "react-syntax-highlighter/dist/esm/styles/prism";
-
-/* Register only the languages used in articles — avoids bundling 200+ Prism grammars */
-import javascript from "react-syntax-highlighter/dist/esm/languages/prism/javascript";
-import jsx from "react-syntax-highlighter/dist/esm/languages/prism/jsx";
-import bash from "react-syntax-highlighter/dist/esm/languages/prism/bash";
-import css from "react-syntax-highlighter/dist/esm/languages/prism/css";
-import markup from "react-syntax-highlighter/dist/esm/languages/prism/markup";
-import http from "react-syntax-highlighter/dist/esm/languages/prism/http";
-import json from "react-syntax-highlighter/dist/esm/languages/prism/json";
-import nginx from "react-syntax-highlighter/dist/esm/languages/prism/nginx";
-import yaml from "react-syntax-highlighter/dist/esm/languages/prism/yaml";
-
-SyntaxHighlighter.registerLanguage("javascript", javascript);
-SyntaxHighlighter.registerLanguage("js", javascript);
-SyntaxHighlighter.registerLanguage("jsx", jsx);
-SyntaxHighlighter.registerLanguage("bash", bash);
-SyntaxHighlighter.registerLanguage("css", css);
-SyntaxHighlighter.registerLanguage("html", markup);
-SyntaxHighlighter.registerLanguage("xml", markup);
-SyntaxHighlighter.registerLanguage("http", http);
-SyntaxHighlighter.registerLanguage("json", json);
-SyntaxHighlighter.registerLanguage("nginx", nginx);
-SyntaxHighlighter.registerLanguage("yaml", yaml);
-
 import { articlesData } from "../data/articlesData";
-import Seo from "./Seo";
-import ArticleAudioPlayer from "./ArticleAudioPlayer";
+import dynamic from "next/dynamic";
+const ArticleAudioPlayer = dynamic(() => import("./ArticleAudioPlayer"), { ssr: false });
+// Lazy-load the syntax highlighter — its chunk is ~400 KB and is not needed
+// for the LCP element (article title/text). Deferring it reduces TBT on mobile.
+const CodeBlock = dynamic(() => import("./CodeBlock"), { ssr: false });
 
 /* Lazy-load RunableCodeBlock — CodeMirror is heavy, only load when an article uses js-exec blocks */
 const RunableCodeBlock = lazy(() => import("./RunableCodeBlock"));
 
-/* Lazy-load article markdown files */
-const markdownFiles = import.meta.glob("../articles/**/*.md", {
-  query: "?raw",
-  import: "default",
-});
-
-/* Lazy-load article images — only resolved when an article actually renders them */
-const assetImporters = import.meta.glob("../assets/*.{png,jpg,jpeg,gif,svg,webp}", {
-  eager: false,
-  import: "default",
-});
-const assetCache = {};
+/* Content is passed as a prop from the server component (read via fs at build time) */
 
 /* ==================== HELPERS ==================== */
 
@@ -308,13 +276,13 @@ function TableOfContents({ headings, grad, sidebar = false }) {
         >
           TABLE OF CONTENTS
         </Typography>
-        <motion.div
-          animate={{ rotate: open ? 180 : 0 }}
-          transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-          style={{ display: "flex" }}
-        >
+        <Box sx={{
+          display: "flex",
+          transform: open ? "rotate(180deg)" : "rotate(0deg)",
+          transition: "transform 0.3s cubic-bezier(0.22, 1, 0.36, 1)",
+        }}>
           <ExpandMore sx={{ color: "text.secondary", fontSize: 20 }} />
-        </motion.div>
+        </Box>
       </Box>
 
       <Collapse in={open} timeout={300}>
@@ -330,7 +298,7 @@ function TableOfContents({ headings, grad, sidebar = false }) {
 const allArticlesFlat = articlesData;
 
 function PrevNextNav({ article, grad }) {
-  const navigate = useNavigate();
+  const router = useRouter();
   const idx = allArticlesFlat.findIndex((a) => a.id === article.id);
   if (idx === -1) return null;
 
@@ -354,7 +322,7 @@ function PrevNextNav({ article, grad }) {
         {prev && (
           <Button
             startIcon={<ArrowBack />}
-            onClick={() => navigate(`/articles/${prev.id}`)}
+            onClick={() => router.push(`/articles/${prev.id}`)}
             sx={{
               textAlign: "left",
               color: "text.secondary",
@@ -378,7 +346,7 @@ function PrevNextNav({ article, grad }) {
         {next && (
           <Button
             endIcon={<ArrowForward />}
-            onClick={() => navigate(`/articles/${next.id}`)}
+            onClick={() => router.push(`/articles/${next.id}`)}
             sx={{
               textAlign: "right",
               color: "text.secondary",
@@ -404,29 +372,7 @@ function PrevNextNav({ article, grad }) {
 /* ==================== LAZY IMAGE ==================== */
 
 function ArticleImage({ src, alt }) {
-  const key = `../assets/${src}`;
-  const [resolved, setResolved] = useState(assetCache[key] ?? null);
   const [zoom, setZoom] = useState(false);
-
-  useEffect(() => {
-    if (assetCache[key]) {
-      setResolved(assetCache[key]);
-      return;
-    }
-    const importer = assetImporters[key];
-    if (importer) {
-      let cancelled = false;
-      importer().then((url) => {
-        if (!cancelled) {
-          assetCache[key] = url;
-          setResolved(url);
-        }
-      });
-      return () => { cancelled = true; };
-    } else {
-      setResolved(src);
-    }
-  }, [src, key]);
 
   useEffect(() => {
     if (!zoom) return;
@@ -439,13 +385,11 @@ function ArticleImage({ src, alt }) {
     };
   }, [zoom]);
 
-  const imgSrc = resolved ?? src;
-
   return (
     <>
       <Box
         component="img"
-        src={imgSrc}
+        src={src}
         alt={alt ?? ""}
         onClick={() => setZoom(true)}
         sx={{
@@ -493,7 +437,7 @@ function ArticleImage({ src, alt }) {
 
           <Box
             component="img"
-            src={imgSrc}
+            src={src}
             alt={alt ?? ""}
             onClick={(e) => e.stopPropagation()}
             sx={{
@@ -517,13 +461,13 @@ function ArticleImage({ src, alt }) {
 
 /* ==================== ARTICLE VIEW ==================== */
 
-export default function ArticleView({ article }) {
+export default function ArticleView({ article, content: initialContent = "" }) {
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
   const grad = `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`;
   const [copied, setCopied] = useState(false);
   const [lightbox, setLightbox] = useState(null); // null | { src, alt }
-  const [content, setContent] = useState("");
+  const [content, setContent] = useState(initialContent);
   const audioPlayerRef = useRef(null);
   const articleBodyRef = useRef(null);
 
@@ -570,8 +514,6 @@ export default function ArticleView({ article }) {
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" });
-    const loader = markdownFiles[`../articles/${article.id}.md`];
-    if (loader) loader().then((text) => setContent(text ?? ""));
   }, [article.id]);
 
   const headings = useMemo(() => parseHeadings(content), [content]);
@@ -721,10 +663,9 @@ export default function ArticleView({ article }) {
         }
         if (lang && raw) {
           return (
-            <SyntaxHighlighter
+            <CodeBlock
               language={lang}
-              style={isDark ? oneDark : oneLight}
-              PreTag="div"
+              isDark={isDark}
               customStyle={{
                 borderRadius: 8,
                 marginTop: 24,
@@ -735,7 +676,7 @@ export default function ArticleView({ article }) {
               }}
             >
               {raw.replace(/\n$/, "")}
-            </SyntaxHighlighter>
+            </CodeBlock>
           );
         }
       }
@@ -915,15 +856,6 @@ export default function ArticleView({ article }) {
 
   return (
     <>
-      <Seo
-        title={article.title}
-        description={article.excerpt}
-        canonical={`/articles/${article.id}`}
-        keywords={article.tags}
-        type="article"
-        image={article.image}
-      />
-
       {/* JSON-LD structured data */}
       <script
         type="application/ld+json"
@@ -995,13 +927,18 @@ export default function ArticleView({ article }) {
         }}
       />
 
+      <Container maxWidth="lg" sx={{ py: { xs: 5, sm: 8 }, px: { xs: 2, sm: 3 } }}>
       <div className="no-print">
         <ReadingProgress grad={grad} />
       </div>
 
       <Box sx={{ display: "flex", gap: { xs: 0, lg: 5 }, alignItems: "flex-start" }}>
         <Box component="main" sx={{ flex: 1, minWidth: 0 }}>
-          <motion.div initial="hidden" animate="visible" variants={fadeInUp}>
+          <Box sx={{
+            "@keyframes fadeInUp": { from: { opacity: 0, transform: "translateY(16px)" }, to: { opacity: 1, transform: "translateY(0)" } },
+            animation: "fadeInUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both",
+            "@media (prefers-reduced-motion: reduce)": { animation: "none" },
+          }}>
             <Box
               className="no-print"
               sx={{
@@ -1013,7 +950,7 @@ export default function ArticleView({ article }) {
             >
               <Button
                 component={Link}
-                to="/articles"
+                href="/articles"
                 startIcon={<ArrowBack />}
                 sx={{ color: "text.secondary", "&:hover": { color: "primary.main" } }}
               >
@@ -1129,17 +1066,21 @@ export default function ArticleView({ article }) {
               >
                 <Box
                   component="img"
-                  src={`/articles/images/${article.image}`}
+                  src={`/articles/images/${article.image.replace(/\.webp$/, "-800w.webp")}`}
+                  srcSet={[320, 640, 800, 1200, 1536, 1920]
+                    .map((w) => `/articles/images/${article.image.replace(/\.webp$/, `-${w}w.webp`)} ${w}w`)
+                    .join(", ")}
+                  sizes="(max-width: 600px) 100vw, (max-width: 1280px) 100vw, 800px"
                   alt={article.title}
-                  width={1536}
-                  height={864}
+                  width={800}
+                  height={450}
                   fetchPriority="high"
                   sx={{ width: "100%", height: "auto", display: "block", transition: "transform 0.2s", "&:hover": { transform: "scale(1.01)" } }}
                 />
               </Box>
             )}
 
-            <Dialog open={Boolean(lightbox)} onClose={() => setLightbox(null)} maxWidth={false} fullScreen TransitionComponent={Fade} PaperProps={{ sx: { m: 0, bgcolor: "transparent" } }}>
+            <Dialog open={Boolean(lightbox)} onClose={() => setLightbox(null)} maxWidth={false} fullScreen TransitionComponent={Fade} PaperProps={{ sx: { m: 0, bgcolor: "rgba(0,0,0,0.9)", cursor: "zoom-out", display: "flex", alignItems: "center", justifyContent: "center" }, onClick: () => setLightbox(null) }}>
               <IconButton
                 onClick={() => setLightbox(null)}
                 sx={{ position: "fixed", top: 16, right: 16, zIndex: 1900, bgcolor: "rgba(0,0,0,0.5)", color: "#fff", "&:hover": { bgcolor: "rgba(0,0,0,0.7)" } }}
@@ -1147,7 +1088,13 @@ export default function ArticleView({ article }) {
                 <Close />
               </IconButton>
               {lightbox && (
-                <Box component="img" src={lightbox.src} alt={lightbox.alt} sx={{ width: "100vw", height: "100vh", objectFit: "contain", display: "block" }} />
+                <Box
+                  component="img"
+                  src={lightbox.src}
+                  alt={lightbox.alt}
+                  onClick={(e) => e.stopPropagation()}
+                  sx={{ maxWidth: "100vw", maxHeight: "100vh", objectFit: "contain", display: "block", cursor: "default" }}
+                />
               )}
             </Dialog>
 
@@ -1158,7 +1105,7 @@ export default function ArticleView({ article }) {
             <div className="no-print">
               <PrevNextNav article={article} grad={grad} />
             </div>
-          </motion.div>
+          </Box>
         </Box>
 
         <Box
@@ -1178,15 +1125,8 @@ export default function ArticleView({ article }) {
           <TableOfContents headings={headings} grad={grad} sidebar />
         </Box>
       </Box>
+      </Container>
     </>
   );
 }
 
-const fadeInUp = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
-  },
-};

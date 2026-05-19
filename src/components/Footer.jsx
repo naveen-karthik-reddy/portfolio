@@ -1,3 +1,4 @@
+'use client';
 import React from "react";
 import { Box, Typography, Divider, IconButton } from "@mui/material";
 import {
@@ -8,15 +9,6 @@ import {
   Code,
 } from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
-import { motion } from "framer-motion";
-
-const fadeInUp = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
-  },
-};
 
 export default function Footer({ portfolioData }) {
   const theme = useTheme();
@@ -34,16 +26,10 @@ export default function Footer({ portfolioData }) {
     <div className="no-print">
       <Divider />
 
-      <motion.div
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true }}
-        variants={fadeInUp}
+      <Box
+        textAlign="center"
+        sx={{ px: 4, pt: 6, pb: 2 }}
       >
-        <Box
-          textAlign="center"
-          sx={{ px: 4, pt: 6, pb: 2 }}
-        >
           <Typography
             variant="h5"
             sx={{
@@ -60,29 +46,28 @@ export default function Footer({ portfolioData }) {
 
           <Box sx={{ display: "flex", justifyContent: "center", gap: 2, flexWrap: "wrap" }}>
             {contacts.map(({ href, Icon, target }, i) => (
-              <motion.div
+              <IconButton
                 key={i}
-                whileHover={{ scale: 1.1, y: -4 }}
-                whileTap={{ scale: 0.95 }}
-                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                href={href}
+                target={target}
+                sx={{
+                  color: "primary.main",
+                  width: 56,
+                  height: 56,
+                  border: "2px solid",
+                  borderColor: "primary.main",
+                  borderRadius: 2,
+                  transition: "transform 0.25s ease, background-color 0.25s ease, color 0.25s ease",
+                  "&:hover": {
+                    bgcolor: "primary.main",
+                    color: "background.default",
+                    transform: "scale(1.1) translateY(-4px)",
+                  },
+                  "&:active": { transform: "scale(0.95)" },
+                }}
               >
-                <IconButton
-                  href={href}
-                  target={target}
-                  sx={{
-                    color: "primary.main",
-                    width: 56,
-                    height: 56,
-                    border: "2px solid",
-                    borderColor: "primary.main",
-                    borderRadius: 2,
-                    transition: "all 0.4s",
-                    "&:hover": { bgcolor: "primary.main", color: "background.default" },
-                  }}
-                >
-                  <Icon sx={{ fontSize: 28 }} />
-                </IconButton>
-              </motion.div>
+                <Icon sx={{ fontSize: 28 }} />
+              </IconButton>
             ))}
           </Box>
 
@@ -94,7 +79,6 @@ export default function Footer({ portfolioData }) {
             © {new Date().getFullYear()} {portfolioData.name} // Built with React & MUI
           </Typography>
         </Box>
-      </motion.div>
     </div>
   );
 }

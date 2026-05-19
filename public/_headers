@@ -1,0 +1,25 @@
+# Cloudflare Pages cache headers
+
+# Hashed JS/CSS assets — immutable, cache 1 year
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Article images — cache 1 week
+/articles/images/*
+  Cache-Control: public, max-age=604800
+
+# Next.js static files
+/_next/static/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Project images — cache 1 week
+/projects/*
+  Cache-Control: public, max-age=604800
+
+# Fonts self-hosted by next/font — cache 1 year
+/_next/static/media/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# HTML pages — always revalidate
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate

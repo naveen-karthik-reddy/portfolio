@@ -4,7 +4,7 @@ import {
 } from "@mui/material";
 import { LayersOutlined, Compare, Settings, MenuBookOutlined, Science } from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { useApp } from "../../context/useApp.js";
 
 export default function TopBar({ onPagesOpen, onSettingsOpen, onCalibrationOpen, simMobileScore, simDesktopScore }) {
@@ -118,7 +118,7 @@ export default function TopBar({ onPagesOpen, onSettingsOpen, onCalibrationOpen,
         <IconButton
           size="small"
           component={Link}
-          to="/articles/web-performance-planner"
+          href="/articles/web-performance-planner"
           sx={{ color: "text.secondary", "&:hover": { color: "primary.main" } }}
         >
           <MenuBookOutlined sx={{ fontSize: 17 }} />

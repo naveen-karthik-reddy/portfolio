@@ -1,0 +1,76 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  font-family: var(--font-inter), 'Segoe UI', 'Roboto', -apple-system, sans-serif;
+  line-height: 1.6;
+  font-weight: 400;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* ── Theme flash prevention ───────────────────────────────────────────────── *
+ * The inline script in layout.jsx sets data-dark / data-theme on <html>
+ * before React loads. These rules apply the correct background immediately,
+ * so the user never sees a white flash before the JS theme kicks in.
+ * Background values must match the gradient in providers.jsx.
+ * ─────────────────────────────────────────────────────────────────────────── */
+html[data-dark="true"] body { background-color: #0a0a0f; }
+html[data-dark="true"][data-theme="ocean"] body { background-color: #0c1929; }
+html[data-dark="true"][data-theme="forest"] body { background-color: #0a1f0a; }
+html[data-dark="true"][data-theme="sunset"] body { background-color: #1a0a0a; }
+html[data-dark="true"][data-theme="lavender"] body { background-color: #0f0a1a; }
+
+html[data-dark="false"] body, html:not([data-dark]) body { background-color: #f8fafc; }
+html[data-dark="false"][data-theme="ocean"] body { background-color: #f0f9ff; }
+html[data-dark="false"][data-theme="forest"] body { background-color: #f0fdf4; }
+html[data-dark="false"][data-theme="sunset"] body { background-color: #fff7ed; }
+html[data-dark="false"][data-theme="lavender"] body { background-color: #faf5ff; }
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #6366f1, #8b5cf6);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #8b5cf6, #a855f7);
+}
+
+::selection {
+  background: rgba(99, 102, 241, 0.3);
+  color: inherit;
+}
+
+::-moz-selection {
+  background: rgba(99, 102, 241, 0.3);
+  color: inherit;
+}
