@@ -354,4 +354,4 @@ try {
 
 ---
 
-**Next:** [JS Foundations #7 — Destructuring, Spread & Rest](/articles/javascript-series/js-destructuring-spread-rest) — array/object destructuring with defaults, spread for copying/merging, and rest parameters.
+**Next:** [Error Handling #2 — AggregateError, Error-First Callbacks & Promise Errors](/articles/js-error-patterns) — AggregateError for Promise.any, error-first callbacks, custom error hierarchies, and Error.cause chaining.

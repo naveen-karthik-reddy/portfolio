@@ -1,4 +1,4 @@
-`mapAsync` runs an async function over every element in an array. The real interview question is `mapAsyncLimit` — do the same thing but never have more than N operations running at once. It's the concurrency pool pattern.
+﻿`mapAsync` runs an async function over every element in an array. The real interview question is `mapAsyncLimit` — do the same thing but never have more than N operations running at once. It's the concurrency pool pattern.
 
 **Related deep-dive:** [Async #8 — Concurrency Control & Retry Patterns](/articles/js-concurrency-limits)
 
@@ -257,6 +257,6 @@ function mapAsyncLimit(array, asyncFn, limit) {
 
 ## Related Questions
 
-- [#18 — Implement Promise.all, race, any & allSettled](/articles/js-interview-promise-combinators)
-- [#20 — Implement promiseTimeout()](/articles/js-interview-promise-timeout)
-- [#19 — Implement promisify()](/articles/js-interview-promisify)
+- [Implement Promise.all, race, any & allSettled](/articles/js-interview-promise-combinators)
+- [Implement promiseTimeout()](/articles/js-interview-promise-timeout)
+- [Implement promisify()](/articles/js-interview-promisify)

@@ -1,4 +1,4 @@
-Currying transforms `f(a, b, c)` into `f(a)(b)(c)`. It's the canonical functional programming interview question — testing recursion, closures, and argument accumulation all at once. This article covers both the fixed-arity version (curry I) and the variadic version (curry II).
+﻿Currying transforms `f(a, b, c)` into `f(a)(b)(c)`. It's the canonical functional programming interview question — testing recursion, closures, and argument accumulation all at once. This article covers both the fixed-arity version (curry I) and the variadic version (curry II).
 
 **Related deep-dive:** [Functions #2 — Currying & Partial Application](/articles/js-currying-partial-application)
 
@@ -219,6 +219,6 @@ function curry(fn) {
 
 ## Related Questions
 
-- [#10 — Implement memoize()](/articles/js-interview-memoize)
-- [#29 — Variadic curry() — Fully Variadic](/articles/js-interview-curry-variadic)
-- [#1 — Implement call(), apply() & bind()](/articles/js-interview-call-apply-bind)
+- [Implement memoize()](/articles/js-interview-memoize)
+- [Variadic curry() — Fully Variadic](/articles/js-interview-curry-variadic)
+- [Implement call(), apply() & bind()](/articles/js-interview-call-apply-bind)

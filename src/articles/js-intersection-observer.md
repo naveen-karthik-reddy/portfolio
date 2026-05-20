@@ -1,7 +1,5 @@
 Scroll event handlers are expensive — they fire at ~60Hz and force layout calculations. `IntersectionObserver` is the modern replacement: it tells you when an element enters or leaves the viewport without any scroll handlers. This article covers lazy loading, infinite scroll, and ad viewability tracking.
 
-**Prerequisites:** [Functions #3 — Debounce & Throttle](/articles/javascript-series/js-debounce-throttle)
-
 ---
 
 ## 1. Basic Observer — Detect When an Element Becomes Visible

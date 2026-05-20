@@ -231,6 +231,5 @@ console.log(Object.is({}, {}));     // false
 
 ## Related Articles
 
-- [#5 — Type Utilities](/articles/js-interview-type-utilities)
-- [#14 — Implement deepEqual()](/articles/js-interview-deep-equal)
+- [Implement deepEqual()](/articles/js-interview-deep-equal)
 - [JS Foundations #5 — Equality & Type Coercion](/articles/js-equality-coercion)

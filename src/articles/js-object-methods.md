@@ -228,7 +228,6 @@ console.log(tag(Promise.resolve())); // '[object Promise]'
 
 ## Related Articles
 
-- [#5 — Type Utilities](/articles/js-interview-type-utilities)
-- [#13 — Implement deepClone()](/articles/js-interview-deep-clone)
-- [#14 — Implement deepEqual()](/articles/js-interview-deep-equal)
+- [Implement deepClone()](/articles/js-interview-deep-clone-circular)
+- [Implement deepEqual()](/articles/js-interview-deep-equal)
 - [Data #3 — Map, Set, WeakMap, WeakSet](/articles/js-map-set-weakmap-weakset)

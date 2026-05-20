@@ -1,4 +1,4 @@
-`listFormat(array)` converts an array into a human-readable list string: `['a', 'b', 'c']` → `"a, b, and c"`. The logic depends on the length — 0, 1, 2, and 3+ items each have different formatting. Support custom conjunctions and an Oxford comma option.
+﻿`listFormat(array)` converts an array into a human-readable list string: `['a', 'b', 'c']` → `"a, b, and c"`. The logic depends on the length — 0, 1, 2, and 3+ items each have different formatting. Support custom conjunctions and an Oxford comma option.
 
 ---
 
@@ -188,6 +188,6 @@ function listFormat(items, {
 
 ## Related Questions
 
-- [#23 — Implement classnames()](/articles/js-interview-classnames)
-- [#2 — Implement map(), filter() & reduce()](/articles/js-interview-map-filter-reduce)
-- [#25 — Implement Data Merging](/articles/js-interview-data-merging)
+- [Implement classnames()](/articles/js-interview-classnames)
+- [Implement map(), filter() & reduce()](/articles/js-interview-map-filter-reduce)
+- [Implement Data Merging](/articles/js-interview-data-merging)

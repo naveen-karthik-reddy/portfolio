@@ -1,4 +1,4 @@
-`sleep(ms)` pauses async execution for a given number of milliseconds. It's the shortest article in this series — a one-liner that tests whether you understand how `Promise` resolution and `await` work together. But the follow-up questions make it interesting.
+﻿`sleep(ms)` pauses async execution for a given number of milliseconds. It's the shortest article in this series — a one-liner that tests whether you understand how `Promise` resolution and `await` work together. But the follow-up questions make it interesting.
 
 ---
 
@@ -213,6 +213,6 @@ function sleep(ms, signal) {
 
 ## Related Questions
 
-- [#18 — Implement Promise Combinators](/articles/js-interview-promise-combinators)
-- [#20 — Implement promiseTimeout()](/articles/js-interview-promise-timeout)
-- [#19 — Implement promisify()](/articles/js-interview-promisify)
+- [Implement Promise Combinators](/articles/js-interview-promise-combinators)
+- [Implement promiseTimeout()](/articles/js-interview-promise-timeout)
+- [Implement promisify()](/articles/js-interview-promisify)

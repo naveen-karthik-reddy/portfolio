@@ -1,6 +1,6 @@
 Normally, `arr.map(f).filter(g)` creates two intermediate arrays. A **transducer** fuses map and filter into a single reduction pass — composing transformers that run per-element without intermediate collections. This article builds transducers from scratch.
 
-**Prerequisites:** [Arrays #1 — map/filter/reduce](/articles/javascript-series/js-array-methods-polyfills-1), [FP #1 — compose/pipe](/articles/javascript-series/js-compose-pipe)
+**Prerequisites:** [FP #1 — compose/pipe](/articles/javascript-series/js-compose-pipe)
 
 ---
 

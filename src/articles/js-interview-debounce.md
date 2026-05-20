@@ -1,6 +1,4 @@
-Debounce is the most commonly requested timing utility in frontend interviews. The base version is straightforward — but interviewers escalate by asking for `cancel()`, `flush()`, and leading-edge variants. Here's how to build every version they might ask for.
-
-**Related deep-dive:** [Functions #3 — Debounce & Throttle](/articles/js-debounce-throttle)
+﻿Debounce is the most commonly requested timing utility in frontend interviews. The base version is straightforward — but interviewers escalate by asking for `cancel()`, `flush()`, and leading-edge variants. Here's how to build every version they might ask for.
 
 ---
 
@@ -325,6 +323,6 @@ function debounce(fn, delay, options = {}) {
 
 ## Related Questions
 
-- [#9 — Implement throttle()](/articles/js-interview-throttle)
-- [#4 — Implement once()](/articles/js-interview-once)
-- [#10 — Implement memoize()](/articles/js-interview-memoize)
+- [Implement throttle()](/articles/js-interview-throttle)
+- [Implement once()](/articles/js-interview-once)
+- [Implement memoize()](/articles/js-interview-memoize)

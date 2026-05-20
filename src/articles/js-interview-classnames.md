@@ -1,4 +1,4 @@
-`classnames(...args)` joins truthy CSS class names into a single string. The real library handles strings, numbers, objects, arrays, and nested arrays — all with a single recursive function. The interviewer wants to see you navigate the mixed-type input cleanly.
+﻿`classnames(...args)` joins truthy CSS class names into a single string. The real library handles strings, numbers, objects, arrays, and nested arrays — all with a single recursive function. The interviewer wants to see you navigate the mixed-type input cleanly.
 
 ---
 
@@ -198,6 +198,6 @@ function classnames(...args) {
 
 ## Related Questions
 
-- [#22 — Implement an EventEmitter](/articles/js-interview-event-emitter)
-- [#6 — Implement _.get()](/articles/js-interview-get)
-- [#27 — Implement listFormat()](/articles/js-interview-list-format)
+- [Implement an EventEmitter](/articles/js-interview-event-emitter)
+- [Implement _.get()](/articles/js-interview-get)
+- [Implement listFormat()](/articles/js-interview-list-format)

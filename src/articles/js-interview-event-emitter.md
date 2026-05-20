@@ -1,4 +1,4 @@
-An `EventEmitter` is a pub-sub pattern with `on`, `off`, `emit`, and `once`. Version I uses a listener array per event. Version II returns a subscription object with `unsubscribe()` — the modern pattern. The interviewer wants to see data structure choice and that you think about emit-during-emit.
+﻿An `EventEmitter` is a pub-sub pattern with `on`, `off`, `emit`, and `once`. Version I uses a listener array per event. Version II returns a subscription object with `unsubscribe()` — the modern pattern. The interviewer wants to see data structure choice and that you think about emit-during-emit.
 
 **Related deep-dive:** [Patterns #1 — Event Emitter / Pub-Sub](/articles/js-event-emitter)
 
@@ -292,6 +292,6 @@ class EventEmitter {
 
 ## Related Questions
 
-- [#23 — Implement classnames()](/articles/js-interview-classnames)
-- [#4 — Implement once()](/articles/js-interview-once)
-- [#10 — Implement memoize()](/articles/js-interview-memoize)
+- [Implement classnames()](/articles/js-interview-classnames)
+- [Implement once()](/articles/js-interview-once)
+- [Implement memoize()](/articles/js-interview-memoize)

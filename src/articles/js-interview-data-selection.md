@@ -1,4 +1,4 @@
-A data selection engine takes an array of rows and a criteria object, returning only rows that match all conditions. It's a small in-memory query engine — exact match, range, multi-value — combined with AND logic. The interviewer wants to see condition dispatch and composability.
+﻿A data selection engine takes an array of rows and a criteria object, returning only rows that match all conditions. It's a small in-memory query engine — exact match, range, multi-value — combined with AND logic. The interviewer wants to see condition dispatch and composability.
 
 ---
 
@@ -305,6 +305,6 @@ Where R is row count and C is the number of criteria keys.
 
 ## Related Questions
 
-- [#25 — Implement Data Merging](/articles/js-interview-data-merging)
-- [#26 — Implement countBy()](/articles/js-interview-count-by)
-- [#2 — Implement map(), filter() & reduce()](/articles/js-interview-map-filter-reduce)
+- [Implement Data Merging](/articles/js-interview-data-merging)
+- [Implement countBy()](/articles/js-interview-count-by)
+- [Implement map(), filter() & reduce()](/articles/js-interview-map-filter-reduce)

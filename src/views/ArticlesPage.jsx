@@ -45,8 +45,9 @@ export default function ArticlesList() {
 
 const CATEGORY_LABELS = {
   performance: "Performance",
-  react: "React",
   javascript: "JavaScript",
+  interview: "Interview",
+  react: "React",
   fundamentals: "Fundamentals",
   css: "CSS",
   product: "Product",
@@ -56,6 +57,7 @@ const CATEGORY_LABELS = {
 const CATEGORY_COLORS = {
   performance: "#22c55e",
   javascript: "#f59e0b",
+  interview: "#6366f1",
   react: "#3b82f6",
   fundamentals: "#6b7280",
   css: "#a855f7",

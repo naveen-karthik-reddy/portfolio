@@ -332,4 +332,3 @@ MyPromise.resolve(1)
 
 ---
 
-**Next:** [Async #4 — `Promise.all`, `allSettled`, `race`, `any` ](/articles/javascript-series/js-promise-combinators) — implement all four combinators from scratch.

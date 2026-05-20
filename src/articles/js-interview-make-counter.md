@@ -1,4 +1,4 @@
-`makeCounter` is the canonical closure interview question. If you understand why the returned function remembers its variables, you understand closures. The question starts simple and escalates — here's how to handle both versions.
+﻿`makeCounter` is the canonical closure interview question. If you understand why the returned function remembers its variables, you understand closures. The question starts simple and escalates — here's how to handle both versions.
 
 **Related deep-dive:** [JS Foundations #3 — Closures & Lexical Scope](/articles/js-closures-lexical-scope)
 
@@ -173,6 +173,6 @@ function makeCounter(initialValue = 0) {
 
 ## Related Questions
 
-- [#4 — Implement once()](/articles/js-interview-once)
-- [#10 — Implement memoize()](/articles/js-interview-memoize)
-- [#1 — Implement call(), apply() & bind()](/articles/js-interview-call-apply-bind)
+- [Implement once()](/articles/js-interview-once)
+- [Implement memoize()](/articles/js-interview-memoize)
+- [Implement call(), apply() & bind()](/articles/js-interview-call-apply-bind)

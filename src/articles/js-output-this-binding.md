@@ -298,6 +298,5 @@ undefined
 ## Go Deeper
 
 - [JS Foundations #2 — this Demystified](/articles/js-this-demystified) — all four rules with detailed examples
-- [Functions #1 — call(), apply() & bind() Polyfills](/articles/js-call-apply-bind) — implement these from scratch
 - [Output Quiz #3 — The Event Loop & Task Ordering](/articles/js-output-event-loop) — the previous quiz
 - [Output Quiz #5 — Type Coercion & Equality Traps](/articles/js-output-type-coercion) — the next quiz

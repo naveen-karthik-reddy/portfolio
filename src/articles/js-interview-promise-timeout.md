@@ -1,4 +1,4 @@
-`promiseTimeout(promise, ms)` rejects with a timeout error if the promise doesn't settle within the given time. It's a direct application of `Promise.race` against a timer — but the interviewer also wants to see cleanup and a higher-order version.
+﻿`promiseTimeout(promise, ms)` rejects with a timeout error if the promise doesn't settle within the given time. It's a direct application of `Promise.race` against a timer — but the interviewer also wants to see cleanup and a higher-order version.
 
 ---
 
@@ -207,7 +207,7 @@ function withTimeout(fn, ms) {
 
 ## Related Questions
 
-- [#18 — Implement Promise.all, race, any & allSettled](/articles/js-interview-promise-combinators)
-- [#19 — Implement promisify()](/articles/js-interview-promisify)
-- [#21 — Implement mapAsync() and mapAsyncLimit()](/articles/js-interview-map-async)
-- [#7 — Implement sleep()](/articles/js-interview-sleep)
+- [Implement Promise.all, race, any & allSettled](/articles/js-interview-promise-combinators)
+- [Implement promisify()](/articles/js-interview-promisify)
+- [Implement mapAsync() and mapAsyncLimit()](/articles/js-interview-map-async)
+- [Implement sleep()](/articles/js-interview-sleep)

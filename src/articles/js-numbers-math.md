@@ -222,7 +222,6 @@ console.log(Math.sign(42));       // 1
 
 ## Related Articles
 
-- [#5 — Type Utilities](/articles/js-interview-type-utilities)
-- [#14 — Implement deepEqual()](/articles/js-interview-deep-equal)
+- [Implement deepEqual()](/articles/js-interview-deep-equal)
 - [#30 — Implement Data Selection](/articles/js-interview-data-selection)
 - [Data Types & Type Checking](/articles/js-data-types)

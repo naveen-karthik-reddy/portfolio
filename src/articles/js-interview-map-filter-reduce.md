@@ -1,6 +1,4 @@
-`map`, `filter`, and `reduce` appear in nearly every frontend interview. The question is rarely "do you know how to use them" — it's "implement them from scratch." Here's how to build polyfills that handle every edge case an interviewer will throw at you.
-
-**Related deep-dive:** [Arrays #1 — map, filter, reduce Polyfills](/articles/js-array-methods-polyfills-1)
+﻿`map`, `filter`, and `reduce` appear in nearly every frontend interview. The question is rarely "do you know how to use them" — it's "implement them from scratch." Here's how to build polyfills that handle every edge case an interviewer will throw at you.
 
 ---
 
@@ -273,6 +271,6 @@ Array.prototype.myReduce = function (callback, initialValue) {
 
 ## Related Questions
 
-- [#1 — Implement call(), apply() & bind()](/articles/js-interview-call-apply-bind)
-- [#12 — Implement Array flatten()](/articles/js-interview-flatten)
-- [#26 — Implement countBy()](/articles/js-interview-count-by)
+- [Implement call(), apply() & bind()](/articles/js-interview-call-apply-bind)
+- [Implement Array flatten()](/articles/js-interview-flatten)
+- [Implement countBy()](/articles/js-interview-count-by)

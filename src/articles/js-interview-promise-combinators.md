@@ -1,6 +1,4 @@
-`Promise.all`, `race`, `allSettled`, and `any` are four combinators that each settle differently. The interviewer wants all four — and tests whether you know which short-circuits on rejection, which on fulfillment, and what shape each result takes.
-
-**Related deep-dive:** [Async #4 — Promise.all, allSettled, race, any](/articles/js-promise-combinators)
+﻿`Promise.all`, `race`, `allSettled`, and `any` are four combinators that each settle differently. The interviewer wants all four — and tests whether you know which short-circuits on rejection, which on fulfillment, and what shape each result takes.
 
 ---
 
@@ -244,6 +242,39 @@ function myPromiseAny(promises) {
 
 ---
 
+## Step 5 — `Promise.finally`
+
+`finally(onFinally)` runs a callback when the promise settles — regardless of outcome — and passes through the original value or reason unchanged:
+
+```js-exec
+Promise.prototype.myFinally = function (onFinally) {
+  return this.then(
+    // On fulfillment: run onFinally, wait for it, then pass the original value through
+    (value) => Promise.resolve(onFinally()).then(() => value),
+    // On rejection: run onFinally, wait for it, then re-throw the original reason
+    (reason) => Promise.resolve(onFinally()).then(() => { throw reason; })
+  );
+};
+
+// Test
+Promise.resolve(42)
+  .myFinally(() => console.log("cleanup"))  // "cleanup"
+  .then(console.log);                        // 42 — original value passes through
+
+Promise.reject(new Error("fail"))
+  .myFinally(() => console.log("cleanup"))  // "cleanup"
+  .catch(err => console.log(err.message));   // "fail" — original reason passes through
+
+// If onFinally itself throws, that error wins
+Promise.resolve(42)
+  .myFinally(() => { throw new Error("finally threw"); })
+  .catch(err => console.log(err.message));  // "finally threw"
+```
+
+The key insight: `finally` is **not** a transformation — it can't change the resolved value or rejection reason unless it throws. Wrapping `onFinally()` in `Promise.resolve()` means it works whether `onFinally` is sync or async.
+
+---
+
 ## What Interviewers Are Testing
 
 - **Promise construction** — creating a new Promise and resolving/rejecting from within
@@ -251,6 +282,7 @@ function myPromiseAny(promises) {
 - **Short-circuit logic** — `all` rejects immediately on first rejection; `any` resolves immediately on first resolution
 - **Edge case: empty input** — each combinator handles empty arrays differently
 - **`Promise.resolve()` wrapping** — ensuring non-promise values are treated as resolved promises
+- **`finally` pass-through** — understanding that `finally` doesn't transform values, just observes settlement
 
 ---
 
@@ -276,6 +308,6 @@ function myPromiseAny(promises) {
 
 ## Related Questions
 
-- [#19 — Implement promisify()](/articles/js-interview-promisify)
-- [#20 — Implement promiseTimeout()](/articles/js-interview-promise-timeout)
-- [#21 — Implement mapAsync() and mapAsyncLimit()](/articles/js-interview-map-async)
+- [Implement promisify()](/articles/js-interview-promisify)
+- [Implement promiseTimeout()](/articles/js-interview-promise-timeout)
+- [Implement mapAsync() and mapAsyncLimit()](/articles/js-interview-map-async)

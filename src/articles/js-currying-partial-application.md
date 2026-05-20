@@ -4,7 +4,7 @@ Currying transforms a function that takes multiple arguments into a chain of fun
 
 Both build on closures and are foundational to functional programming.
 
-**Prerequisites:** [JS Foundations #3 — Closures](/articles/javascript-series/js-closures-lexical-scope), [Functions #1 — call/apply/bind](/articles/javascript-series/js-call-apply-bind)
+**Prerequisites:** [JS Foundations #3 — Closures](/articles/javascript-series/js-closures-lexical-scope)
 
 ---
 
@@ -209,4 +209,3 @@ console.log(api("users", { id: 42 }));
 
 ---
 
-**Next:** [Functions #3 — Debounce & Throttle](/articles/javascript-series/js-debounce-throttle) — control how often a function can fire during scroll, resize, and input events.

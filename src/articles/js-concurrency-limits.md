@@ -1,6 +1,6 @@
 Running 1000 `fetch` calls in parallel can overwhelm your server or hit rate limits. This article covers three patterns: sequential execution, pooled concurrency (N at a time), and retry with exponential backoff.
 
-**Prerequisites:** [Async #3 — Promises](/articles/javascript-series/js-promise-from-scratch), [Async #4 — Promise Combinators](/articles/javascript-series/js-promise-combinators)
+**Prerequisites:** [Async #3 — Promises](/articles/javascript-series/js-promise-from-scratch)
 
 ---
 

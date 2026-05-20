@@ -1,4 +1,4 @@
-# Articles Reference
+﻿# Articles Reference
 
 > Single source of truth for all articles. Update this file whenever an article is added, removed, or significantly changed.
 
@@ -45,24 +45,21 @@
 - [JS Foundations #4 — Prototypes & Inheritance](#article-js-prototypes-inheritance)
 - [JS Foundations #5 — Equality & Type Coercion](#article-js-equality-coercion)
 - [JS Foundations #6 — Error Handling](#article-js-error-handling)
+- [Error Handling #2 — AggregateError, Error-First Callbacks & Promise Errors](#article-js-error-patterns)
 - [JS Foundations #7 — Destructuring, Spread & Rest](#article-js-destructuring-spread-rest)
 - [JS Foundations #8 — Template Literals & Tagged Templates](#article-js-template-literals)
 - [JS Foundations #9 — Data Types & Type Checking](#article-js-data-types)
-- [Type Checking Quick Reference](#article-js-type-checking)
 - [JS Foundations #10 — Numbers & Math](#article-js-numbers-math)
 - [JS Foundations #11 — String Methods Reference](#article-js-string-methods)
 - [JS Foundations #12 — Regular Expressions](#article-js-regex-basics)
 - [JS Foundations #13 — Date & Time](#article-js-date-time)
-- [Error Handling #2 — AggregateError, Error-First Callbacks & Promise Errors](#article-js-error-patterns)
+- [Type Checking Quick Reference](#article-js-type-checking)
+- [JS Type Conversions — The Complete Reference](#article-js-conversions-reference)
 
 ### Functions & Arrays (Level 2)
-- [Functions #1 — call(), apply() & bind() Polyfills](#article-js-call-apply-bind)
 - [Functions #2 — Currying & Partial Application](#article-js-currying-partial-application)
-- [Functions #3 — Debounce & Throttle](#article-js-debounce-throttle)
-- [Arrays #1 — map, filter, reduce Polyfills](#article-js-array-methods-polyfills-1)
 - [Arrays #2 — flat, flatMap, find, every, some Polyfills](#article-js-array-methods-polyfills-2)
 - [Arrays #3 — Array Methods Usage Reference](#article-js-array-methods-reference)
-- [Functions #4 — memoize() & once()](#article-js-memoize-once)
 - [Recursion Patterns — Tree Walk, Permutations & More](#article-js-recursion-patterns)
 - [Data #1 — Deep Clone & Deep Compare](#article-js-deep-clone-compare)
 - [Data #2 — Flatten & Unflatten Nested Objects](#article-js-flatten-unflatten-object)
@@ -72,7 +69,6 @@
 - [Async #1 — The Event Loop in Depth](#article-js-event-loop-in-depth)
 - [Async #2 — setTimeout & setInterval Deep Dive](#article-settimeout-setinterval)
 - [Async #3 — Building a Promise from Scratch](#article-js-promise-from-scratch)
-- [Async #4 — Promise.all, allSettled, race, any](#article-js-promise-combinators)
 - [Async #5 — async/await Under the Hood](#article-js-async-await-under-hood)
 - [Async #6 — Generators & Iterators](#article-js-generators-iterators)
 - [Async #7 — Async Iteration](#article-js-async-iteration)
@@ -126,36 +122,43 @@
 - [Web APIs #4 — localStorage, Cookies, sessionStorage & IndexedDB](#article-js-storage-cookies-indexeddb)
 
 ### Interview Implementation Problems
-- [Interview #1 — Implement call(), apply() & bind() from Scratch](#article-js-interview-call-apply-bind)
-- [Interview #2 — Implement map(), filter() & reduce() from Scratch](#article-js-interview-map-filter-reduce)
-- [Interview #3 — Make Counter: The Classic Closure Question](#article-js-interview-make-counter)
-- [Interview #4 — Implement once() — A Function That Runs At Most Once](#article-js-interview-once)
-- [Interview #5 — Type Utilities: typeof, instanceof & Custom Type Checks](#article-js-interview-type-utilities)
-- [Interview #6 — Implement Lodash's _.get() for Safe Nested Access](#article-js-interview-get)
-- [Interview #7 — Implement sleep() — Pausing Execution with Promises](#article-js-interview-sleep)
-- [Interview #8 — Implement debounce() with cancel() and flush()](#article-js-interview-debounce)
-- [Interview #9 — Implement throttle() with Trailing Edge](#article-js-interview-throttle)
-- [Interview #10 — Implement memoize() with Custom Key Resolver](#article-js-interview-memoize)
-- [Interview #11 — Implement curry() — Fixed Arity and Variadic](#article-js-interview-curry)
-- [Interview #12 — Implement Array flatten() with Depth Control](#article-js-interview-flatten)
-- [Interview #13 — Implement deepClone() for JSON-Serializable Values](#article-js-interview-deep-clone)
-- [Interview #14 — Implement deepEqual() for Structural Comparison](#article-js-interview-deep-equal)
-- [Interview #15 — Implement deepOmit() — Remove Keys from Nested Objects](#article-js-interview-deep-omit)
-- [Interview #16 — Implement squash() — Flatten Nested Objects to Dot Paths](#article-js-interview-squash-object)
-- [Interview #17 — Implement a Simplified JSON.stringify()](#article-js-interview-json-stringify)
-- [Interview #18 — Implement Promise.all, race, any & allSettled](#article-js-interview-promise-combinators)
-- [Interview #19 — Implement promisify() — Convert Callbacks to Promises](#article-js-interview-promisify)
-- [Interview #20 — Implement promiseTimeout() — Race a Promise Against a Deadline](#article-js-interview-promise-timeout)
-- [Interview #21 — Implement mapAsync() and mapAsyncLimit()](#article-js-interview-map-async)
-- [Interview #22 — Implement an EventEmitter with on, off, emit & once](#article-js-interview-event-emitter)
-- [Interview #23 — Implement classnames() — Conditional CSS Class Joining](#article-js-interview-classnames)
-- [Interview #24 — Implement getElementsByClassName, TagName & Style](#article-js-interview-dom-traversal)
-- [Interview #25 — Implement Data Merging — Combine Rows by User](#article-js-interview-data-merging)
-- [Interview #26 — Implement countBy() — Group and Count Array Elements](#article-js-interview-count-by)
-- [Interview #27 — Implement listFormat() — Human-Readable List Strings](#article-js-interview-list-format)
-- [Interview #28 — Deep Clone with Circular Reference Handling](#article-js-interview-deep-clone-circular)
-- [Interview #29 — Variadic curry() — Call with Any Number of Args](#article-js-interview-curry-variadic)
-- [Interview #30 — Implement a Data Selection / Filter Engine](#article-js-interview-data-selection)
+- [Implement debounce() with cancel() and flush()](#article-js-interview-debounce)
+- [Implement throttle() with Trailing Edge](#article-js-interview-throttle)
+- [Implement memoize() with Custom Key Resolver](#article-js-interview-memoize)
+- [Implement curry() — Fixed Arity](#article-js-interview-curry)
+- [Implement once() — A Function That Runs At Most Once](#article-js-interview-once)
+- [Implement call(), apply() & bind() from Scratch](#article-js-interview-call-apply-bind)
+- [Implement map(), filter() & reduce() from Scratch](#article-js-interview-map-filter-reduce)
+- [Implement Promise.all, race, any & allSettled](#article-js-interview-promise-combinators)
+- [Implement a Promise from Scratch](#article-js-interview-promise-from-scratch)
+- [Implement deepClone() — Complete Guide](#article-js-interview-deep-clone-circular)
+- [Implement deepEqual() for Structural Comparison](#article-js-interview-deep-equal)
+- [Implement an EventEmitter with on, off, emit & once](#article-js-interview-event-emitter)
+- [Implement Array flatten() with Depth Control](#article-js-interview-flatten)
+- [Implement promisify() — Convert Callbacks to Promises](#article-js-interview-promisify)
+- [Implement promiseTimeout() — Race a Promise Against a Deadline](#article-js-interview-promise-timeout)
+- [Implement retry() with Exponential Backoff](#article-js-interview-retry)
+- [Implement mapAsync() and mapAsyncLimit()](#article-js-interview-map-async)
+- [Implement Async Tasks in Series](#article-js-interview-async-series)
+- [Implement compose() & pipe() — Function Pipelines](#article-js-interview-compose-pipe)
+- [Variadic curry() — Call with Any Number of Args](#article-js-interview-curry-variadic)
+- [Implement curry() with Placeholders](#article-js-interview-curry-placeholder)
+- [Implement a Browser History Stack](#article-js-interview-browser-history)
+- [Implement squash() — Flatten Nested Objects to Dot Paths](#article-js-interview-squash-object)
+- [Implement deepOmit() — Remove Keys from Nested Objects](#article-js-interview-deep-omit)
+- [Implement a Simplified JSON.stringify()](#article-js-interview-json-stringify)
+- [Implement Lodash's _.get() for Safe Nested Access](#article-js-interview-get)
+- [Implement Lodash's _.set() for Deep Property Writing](#article-js-interview-set)
+- [Implement partial() — Pre-fill Function Arguments](#article-js-interview-partial)
+- [Implement sleep() — Pausing Execution with Promises](#article-js-interview-sleep)
+- [Implement classnames() — Conditional CSS Class Joining](#article-js-interview-classnames)
+- [Make Counter: The Classic Closure Question](#article-js-interview-make-counter)
+
+- [Implement a Data Selection / Filter Engine](#article-js-interview-data-selection)
+- [Implement countBy() — Group and Count Array Elements](#article-js-interview-count-by)
+- [Implement Data Merging — Combine Rows by User](#article-js-interview-data-merging)
+- [Implement listFormat() — Human-Readable List Strings](#article-js-interview-list-format)
+- [Implement getElementsByClassName, TagName & Style](#article-js-interview-dom-traversal)
 
 ### Interview Output Problems
 - [Output Quiz #1 — Scope, Hoisting & the TDZ](#article-js-output-scope-hoisting)
@@ -1261,7 +1264,7 @@
 | **Tags** | JavaScript, Fundamentals, Error Handling |
 | **Read Time** | 9 min read |
 | **Previous** | `js-equality-coercion` — JS Foundations #5 — Equality & Type Coercion |
-| **Next** | `js-destructuring-spread-rest` — JS Foundations #7 — Destructuring, Spread & Rest |
+| **Next** | `js-error-patterns` — Error Handling #2 — AggregateError, Error-First Callbacks & Promise Errors |
 
 **Excerpt:** try/catch/finally, custom error classes, unhandled rejection events, global error handlers, and error propagation patterns — with runnable examples.
 
@@ -1294,7 +1297,7 @@
 | **Series / Category** | javascript |
 | **Tags** | JavaScript, ES6, Destructuring |
 | **Read Time** | 10 min read |
-| **Previous** | `js-error-handling` — JS Foundations #6 — Error Handling |
+| **Previous** | `js-error-patterns` — Error Handling #2 — AggregateError, Error-First Callbacks & Promise Errors |
 | **Next** | `js-template-literals` — JS Foundations #8 — Template Literals & Tagged Templates |
 
 **Excerpt:** Array and object destructuring, nested destructuring with defaults, spread for copying/merging, rest parameters, and the difference between spread and rest syntax.
@@ -1357,7 +1360,7 @@
 | **Tags** | JavaScript, Fundamentals, Types, typeof |
 | **Read Time** | 10 min read |
 | **Previous** | `js-template-literals` — JS Foundations #8 — Template Literals & Tagged Templates |
-| **Next** | `js-type-checking` — Type Checking Quick Reference |
+| **Next** | `js-numbers-math` — JS Foundations #10 — Numbers & Math |
 
 **Excerpt:** JavaScript's 8 types, typeof quirks (null, arrays), instanceof prototype chain walk, Object.prototype.toString.call, and the reliable type-checking toolkit for every built-in type.
 
@@ -1389,8 +1392,8 @@
 | **Series / Category** | javascript |
 | **Tags** | JavaScript, Fundamentals, Types, typeof |
 | **Read Time** | 4 min read |
-| **Previous** | `js-data-types` — JS Foundations #9 — Data Types & Type Checking |
-| **Next** | `js-numbers-math` — JS Foundations #10 — Numbers & Math |
+| **Previous** | `js-date-time` — JS Foundations #13 — Date & Time |
+| **Next** | `js-conversions-reference` — JS Type Conversions — The Complete Reference |
 
 **Excerpt:** The right way to check every JavaScript type — typeof for primitives, Array.isArray for arrays, instanceof for built-ins, and Object.prototype.toString for everything else.
 
@@ -1408,6 +1411,40 @@
 
 ---
 
+<a name="article-js-conversions-reference"></a>
+
+## Article: JS Type Conversions — The Complete Reference
+
+| Field | Value |
+|-------|-------|
+| **ID / Slug** | `js-conversions-reference` |
+| **URL** | `/articles/js-conversions-reference` |
+| **Series / Category** | javascript |
+| **Tags** | JavaScript, Fundamentals, Types, Coercion |
+| **Read Time** | 12 min read |
+| **Previous** | `js-type-checking` — Type Checking Quick Reference |
+| **Next** | `js-currying-partial-application` — Functions #2 — Currying & Partial Application |
+
+**Excerpt:** Every JavaScript type conversion in one place: boxing/unboxing, string/number/boolean coercion, character codes, array/object/JSON transforms, implicit rules, and Symbol.toPrimitive.
+
+**Sections:**
+- 1. Primitive → Object (Boxing)
+- 2. Object → Primitive (Unboxing)
+- 3. → String
+- 4. → Number
+- 5. → Boolean
+- 6. Character ↔ Number (ASCII / Unicode)
+- 7. Array ↔ String
+- 8. Object ↔ Array
+- 9. JSON Conversions
+- 10. Implicit Coercion — The Hidden Rules
+- 11. Symbol.toPrimitive — Custom Conversion
+- Quick Reference
+
+**External Links:** None
+
+---
+
 <a name="article-js-numbers-math"></a>
 
 ## Article: JS Foundations #10 — Numbers & Math
@@ -1419,7 +1456,7 @@
 | **Series / Category** | javascript |
 | **Tags** | JavaScript, Fundamentals, Numbers, Math |
 | **Read Time** | 8 min read |
-| **Previous** | `js-type-checking` — Type Checking Quick Reference |
+| **Previous** | `js-data-types` — JS Foundations #9 — Data Types & Type Checking |
 | **Next** | `js-string-methods` — JS Foundations #11 — String Methods Reference |
 
 **Excerpt:** IEEE 754 floating point, NaN, Infinity, +0/-0, Number.isNaN vs isNaN, Number.isFinite, and every Math method you'll reach for — with the traps interviewers test.
@@ -1520,7 +1557,7 @@
 | **Tags** | JavaScript, Fundamentals, Date |
 | **Read Time** | 7 min read |
 | **Previous** | `js-regex-basics` — JS Foundations #12 — Regular Expressions |
-| **Next** | `js-error-patterns` — Error Handling #2 — AggregateError, Error-First Callbacks & Promise Errors |
+| **Next** | `js-type-checking` — Type Checking Quick Reference |
 
 **Excerpt:** Date constructor (beware month is 0-based), getTime, Date.now, formatting with toISOString/toLocaleDateString, date arithmetic, and performance.now for high-res timing.
 
@@ -1553,8 +1590,8 @@
 | **Series / Category** | javascript |
 | **Tags** | JavaScript, Error Handling, Patterns, Promises |
 | **Read Time** | 9 min read |
-| **Previous** | `js-date-time` — JS Foundations #13 — Date & Time |
-| **Next** | `js-call-apply-bind` — Functions #1 — call(), apply() & bind() Polyfills |
+| **Previous** | `js-error-handling` — JS Foundations #6 — Error Handling |
+| **Next** | `js-destructuring-spread-rest` — JS Foundations #7 — Destructuring, Spread & Rest |
 
 **Excerpt:** AggregateError for Promise.any, error-first callback convention, custom error hierarchies, error recovery in .catch(), Error.cause chaining, and unhandled rejection handling.
 
@@ -1574,37 +1611,6 @@
 
 ---
 
-<a name="article-js-call-apply-bind"></a>
-
-## Article: Functions #1 — call(), apply() & bind() Polyfills
-
-| Field | Value |
-|-------|-------|
-| **ID / Slug** | `js-call-apply-bind` |
-| **URL** | `/articles/js-call-apply-bind` |
-| **Series / Category** | javascript |
-| **Tags** | JavaScript, Functions, this, Polyfill |
-| **Read Time** | 12 min read |
-| **Previous** | `js-error-patterns` — Error Handling #2 — AggregateError, Error-First Callbacks & Promise Errors |
-| **Next** | `js-currying-partial-application` — Functions #2 — Currying & Partial Application |
-
-**Excerpt:** Implement Function.prototype.call, apply, and bind from scratch. Understand how each borrows this, and why bind returns a bound function you can't rebind.
-
-**Sections:**
-- 1. The Three Methods at a Glance
-- 2. Implementing `call()` — Step by Step
-- 3. Implementing `apply()` — Arguments as an Array
-- 4. `call` vs `apply` — When to Use Which
-- 5. Implementing `bind()` — Return a Bound Function
-- 6. `bind` + `new` — The Edge Case
-- 7. Partial Application with `bind`
-- 8. Quick Reference — Implementing All Three Manually
-- Key Takeaways
-
-**External Links:** None
-
----
-
 <a name="article-js-currying-partial-application"></a>
 
 ## Article: Functions #2 — Currying & Partial Application
@@ -1616,8 +1622,8 @@
 | **Series / Category** | javascript |
 | **Tags** | JavaScript, Functions, Currying, Closures |
 | **Read Time** | 10 min read |
-| **Previous** | `js-call-apply-bind` — Functions #1 — call(), apply() & bind() Polyfills |
-| **Next** | `js-debounce-throttle` — Functions #3 — Debounce & Throttle |
+| **Previous** | `js-conversions-reference` — JS Type Conversions — The Complete Reference |
+| **Next** | `js-array-methods-polyfills-2` — Arrays #2 — flat, flatMap, find, every, some Polyfills |
 
 **Excerpt:** Transform f(a,b,c) into f(a)(b)(c), implement infinite currying sum(1)(2)(3)(), and understand partial application vs currying.
 
@@ -1628,64 +1634,6 @@
 - 4. Partial Application — Fix Arguments Upfront
 - 5. Currying vs Partial Application
 - 6. Real-World Use Cases
-- Key Takeaways
-
-**External Links:** None
-
----
-
-<a name="article-js-debounce-throttle"></a>
-
-## Article: Functions #3 — Debounce & Throttle
-
-| Field | Value |
-|-------|-------|
-| **ID / Slug** | `js-debounce-throttle` |
-| **URL** | `/articles/js-debounce-throttle` |
-| **Series / Category** | javascript |
-| **Tags** | JavaScript, Functions, Performance |
-| **Read Time** | 12 min read |
-| **Previous** | `js-currying-partial-application` — Functions #2 — Currying & Partial Application |
-| **Next** | `js-array-methods-polyfills-1` — Arrays #1 — map, filter, reduce Polyfills |
-
-**Excerpt:** Implement debounce (leading, trailing, immediate) and throttle (with trailing edge). Understand when each fits, with runnable scroll/resize simulation examples.
-
-**Sections:**
-- 1. Debounce — Wait for the Pause
-- 2. Debounce — Trailing vs Leading Edge
-- 3. Throttle — Enforce a Rate Limit
-- 4. Throttle with Trailing Edge
-- 5. Debounce vs Throttle — When to Use Which
-- 6. A Combined "Smart" Utility
-- Key Takeaways
-
-**External Links:** None
-
----
-
-<a name="article-js-array-methods-polyfills-1"></a>
-
-## Article: Arrays #1 — map, filter, reduce Polyfills
-
-| Field | Value |
-|-------|-------|
-| **ID / Slug** | `js-array-methods-polyfills-1` |
-| **URL** | `/articles/js-array-methods-polyfills-1` |
-| **Series / Category** | javascript |
-| **Tags** | JavaScript, Arrays, Polyfill |
-| **Read Time** | 12 min read |
-| **Previous** | `js-debounce-throttle` — Functions #3 — Debounce & Throttle |
-| **Next** | `js-array-methods-polyfills-2` — Arrays #2 — flat, flatMap, find, every, some Polyfills |
-
-**Excerpt:** Build Array.prototype.map, filter, and reduce from scratch. Understand callback signatures, thisArg, sparse array handling, and edge cases.
-
-**Sections:**
-- 1. How the Real Methods Behave
-- 2. Implementing `Array.prototype.map()`
-- 3. Implementing `Array.prototype.filter()`
-- 4. Implementing `Array.prototype.reduce()`
-- 5. Building `map` and `filter` from `reduce`
-- 6. Classic `reduce` Interview Problems
 - Key Takeaways
 
 **External Links:** None
@@ -1703,7 +1651,7 @@
 | **Series / Category** | javascript |
 | **Tags** | JavaScript, Arrays, Polyfill |
 | **Read Time** | 11 min read |
-| **Previous** | `js-array-methods-polyfills-1` — Arrays #1 — map, filter, reduce Polyfills |
+| **Previous** | `js-currying-partial-application` — Functions #2 — Currying & Partial Application |
 | **Next** | `js-array-methods-reference` — Arrays #3 — Array Methods Usage Reference |
 
 **Excerpt:** Implement Array.prototype.flat with depth, flatMap, find, findIndex, every, and some — with sparse array handling and edge cases.
@@ -1733,7 +1681,7 @@
 | **Tags** | JavaScript, Arrays, Reference |
 | **Read Time** | 12 min read |
 | **Previous** | `js-array-methods-polyfills-2` — Arrays #2 — flat, flatMap, find, every, some Polyfills |
-| **Next** | `js-memoize-once` — Functions #4 — memoize() & once() |
+| **Next** | `js-recursion-patterns` — Recursion Patterns — Tree Walk, Permutations & More |
 
 **Excerpt:** Every array method organized by purpose: add/remove, slice, search, transform, sort, iterate. Practical runnable examples for all 30+ methods — not a polyfill, a usage guide.
 
@@ -1753,35 +1701,6 @@
 
 ---
 
-<a name="article-js-memoize-once"></a>
-
-## Article: Functions #4 — memoize() & once()
-
-| Field | Value |
-|-------|-------|
-| **ID / Slug** | `js-memoize-once` |
-| **URL** | `/articles/js-memoize-once` |
-| **Series / Category** | javascript |
-| **Tags** | JavaScript, Functions, Closures, Cache |
-| **Read Time** | 9 min read |
-| **Previous** | `js-array-methods-reference` — Arrays #3 — Array Methods Usage Reference |
-| **Next** | `js-recursion-patterns` — Recursion Patterns — Tree Walk, Permutations & More |
-
-**Excerpt:** Implement memoize with custom key resolver, once that runs a function at most one time, and understand how closures make both possible.
-
-**Sections:**
-- 1. Basic `memoize()` — Cache by First Argument
-- 2. `memoize()` with Custom Resolver — Multi-Argument Cache Key
-- 3. Recursive Functions and Memoization
-- 4. `once()` — Run at Most Once
-- 5. `memoize` with Cache Eviction (TTL)
-- 6. Real-World Examples
-- Key Takeaways
-
-**External Links:** None
-
----
-
 <a name="article-js-recursion-patterns"></a>
 
 ## Article: Recursion Patterns — Tree Walk, Permutations & More
@@ -1793,7 +1712,7 @@
 | **Series / Category** | javascript |
 | **Tags** | JavaScript, Recursion, Algorithms |
 | **Read Time** | 11 min read |
-| **Previous** | `js-memoize-once` — Functions #4 — memoize() & once() |
+| **Previous** | `js-array-methods-reference` — Arrays #3 — Array Methods Usage Reference |
 | **Next** | `js-deep-clone-compare` — Data #1 — Deep Clone & Deep Compare |
 
 **Excerpt:** Deep flatten, Fibonacci (recursive, memoized, iterative), generating all permutations and combinations, and tail-call optimization explained.
@@ -1977,7 +1896,7 @@
 | **Tags** | JavaScript, Async, Promise, Polyfill |
 | **Read Time** | 14 min read |
 | **Previous** | `settimeout-setinterval` — Async #2 — setTimeout & setInterval Deep Dive |
-| **Next** | `js-promise-combinators` — Async #4 — Promise.all, allSettled, race, any |
+| **Next** | `js-async-await-under-hood` — Async #5 — async/await Under the Hood |
 
 **Excerpt:** Implement the Promise constructor, then, catch, finally, resolve, reject — with state machine (pending/fulfilled/rejected), chaining, and microtask scheduling.
 
@@ -1995,34 +1914,6 @@
 
 ---
 
-<a name="article-js-promise-combinators"></a>
-
-## Article: Async #4 — Promise.all, allSettled, race, any
-
-| Field | Value |
-|-------|-------|
-| **ID / Slug** | `js-promise-combinators` |
-| **URL** | `/articles/js-promise-combinators` |
-| **Series / Category** | javascript |
-| **Tags** | JavaScript, Async, Promise, Polyfill |
-| **Read Time** | 12 min read |
-| **Previous** | `js-promise-from-scratch` — Async #3 — Building a Promise from Scratch |
-| **Next** | `js-async-await-under-hood` — Async #5 — async/await Under the Hood |
-
-**Excerpt:** Implement all four Promise combinators from scratch. Understand the subtle differences: short-circuit rejection, AggregateError, and the order of resolution.
-
-**Sections:**
-- 1. `Promise.all()` — All or Nothing
-- 2. `Promise.allSettled()` — Wait for Everything
-- 3. `Promise.race()` — Fastest Wins
-- 4. `Promise.any()` — First Success Wins
-- 5. Quick Comparison — All Four Combinators
-- Key Takeaways
-
-**External Links:** None
-
----
-
 <a name="article-js-async-await-under-hood"></a>
 
 ## Article: Async #5 — async/await Under the Hood
@@ -2034,7 +1925,7 @@
 | **Series / Category** | javascript |
 | **Tags** | JavaScript, Async, Generators |
 | **Read Time** | 12 min read |
-| **Previous** | `js-promise-combinators` — Async #4 — Promise.all, allSettled, race, any |
+| **Previous** | `js-promise-from-scratch` — Async #3 — Building a Promise from Scratch |
 | **Next** | `js-generators-iterators` — Async #6 — Generators & Iterators |
 
 **Excerpt:** Desugar async/await to generators + Promises. Understand paused execution, .next() driving the state machine, and why await blocks but doesn't freeze the thread.
@@ -3196,7 +3087,7 @@
 | **Tags** | JavaScript, Web API, Storage, Browser |
 | **Read Time** | 12 min read |
 | **Previous** | `js-drag-and-drop` — DOM Events #2 — Drag & Drop |
-| **Next** | `js-interview-call-apply-bind` — Interview #1 — Implement call(), apply() & bind() from Scratch |
+| **Next** | `js-interview-debounce` — Implement debounce() with cancel() and flush() |
 
 **Excerpt:** Compare all four storage APIs. Implement a localStorage wrapper with TTL expiry, cookie get/set/delete utilities, and a basic IndexedDB CRUD store.
 
@@ -3214,7 +3105,7 @@
 
 <a name="article-js-interview-call-apply-bind"></a>
 
-## Article: Interview #1 — Implement call(), apply() & bind() from Scratch
+## Article: Implement call(), apply() & bind() from Scratch
 
 | Field | Value |
 |-------|-------|
@@ -3223,8 +3114,8 @@
 | **Series / Category** | javascript |
 | **Tags** | JavaScript, Interview, Implementation, this |
 | **Read Time** | 12 min read |
-| **Previous** | `js-storage-cookies-indexeddb` — Web APIs #4 — localStorage, Cookies, sessionStorage & IndexedDB |
-| **Next** | `js-interview-map-filter-reduce` — Interview #2 — Implement map(), filter() & reduce() from Scratch |
+| **Previous** | `js-interview-once` — Implement once() — A Function That Runs At Most Once |
+| **Next** | `js-interview-map-filter-reduce` — Implement map(), filter() & reduce() from Scratch |
 
 **Excerpt:** Implementing call, apply, and bind is one of the most common JS interview questions. Here's how each one borrows this, and how to write polyfills that pass every edge case.
 
@@ -3248,7 +3139,7 @@
 
 <a name="article-js-interview-map-filter-reduce"></a>
 
-## Article: Interview #2 — Implement map(), filter() & reduce() from Scratch
+## Article: Implement map(), filter() & reduce() from Scratch
 
 | Field | Value |
 |-------|-------|
@@ -3257,8 +3148,8 @@
 | **Series / Category** | javascript |
 | **Tags** | JavaScript, Interview, Implementation, Arrays |
 | **Read Time** | 12 min read |
-| **Previous** | `js-interview-call-apply-bind` — Interview #1 — Implement call(), apply() & bind() from Scratch |
-| **Next** | `js-interview-make-counter` — Interview #3 — Make Counter: The Classic Closure Question |
+| **Previous** | `js-interview-call-apply-bind` — Implement call(), apply() & bind() from Scratch |
+| **Next** | `js-interview-promise-combinators` — Implement Promise.all, race, any & allSettled |
 
 **Excerpt:** These three polyfills appear in almost every frontend interview. Build each one from scratch — handling the callback signature, thisArg, sparse arrays, and the reduce initialValue edge case.
 
@@ -3282,7 +3173,7 @@
 
 <a name="article-js-interview-make-counter"></a>
 
-## Article: Interview #3 — Make Counter: The Classic Closure Question
+## Article: Make Counter: The Classic Closure Question
 
 | Field | Value |
 |-------|-------|
@@ -3291,8 +3182,8 @@
 | **Series / Category** | javascript |
 | **Tags** | JavaScript, Interview, Implementation, Closures |
 | **Read Time** | 8 min read |
-| **Previous** | `js-interview-map-filter-reduce` — Interview #2 — Implement map(), filter() & reduce() from Scratch |
-| **Next** | `js-interview-once` — Interview #4 — Implement once() — A Function That Runs At Most Once |
+| **Previous** | `js-interview-classnames` — Implement classnames() — Conditional CSS Class Joining |
+| **Next** | `js-interview-data-selection` — Implement a Data Selection / Filter Engine |
 
 **Excerpt:** makeCounter is the canonical closure interview question. Start with a simple increment counter, then build the full version with reset, increment, decrement, and getValue methods.
 
@@ -3316,7 +3207,7 @@
 
 <a name="article-js-interview-once"></a>
 
-## Article: Interview #4 — Implement once() — A Function That Runs At Most Once
+## Article: Implement once() — A Function That Runs At Most Once
 
 | Field | Value |
 |-------|-------|
@@ -3325,8 +3216,8 @@
 | **Series / Category** | javascript |
 | **Tags** | JavaScript, Interview, Implementation, Closures |
 | **Read Time** | 7 min read |
-| **Previous** | `js-interview-make-counter` — Interview #3 — Make Counter: The Classic Closure Question |
-| **Next** | `js-interview-type-utilities` — Interview #5 — Type Utilities: typeof, instanceof & Custom Type Checks |
+| **Previous** | `js-interview-curry` — Implement curry() — Fixed Arity |
+| **Next** | `js-interview-call-apply-bind` — Implement call(), apply() & bind() from Scratch |
 
 **Excerpt:** once() wraps a function so it can only execute on the first call. Every subsequent call returns the cached result. It's a single-closure problem with a few tricky edge cases.
 
@@ -3348,43 +3239,9 @@
 
 ---
 
-<a name="article-js-interview-type-utilities"></a>
-
-## Article: Interview #5 — Type Utilities: typeof, instanceof & Custom Type Checks
-
-| Field | Value |
-|-------|-------|
-| **ID / Slug** | `js-interview-type-utilities` |
-| **URL** | `/articles/js-interview-type-utilities` |
-| **Series / Category** | javascript |
-| **Tags** | JavaScript, Interview, Implementation, Types |
-| **Read Time** | 8 min read |
-| **Previous** | `js-interview-once` — Interview #4 — Implement once() — A Function That Runs At Most Once |
-| **Next** | `js-interview-get` — Interview #6 — Implement Lodash's _.get() for Safe Nested Access |
-
-**Excerpt:** Type checking in JavaScript is a minefield of quirks. Build a complete set of isString, isNumber, isArray, isNull, isPlainObject utilities using typeof, instanceof, and Object.prototype.toString.
-
-**Sections:**
-- What are Type Utilities?
-- The Problem
-- Thought Process
-- Step 1 — `typeof` — What It Gets Right and Wrong
-- Step 2 — Base Implementations
-- Step 3 — `isArray` and `isObject`
-- Step 4 — `isPlainObject`
-- Step 5 — Edge Cases
-- Full Solution
-- What Interviewers Are Testing
-- Complexity
-- Interview Tips
-
-**External Links:** None
-
----
-
 <a name="article-js-interview-get"></a>
 
-## Article: Interview #6 — Implement Lodash's _.get() for Safe Nested Access
+## Article: Implement Lodash's _.get() for Safe Nested Access
 
 | Field | Value |
 |-------|-------|
@@ -3393,8 +3250,8 @@
 | **Series / Category** | javascript |
 | **Tags** | JavaScript, Interview, Implementation, Objects |
 | **Read Time** | 7 min read |
-| **Previous** | `js-interview-type-utilities` — Interview #5 — Type Utilities: typeof, instanceof & Custom Type Checks |
-| **Next** | `js-interview-sleep` — Interview #7 — Implement sleep() — Pausing Execution with Promises |
+| **Previous** | `js-interview-json-stringify` — Implement a Simplified JSON.stringify() |
+| **Next** | `js-interview-set` — Implement Lodash's _.set() for Deep Property Writing |
 
 **Excerpt:** _.get(obj, 'a.b.c', defaultValue) safely drills into nested objects without throwing. Implement it supporting dot notation, bracket notation, and a fallback default value.
 
@@ -3415,9 +3272,75 @@
 
 ---
 
+<a name="article-js-interview-set"></a>
+
+## Article: Implement Lodash's _.set() for Deep Property Writing
+
+| Field | Value |
+|-------|-------|
+| **ID / Slug** | `js-interview-set` |
+| **URL** | `/articles/js-interview-set` |
+| **Series / Category** | javascript |
+| **Tags** | JavaScript, Interview, Implementation, Objects |
+| **Read Time** | 9 min read |
+| **Previous** | `js-interview-get` — Implement Lodash's _.get() for Safe Nested Access |
+| **Next** | `js-interview-partial` — Implement partial() — Pre-fill Function Arguments |
+
+**Excerpt:** _.set(obj, 'a.b.c', value) writes at an arbitrarily deep path, creating intermediate objects or arrays as needed. The companion to _.get() — harder because you mutate rather than read.
+
+**Sections:**
+- What is `_.set()`?
+- The Problem
+- Thought Process
+- Step 1 — Parsing the Path
+- Step 2 — Walk and Write
+- Step 3 — Overwriting Non-Object Nodes
+- Full Solution
+- What Interviewers Are Testing
+- Complexity
+- Interview Tips
+- Related Questions
+
+**External Links:** None
+
+---
+
+<a name="article-js-interview-partial"></a>
+
+## Article: Implement partial() — Pre-fill Function Arguments
+
+| Field | Value |
+|-------|-------|
+| **ID / Slug** | `js-interview-partial` |
+| **URL** | `/articles/js-interview-partial` |
+| **Series / Category** | javascript |
+| **Tags** | JavaScript, Interview, Implementation, Functional |
+| **Read Time** | 10 min read |
+| **Previous** | `js-interview-set` — Implement Lodash's _.set() for Deep Property Writing |
+| **Next** | `js-interview-sleep` — Implement sleep() — Pausing Execution with Promises |
+
+**Excerpt:** partial(fn, ...presetArgs) locks in leftmost arguments and returns a new function for the rest. Add placeholder support to fix any position — the built-in bind() without the this binding.
+
+**Sections:**
+- What is `partial()`?
+- The Problem
+- Thought Process
+- Step 1 — Base Implementation
+- Step 2 — With Placeholder Support
+- Step 3 — Edge Cases
+- Full Solution
+- What Interviewers Are Testing
+- Complexity
+- Interview Tips
+- Related Questions
+
+**External Links:** None
+
+---
+
 <a name="article-js-interview-sleep"></a>
 
-## Article: Interview #7 — Implement sleep() — Pausing Execution with Promises
+## Article: Implement sleep() — Pausing Execution with Promises
 
 | Field | Value |
 |-------|-------|
@@ -3426,8 +3349,8 @@
 | **Series / Category** | javascript |
 | **Tags** | JavaScript, Interview, Implementation, Async |
 | **Read Time** | 5 min read |
-| **Previous** | `js-interview-get` — Interview #6 — Implement Lodash's _.get() for Safe Nested Access |
-| **Next** | `js-interview-debounce` — Interview #8 — Implement debounce() with cancel() and flush() |
+| **Previous** | `js-interview-partial` — Implement partial() — Pre-fill Function Arguments |
+| **Next** | `js-interview-classnames` — Implement classnames() — Conditional CSS Class Joining |
 
 **Excerpt:** sleep(ms) pauses async execution for a given number of milliseconds. It's a one-liner that tests whether you understand how Promise resolution and await work together.
 
@@ -3452,7 +3375,7 @@
 
 <a name="article-js-interview-debounce"></a>
 
-## Article: Interview #8 — Implement debounce() with cancel() and flush()
+## Article: Implement debounce() with cancel() and flush()
 
 | Field | Value |
 |-------|-------|
@@ -3461,8 +3384,8 @@
 | **Series / Category** | javascript |
 | **Tags** | JavaScript, Interview, Implementation, Timers |
 | **Read Time** | 14 min read |
-| **Previous** | `js-interview-sleep` — Interview #7 — Implement sleep() — Pausing Execution with Promises |
-| **Next** | `js-interview-throttle` — Interview #9 — Implement throttle() with Trailing Edge |
+| **Previous** | `js-storage-cookies-indexeddb` — Web APIs #4 — localStorage, Cookies, sessionStorage & IndexedDB |
+| **Next** | `js-interview-throttle` — Implement throttle() with Trailing Edge |
 
 **Excerpt:** Debounce delays execution until calls stop. Build trailing-edge debounce first, then add leading edge, cancel(), and flush() — covering every variant interviewers ask for.
 
@@ -3487,7 +3410,7 @@
 
 <a name="article-js-interview-throttle"></a>
 
-## Article: Interview #9 — Implement throttle() with Trailing Edge
+## Article: Implement throttle() with Trailing Edge
 
 | Field | Value |
 |-------|-------|
@@ -3496,8 +3419,8 @@
 | **Series / Category** | javascript |
 | **Tags** | JavaScript, Interview, Implementation, Timers |
 | **Read Time** | 12 min read |
-| **Previous** | `js-interview-debounce` — Interview #8 — Implement debounce() with cancel() and flush() |
-| **Next** | `js-interview-memoize` — Interview #10 — Implement memoize() with Custom Key Resolver |
+| **Previous** | `js-interview-debounce` — Implement debounce() with cancel() and flush() |
+| **Next** | `js-interview-memoize` — Implement memoize() with Custom Key Resolver |
 
 **Excerpt:** Throttle guarantees a function runs at most once per interval. Build leading-edge throttle, then add a trailing-edge call to ensure the last invocation always fires.
 
@@ -3523,7 +3446,7 @@
 
 <a name="article-js-interview-memoize"></a>
 
-## Article: Interview #10 — Implement memoize() with Custom Key Resolver
+## Article: Implement memoize() with Custom Key Resolver
 
 | Field | Value |
 |-------|-------|
@@ -3532,8 +3455,8 @@
 | **Series / Category** | javascript |
 | **Tags** | JavaScript, Interview, Implementation, Closures |
 | **Read Time** | 10 min read |
-| **Previous** | `js-interview-throttle` — Interview #9 — Implement throttle() with Trailing Edge |
-| **Next** | `js-interview-curry` — Interview #11 — Implement curry() — Fixed Arity and Variadic |
+| **Previous** | `js-interview-throttle` — Implement throttle() with Trailing Edge |
+| **Next** | `js-interview-curry` — Implement curry() — Fixed Arity |
 
 **Excerpt:** Memoize caches a function's results keyed by its arguments. Build memoize for single-arg functions, then extend it with a resolver for multi-arg and object-key caching.
 
@@ -3558,7 +3481,7 @@
 
 <a name="article-js-interview-curry"></a>
 
-## Article: Interview #11 — Implement curry() — Fixed Arity and Variadic
+## Article: Implement curry() — Fixed Arity and Variadic
 
 | Field | Value |
 |-------|-------|
@@ -3567,8 +3490,8 @@
 | **Series / Category** | javascript |
 | **Tags** | JavaScript, Interview, Implementation, Functional |
 | **Read Time** | 12 min read |
-| **Previous** | `js-interview-memoize` — Interview #10 — Implement memoize() with Custom Key Resolver |
-| **Next** | `js-interview-flatten` — Interview #12 — Implement Array flatten() with Depth Control |
+| **Previous** | `js-interview-memoize` — Implement memoize() with Custom Key Resolver |
+| **Next** | `js-interview-once` — Implement once() — A Function That Runs At Most Once |
 
 **Excerpt:** curry(fn) transforms f(a, b, c) into f(a)(b)(c). Build the fixed-arity version using fn.length, then the variadic version that collects args until called with no arguments.
 
@@ -3592,7 +3515,7 @@
 
 <a name="article-js-interview-flatten"></a>
 
-## Article: Interview #12 — Implement Array flatten() with Depth Control
+## Article: Implement Array flatten() with Depth Control
 
 | Field | Value |
 |-------|-------|
@@ -3601,8 +3524,8 @@
 | **Series / Category** | javascript |
 | **Tags** | JavaScript, Interview, Implementation, Arrays |
 | **Read Time** | 10 min read |
-| **Previous** | `js-interview-curry` — Interview #11 — Implement curry() — Fixed Arity and Variadic |
-| **Next** | `js-interview-deep-clone` — Interview #13 — Implement deepClone() for JSON-Serializable Values |
+| **Previous** | `js-interview-event-emitter` — Implement an EventEmitter with on, off, emit & once |
+| **Next** | `js-interview-promisify` — Implement promisify() — Convert Callbacks to Promises |
 
 **Excerpt:** Flatten an array recursively to a single level, or to a specified depth. Three approaches — recursive, iterative with a stack, and reduce-based — each with different trade-offs.
 
@@ -3624,42 +3547,9 @@
 
 ---
 
-<a name="article-js-interview-deep-clone"></a>
-
-## Article: Interview #13 — Implement deepClone() for JSON-Serializable Values
-
-| Field | Value |
-|-------|-------|
-| **ID / Slug** | `js-interview-deep-clone` |
-| **URL** | `/articles/js-interview-deep-clone` |
-| **Series / Category** | javascript |
-| **Tags** | JavaScript, Interview, Implementation, Objects |
-| **Read Time** | 11 min read |
-| **Previous** | `js-interview-flatten` — Interview #12 — Implement Array flatten() with Depth Control |
-| **Next** | `js-interview-deep-equal` — Interview #14 — Implement deepEqual() for Structural Comparison |
-
-**Excerpt:** Deep clone a value containing objects, arrays, strings, numbers, null, and booleans — without JSON.stringify. Build it with recursion, handling every JSON-serializable type correctly.
-
-**Sections:**
-- What is `deepClone()`?
-- The Problem
-- Thought Process
-- Step 1 — Base Implementation
-- Step 2 — Handle Nested Arrays
-- Step 3 — Edge Cases
-- Full Solution
-- What Interviewers Are Testing
-- Complexity
-- Interview Tips
-- Related Questions
-
-**External Links:** None
-
----
-
 <a name="article-js-interview-deep-equal"></a>
 
-## Article: Interview #14 — Implement deepEqual() for Structural Comparison
+## Article: Implement deepEqual() for Structural Comparison
 
 | Field | Value |
 |-------|-------|
@@ -3668,8 +3558,8 @@
 | **Series / Category** | javascript |
 | **Tags** | JavaScript, Interview, Implementation, Objects |
 | **Read Time** | 11 min read |
-| **Previous** | `js-interview-deep-clone` — Interview #13 — Implement deepClone() for JSON-Serializable Values |
-| **Next** | `js-interview-deep-omit` — Interview #15 — Implement deepOmit() — Remove Keys from Nested Objects |
+| **Previous** | `js-interview-deep-clone-circular` — Implement deepClone() — Complete Guide |
+| **Next** | `js-interview-event-emitter` — Implement an EventEmitter with on, off, emit & once |
 
 **Excerpt:** deepEqual checks if two values have the same structure and values, not the same reference. Handle primitives, arrays, plain objects, null, NaN, and the +0/-0 edge case.
 
@@ -3693,7 +3583,7 @@
 
 <a name="article-js-interview-deep-omit"></a>
 
-## Article: Interview #15 — Implement deepOmit() — Remove Keys from Nested Objects
+## Article: Implement deepOmit() — Remove Keys from Nested Objects
 
 | Field | Value |
 |-------|-------|
@@ -3702,8 +3592,8 @@
 | **Series / Category** | javascript |
 | **Tags** | JavaScript, Interview, Implementation, Objects |
 | **Read Time** | 9 min read |
-| **Previous** | `js-interview-deep-equal` — Interview #14 — Implement deepEqual() for Structural Comparison |
-| **Next** | `js-interview-squash-object` — Interview #16 — Implement squash() — Flatten Nested Objects to Dot Paths |
+| **Previous** | `js-interview-squash-object` — Implement squash() — Flatten Nested Objects to Dot Paths |
+| **Next** | `js-interview-json-stringify` — Implement a Simplified JSON.stringify() |
 
 **Excerpt:** deepOmit(obj, keys) removes specified keys at every level of a nested object or array. Build it with recursion handling both object and array nodes.
 
@@ -3727,7 +3617,7 @@
 
 <a name="article-js-interview-squash-object"></a>
 
-## Article: Interview #16 — Implement squash() — Flatten Nested Objects to Dot Paths
+## Article: Implement squash() — Flatten Nested Objects to Dot Paths
 
 | Field | Value |
 |-------|-------|
@@ -3736,8 +3626,8 @@
 | **Series / Category** | javascript |
 | **Tags** | JavaScript, Interview, Implementation, Objects |
 | **Read Time** | 10 min read |
-| **Previous** | `js-interview-deep-omit` — Interview #15 — Implement deepOmit() — Remove Keys from Nested Objects |
-| **Next** | `js-interview-json-stringify` — Interview #17 — Implement a Simplified JSON.stringify() |
+| **Previous** | `js-interview-browser-history` — Implement a Browser History Stack |
+| **Next** | `js-interview-deep-omit` — Implement deepOmit() — Remove Keys from Nested Objects |
 
 **Excerpt:** squash({ a: { b: { c: 1 } } }) returns { 'a.b.c': 1 }. Build it with recursion, handle arrays with bracket notation, and optionally implement the reverse (unsquash).
 
@@ -3761,7 +3651,7 @@
 
 <a name="article-js-interview-json-stringify"></a>
 
-## Article: Interview #17 — Implement a Simplified JSON.stringify()
+## Article: Implement a Simplified JSON.stringify()
 
 | Field | Value |
 |-------|-------|
@@ -3770,8 +3660,8 @@
 | **Series / Category** | javascript |
 | **Tags** | JavaScript, Interview, Implementation, Parsing |
 | **Read Time** | 11 min read |
-| **Previous** | `js-interview-squash-object` — Interview #16 — Implement squash() — Flatten Nested Objects to Dot Paths |
-| **Next** | `js-interview-promise-combinators` — Interview #18 — Implement Promise.all, race, any & allSettled |
+| **Previous** | `js-interview-deep-omit` — Implement deepOmit() — Remove Keys from Nested Objects |
+| **Next** | `js-interview-get` — Implement Lodash's _.get() for Safe Nested Access |
 
 **Excerpt:** Build a JSON.stringify that handles all JSON-serializable types: strings, numbers, booleans, null, arrays, and objects. Understand what the real implementation skips (undefined, functions, symbols).
 
@@ -3795,7 +3685,7 @@
 
 <a name="article-js-interview-promise-combinators"></a>
 
-## Article: Interview #18 — Implement Promise.all, race, any & allSettled
+## Article: Implement Promise.all, race, any & allSettled
 
 | Field | Value |
 |-------|-------|
@@ -3804,8 +3694,8 @@
 | **Series / Category** | javascript |
 | **Tags** | JavaScript, Interview, Implementation, Promises |
 | **Read Time** | 14 min read |
-| **Previous** | `js-interview-json-stringify` — Interview #17 — Implement a Simplified JSON.stringify() |
-| **Next** | `js-interview-promisify` — Interview #19 — Implement promisify() — Convert Callbacks to Promises |
+| **Previous** | `js-interview-map-filter-reduce` — Implement map(), filter() & reduce() from Scratch |
+| **Next** | `js-interview-promise-from-scratch` — Implement a Promise from Scratch |
 
 **Excerpt:** Four combinators, four different resolution strategies. Implement each from scratch — understanding exactly when each resolves, when it rejects, and what shape the result takes.
 
@@ -3829,9 +3719,43 @@
 
 ---
 
+<a name="article-js-interview-promise-from-scratch"></a>
+
+## Article: Implement a Promise from Scratch
+
+| Field | Value |
+|-------|-------|
+| **ID / Slug** | `js-interview-promise-from-scratch` |
+| **URL** | `/articles/js-interview-promise-from-scratch` |
+| **Series / Category** | javascript |
+| **Tags** | JavaScript, Interview, Implementation, Promises |
+| **Read Time** | 16 min read |
+| **Previous** | `js-interview-promise-combinators` — Implement Promise.all, race, any & allSettled |
+| **Next** | `js-interview-deep-clone-circular` — Implement deepClone() — Complete Guide |
+
+**Excerpt:** Build a fully spec-compliant Promise class step by step: the state machine, then-chaining with microtask scheduling, the resolution procedure for thenable adoption, and static helpers.
+
+**Sections:**
+- What is a Promise from Scratch?
+- The Problem
+- Thought Process
+- Step 1 — State Machine
+- Step 2 — `.then()` Chaining with `queueMicrotask`
+- Step 3 — Resolution Procedure (Thenable Adoption)
+- Step 4 — `.catch()`, `.finally()`, and Static Helpers
+- Full Solution
+- What Interviewers Are Testing
+- Complexity
+- Interview Tips
+- Related Questions
+
+**External Links:** None
+
+---
+
 <a name="article-js-interview-promisify"></a>
 
-## Article: Interview #19 — Implement promisify() — Convert Callbacks to Promises
+## Article: Implement promisify() — Convert Callbacks to Promises
 
 | Field | Value |
 |-------|-------|
@@ -3840,8 +3764,8 @@
 | **Series / Category** | javascript |
 | **Tags** | JavaScript, Interview, Implementation, Promises |
 | **Read Time** | 10 min read |
-| **Previous** | `js-interview-promise-combinators` — Interview #18 — Implement Promise.all, race, any & allSettled |
-| **Next** | `js-interview-promise-timeout` — Interview #20 — Implement promiseTimeout() — Race a Promise Against a Deadline |
+| **Previous** | `js-interview-flatten` — Implement Array flatten() with Depth Control |
+| **Next** | `js-interview-promise-timeout` — Implement promiseTimeout() — Race a Promise Against a Deadline |
 
 **Excerpt:** promisify wraps a Node.js-style error-first callback function and returns a Promise-based version. Build the base version, then extend it to let the original function override the resolved value.
 
@@ -3866,7 +3790,7 @@
 
 <a name="article-js-interview-promise-timeout"></a>
 
-## Article: Interview #20 — Implement promiseTimeout() — Race a Promise Against a Deadline
+## Article: Implement promiseTimeout() — Race a Promise Against a Deadline
 
 | Field | Value |
 |-------|-------|
@@ -3875,8 +3799,8 @@
 | **Series / Category** | javascript |
 | **Tags** | JavaScript, Interview, Implementation, Promises |
 | **Read Time** | 8 min read |
-| **Previous** | `js-interview-promisify` — Interview #19 — Implement promisify() — Convert Callbacks to Promises |
-| **Next** | `js-interview-map-async` — Interview #21 — Implement mapAsync() and mapAsyncLimit() |
+| **Previous** | `js-interview-promisify` — Implement promisify() — Convert Callbacks to Promises |
+| **Next** | `js-interview-retry` — Implement retry() with Exponential Backoff |
 
 **Excerpt:** promiseTimeout(promise, ms) rejects with a timeout error if the promise doesn't settle within the given time. This is a direct application of Promise.race with a timer.
 
@@ -3899,9 +3823,43 @@
 
 ---
 
+<a name="article-js-interview-retry"></a>
+
+## Article: Implement retry() with Exponential Backoff
+
+| Field | Value |
+|-------|-------|
+| **ID / Slug** | `js-interview-retry` |
+| **URL** | `/articles/js-interview-retry` |
+| **Series / Category** | javascript |
+| **Tags** | JavaScript, Interview, Implementation, Async |
+| **Read Time** | 12 min read |
+| **Previous** | `js-interview-promise-timeout` — Implement promiseTimeout() — Race a Promise Against a Deadline |
+| **Next** | `js-interview-map-async` — Implement mapAsync() and mapAsyncLimit() |
+
+**Excerpt:** retry(fn, attempts) re-executes an async function on failure. Build up from a fixed retry loop to exponential backoff, a maxDelay cap, and a shouldRetry predicate to skip unretryable errors.
+
+**Sections:**
+- What is `retry()`?
+- The Problem
+- Thought Process
+- Step 1 — Base: Fixed Attempts
+- Step 2 — Fixed Delay Between Retries
+- Step 3 — Exponential Backoff
+- Step 4 — `shouldRetry` Predicate
+- Full Solution
+- What Interviewers Are Testing
+- Complexity
+- Interview Tips
+- Related Questions
+
+**External Links:** None
+
+---
+
 <a name="article-js-interview-map-async"></a>
 
-## Article: Interview #21 — Implement mapAsync() and mapAsyncLimit()
+## Article: Implement mapAsync() and mapAsyncLimit()
 
 | Field | Value |
 |-------|-------|
@@ -3910,8 +3868,8 @@
 | **Series / Category** | javascript |
 | **Tags** | JavaScript, Interview, Implementation, Async, Concurrency |
 | **Read Time** | 12 min read |
-| **Previous** | `js-interview-promise-timeout` — Interview #20 — Implement promiseTimeout() — Race a Promise Against a Deadline |
-| **Next** | `js-interview-event-emitter` — Interview #22 — Implement an EventEmitter with on, off, emit & once |
+| **Previous** | `js-interview-retry` — Implement retry() with Exponential Backoff |
+| **Next** | `js-interview-async-series` — Implement Async Tasks in Series |
 
 **Excerpt:** mapAsync runs an async mapping function over an array. mapAsyncLimit adds a concurrency cap — never more than N requests in flight at once. The second is the real interview question.
 
@@ -3933,9 +3891,76 @@
 
 ---
 
+<a name="article-js-interview-async-series"></a>
+
+## Article: Implement Async Tasks in Series
+
+| Field | Value |
+|-------|-------|
+| **ID / Slug** | `js-interview-async-series` |
+| **URL** | `/articles/js-interview-async-series` |
+| **Series / Category** | javascript |
+| **Tags** | JavaScript, Interview, Implementation, Async |
+| **Read Time** | 10 min read |
+| **Previous** | `js-interview-map-async` — Implement mapAsync() and mapAsyncLimit() |
+| **Next** | `js-interview-compose-pipe` — Implement compose() & pipe() — Function Pipelines |
+
+**Excerpt:** Run async functions one at a time in order. Implement runSeries and mapSeries with for...of + await, then the reduce-based promise-chain equivalent — and contrast both with parallel Promise.all.
+
+**Sections:**
+- What is "async tasks in series"?
+- The Problem
+- Thought Process
+- Step 1 — `runSeries`: Sequential Task Runner
+- Step 2 — `mapSeries`: Async Map in Series
+- Step 3 — Reduce-Based Implementation
+- Step 4 — Parallel vs Series Comparison
+- Full Solution
+- What Interviewers Are Testing
+- Complexity
+- Interview Tips
+- Related Questions
+
+**External Links:** None
+
+---
+
+<a name="article-js-interview-compose-pipe"></a>
+
+## Article: Implement compose() & pipe() — Function Pipelines
+
+| Field | Value |
+|-------|-------|
+| **ID / Slug** | `js-interview-compose-pipe` |
+| **URL** | `/articles/js-interview-compose-pipe` |
+| **Series / Category** | javascript |
+| **Tags** | JavaScript, Interview, Implementation, Functional |
+| **Read Time** | 11 min read |
+| **Previous** | `js-interview-async-series` — Implement Async Tasks in Series |
+| **Next** | `js-interview-curry-variadic` — Variadic curry() — Call with Any Number of Args |
+
+**Excerpt:** compose and pipe are both a reduce over an array of functions — right-to-left vs left-to-right. Build both, handle multi-arg first functions, and extend to async pipelines.
+
+**Sections:**
+- What are `compose()` and `pipe()`?
+- The Problem
+- Thought Process
+- Step 1 — `compose()`: Right-to-Left
+- Step 2 — Cleaner `compose()` with `reduceRight`
+- Step 3 — `pipe()`: Left-to-Right
+- Step 4 — `pipeAsync()`: Async Pipeline
+- Full Solution
+- What Interviewers Are Testing
+- Interview Tips
+- Related Questions
+
+**External Links:** None
+
+---
+
 <a name="article-js-interview-event-emitter"></a>
 
-## Article: Interview #22 — Implement an EventEmitter with on, off, emit & once
+## Article: Implement an EventEmitter with on, off, emit & once
 
 | Field | Value |
 |-------|-------|
@@ -3944,8 +3969,8 @@
 | **Series / Category** | javascript |
 | **Tags** | JavaScript, Interview, Implementation, Patterns |
 | **Read Time** | 12 min read |
-| **Previous** | `js-interview-map-async` — Interview #21 — Implement mapAsync() and mapAsyncLimit() |
-| **Next** | `js-interview-classnames` — Interview #23 — Implement classnames() — Conditional CSS Class Joining |
+| **Previous** | `js-interview-deep-equal` — Implement deepEqual() for Structural Comparison |
+| **Next** | `js-interview-flatten` — Implement Array flatten() with Depth Control |
 
 **Excerpt:** Build an EventEmitter class from scratch. Version I uses a listener array. Version II returns a subscription object with an unsubscribe() method.
 
@@ -3969,7 +3994,7 @@
 
 <a name="article-js-interview-classnames"></a>
 
-## Article: Interview #23 — Implement classnames() — Conditional CSS Class Joining
+## Article: Implement classnames() — Conditional CSS Class Joining
 
 | Field | Value |
 |-------|-------|
@@ -3978,8 +4003,8 @@
 | **Series / Category** | javascript |
 | **Tags** | JavaScript, Interview, Implementation, Utilities |
 | **Read Time** | 9 min read |
-| **Previous** | `js-interview-event-emitter` — Interview #22 — Implement an EventEmitter with on, off, emit & once |
-| **Next** | `js-interview-dom-traversal` — Interview #24 — Implement getElementsByClassName, TagName & Style |
+| **Previous** | `js-interview-sleep` — Implement sleep() — Pausing Execution with Promises |
+| **Next** | `js-interview-make-counter` — Make Counter: The Classic Closure Question |
 
 **Excerpt:** classnames(a, b, { active: true, hidden: false }) joins truthy class names into a single string. Handle strings, numbers, arrays, objects, and nested arrays.
 
@@ -4002,7 +4027,7 @@
 
 <a name="article-js-interview-dom-traversal"></a>
 
-## Article: Interview #24 — Implement getElementsByClassName, TagName & Style
+## Article: Implement getElementsByClassName, TagName & Style
 
 | Field | Value |
 |-------|-------|
@@ -4011,8 +4036,8 @@
 | **Series / Category** | javascript |
 | **Tags** | JavaScript, Interview, Implementation, DOM |
 | **Read Time** | 11 min read |
-| **Previous** | `js-interview-classnames` — Interview #23 — Implement classnames() — Conditional CSS Class Joining |
-| **Next** | `js-interview-data-merging` — Interview #25 — Implement Data Merging — Combine Rows by User |
+| **Previous** | `js-interview-list-format` — Implement listFormat() — Human-Readable List Strings |
+| **Next** | `js-output-scope-hoisting` — Output Quiz #1 — Scope, Hoisting & the TDZ |
 
 **Excerpt:** Three classic DOM traversal questions in one. Each requires a recursive tree walk — the logic is the same, only the match condition changes.
 
@@ -4036,7 +4061,7 @@
 
 <a name="article-js-interview-data-merging"></a>
 
-## Article: Interview #25 — Implement Data Merging — Combine Rows by User
+## Article: Implement Data Merging — Combine Rows by User
 
 | Field | Value |
 |-------|-------|
@@ -4045,8 +4070,8 @@
 | **Series / Category** | javascript |
 | **Tags** | JavaScript, Interview, Implementation, Arrays |
 | **Read Time** | 9 min read |
-| **Previous** | `js-interview-dom-traversal` — Interview #24 — Implement getElementsByClassName, TagName & Style |
-| **Next** | `js-interview-count-by` — Interview #26 — Implement countBy() — Group and Count Array Elements |
+| **Previous** | `js-interview-count-by` — Implement countBy() — Group and Count Array Elements |
+| **Next** | `js-interview-list-format` — Implement listFormat() — Human-Readable List Strings |
 
 **Excerpt:** Given an array of user activity rows where one user can appear multiple times, merge them into one row per user. This is a reduce-into-a-Map problem with careful field merging logic.
 
@@ -4069,7 +4094,7 @@
 
 <a name="article-js-interview-count-by"></a>
 
-## Article: Interview #26 — Implement countBy() — Group and Count Array Elements
+## Article: Implement countBy() — Group and Count Array Elements
 
 | Field | Value |
 |-------|-------|
@@ -4078,8 +4103,8 @@
 | **Series / Category** | javascript |
 | **Tags** | JavaScript, Interview, Implementation, Arrays |
 | **Read Time** | 7 min read |
-| **Previous** | `js-interview-data-merging` — Interview #25 — Implement Data Merging — Combine Rows by User |
-| **Next** | `js-interview-list-format` — Interview #27 — Implement listFormat() — Human-Readable List Strings |
+| **Previous** | `js-interview-data-selection` — Implement a Data Selection / Filter Engine |
+| **Next** | `js-interview-data-merging` — Implement Data Merging — Combine Rows by User |
 
 **Excerpt:** countBy(array, fn) groups array elements by the result of a function and returns a count of how many fall into each group. It's a single reduce call.
 
@@ -4103,7 +4128,7 @@
 
 <a name="article-js-interview-list-format"></a>
 
-## Article: Interview #27 — Implement listFormat() — Human-Readable List Strings
+## Article: Implement listFormat() — Human-Readable List Strings
 
 | Field | Value |
 |-------|-------|
@@ -4112,8 +4137,8 @@
 | **Series / Category** | javascript |
 | **Tags** | JavaScript, Interview, Implementation, Strings |
 | **Read Time** | 7 min read |
-| **Previous** | `js-interview-count-by` — Interview #26 — Implement countBy() — Group and Count Array Elements |
-| **Next** | `js-interview-deep-clone-circular` — Interview #28 — Deep Clone with Circular Reference Handling |
+| **Previous** | `js-interview-data-merging` — Implement Data Merging — Combine Rows by User |
+| **Next** | `js-interview-dom-traversal` — Implement getElementsByClassName, TagName & Style |
 
 **Excerpt:** listFormat(['a', 'b', 'c']) returns 'a, b, and c'. Handle 0, 1, 2, and 3+ items differently, support custom conjunctions, and match the behavior of Intl.ListFormat.
 
@@ -4137,7 +4162,7 @@
 
 <a name="article-js-interview-deep-clone-circular"></a>
 
-## Article: Interview #28 — Deep Clone with Circular Reference Handling
+## Article: Implement deepClone() — Complete Guide
 
 | Field | Value |
 |-------|-------|
@@ -4146,8 +4171,8 @@
 | **Series / Category** | javascript |
 | **Tags** | JavaScript, Interview, Implementation, Objects |
 | **Read Time** | 11 min read |
-| **Previous** | `js-interview-list-format` — Interview #27 — Implement listFormat() — Human-Readable List Strings |
-| **Next** | `js-interview-curry-variadic` — Interview #29 — Variadic curry() — Call with Any Number of Args |
+| **Previous** | `js-interview-promise-from-scratch` — Implement a Promise from Scratch |
+| **Next** | `js-interview-deep-equal` — Implement deepEqual() for Structural Comparison |
 
 **Excerpt:** The base deep clone breaks on circular references. Solve it with a WeakMap that tracks already-cloned objects and returns the clone instead of recursing infinitely.
 
@@ -4171,7 +4196,7 @@
 
 <a name="article-js-interview-curry-variadic"></a>
 
-## Article: Interview #29 — Variadic curry() — Call with Any Number of Args
+## Article: Variadic curry() — Call with Any Number of Args
 
 | Field | Value |
 |-------|-------|
@@ -4180,8 +4205,8 @@
 | **Series / Category** | javascript |
 | **Tags** | JavaScript, Interview, Implementation, Functional |
 | **Read Time** | 12 min read |
-| **Previous** | `js-interview-deep-clone-circular` — Interview #28 — Deep Clone with Circular Reference Handling |
-| **Next** | `js-interview-data-selection` — Interview #30 — Implement a Data Selection / Filter Engine |
+| **Previous** | `js-interview-compose-pipe` — Implement compose() & pipe() — Function Pipelines |
+| **Next** | `js-interview-curry-placeholder` — Implement curry() with Placeholders |
 
 **Excerpt:** The hardest curry variant: transform f(a, b, c, d) so it can be called as f(a)(b, c)(d) — any number of arguments at each step, accumulating until enough args are collected.
 
@@ -4205,9 +4230,76 @@
 
 ---
 
+<a name="article-js-interview-curry-placeholder"></a>
+
+## Article: Implement curry() with Placeholders
+
+| Field | Value |
+|-------|-------|
+| **ID / Slug** | `js-interview-curry-placeholder` |
+| **URL** | `/articles/js-interview-curry-placeholder` |
+| **Series / Category** | javascript |
+| **Tags** | JavaScript, Interview, Implementation, Functional |
+| **Read Time** | 12 min read |
+| **Previous** | `js-interview-curry-variadic` — Variadic curry() — Call with Any Number of Args |
+| **Next** | `js-interview-browser-history` — Implement a Browser History Stack |
+
+**Excerpt:** Placeholder curry lets you fix arguments at any position — curry(fn)(_, b)(a) fills b now and a later. Build the Symbol sentinel, the mergeArgs operation, and the completion check.
+
+**Sections:**
+- What is curry with placeholders?
+- The Problem
+- Thought Process
+- Step 1 — The Placeholder Sentinel
+- Step 2 — Merging Arguments
+- Step 3 — Full Implementation
+- Step 4 — Edge Cases
+- Full Solution
+- What Interviewers Are Testing
+- Complexity
+- Interview Tips
+- Related Questions
+
+**External Links:** None
+
+---
+
+<a name="article-js-interview-browser-history"></a>
+
+## Article: Implement a Browser History Stack
+
+| Field | Value |
+|-------|-------|
+| **ID / Slug** | `js-interview-browser-history` |
+| **URL** | `/articles/js-interview-browser-history` |
+| **Series / Category** | javascript |
+| **Tags** | JavaScript, Interview, Implementation, Data Structures |
+| **Read Time** | 11 min read |
+| **Previous** | `js-interview-curry-placeholder` — Implement curry() with Placeholders |
+| **Next** | `js-interview-squash-object` — Implement squash() — Flatten Nested Objects to Dot Paths |
+
+**Excerpt:** BrowserHistory tracks visited URLs with a pointer. Implement push (truncating forward entries), back, forward, go(n) with boundary clamping, and canGoBack/canGoForward getters.
+
+**Sections:**
+- What is a Browser History?
+- The Problem
+- Thought Process
+- Step 1 — Base Implementation
+- Step 2 — `go(n)`, `canGoBack`, `canGoForward`
+- Step 3 — Edge Cases
+- Full Solution
+- What Interviewers Are Testing
+- Complexity
+- Interview Tips
+- Related Questions
+
+**External Links:** None
+
+---
+
 <a name="article-js-interview-data-selection"></a>
 
-## Article: Interview #30 — Implement a Data Selection / Filter Engine
+## Article: Implement a Data Selection / Filter Engine
 
 | Field | Value |
 |-------|-------|
@@ -4216,8 +4308,8 @@
 | **Series / Category** | javascript |
 | **Tags** | JavaScript, Interview, Implementation, Data |
 | **Read Time** | 13 min read |
-| **Previous** | `js-interview-curry-variadic` — Interview #29 — Variadic curry() — Call with Any Number of Args |
-| **Next** | `js-output-scope-hoisting` — Output Quiz #1 — Scope, Hoisting & the TDZ |
+| **Previous** | `js-interview-make-counter` — Make Counter: The Classic Closure Question |
+| **Next** | `js-interview-count-by` — Implement countBy() — Group and Count Array Elements |
 
 **Excerpt:** Build a filter function that takes an array of rows and a criteria object, returning only rows that match all conditions. Support exact match, range filters, and multi-value filters.
 
@@ -4252,7 +4344,7 @@
 | **Series / Category** | javascript |
 | **Tags** | JavaScript, Interview, Output |
 | **Read Time** | 10 min read |
-| **Previous** | `js-interview-data-selection` — Interview #30 — Implement a Data Selection / Filter Engine |
+| **Previous** | `js-interview-dom-traversal` — Implement getElementsByClassName, TagName & Style |
 | **Next** | `js-output-closures` — Output Quiz #2 — Closures & the Loop Problem |
 
 **Excerpt:** 10 output questions on var hoisting, function hoisting, let/const TDZ, and block scope — predict the output before revealing the answer.

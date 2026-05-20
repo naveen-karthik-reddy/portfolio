@@ -297,7 +297,7 @@ function TableOfContents({ headings, grad, sidebar = false }) {
 // Build a flat index of all articles for prev/next across ALL categories
 const allArticlesFlat = articlesData;
 
-function PrevNextNav({ article, grad }) {
+function PrevNextNav({ article, grad, sx: sxOverride }) {
   const router = useRouter();
   const idx = allArticlesFlat.findIndex((a) => a.id === article.id);
   if (idx === -1) return null;
@@ -316,6 +316,7 @@ function PrevNextNav({ article, grad }) {
         borderTop: "1px solid",
         borderColor: "divider",
         flexWrap: "wrap",
+        ...sxOverride,
       }}
     >
       <Box sx={{ flex: 1 }}>
@@ -1050,6 +1051,14 @@ export default function ArticleView({ article, content: initialContent = "" }) {
                 />
               ))}
             </Box>
+
+            <div className="no-print">
+              <PrevNextNav
+                article={article}
+                grad={grad}
+                sx={{ mt: 0, pt: 0, mb: 3, pb: 3, borderTop: "none", borderBottom: "1px solid" }}
+              />
+            </div>
 
             <Divider sx={{ mb: 3 }} />
 

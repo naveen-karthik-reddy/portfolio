@@ -1,4 +1,4 @@
-`promisify(fn)` converts a Node.js-style callback function `(arg, cb)` into a Promise-returning function `(arg) => Promise`. The callback convention is `(err, result)` — error-first. Build the base version, then extend it so the original function can override the resolved value.
+﻿`promisify(fn)` converts a Node.js-style callback function `(arg, cb)` into a Promise-returning function `(arg) => Promise`. The callback convention is `(err, result)` — error-first. Build the base version, then extend it so the original function can override the resolved value.
 
 ---
 
@@ -229,6 +229,6 @@ function promisify(fn) {
 
 ## Related Questions
 
-- [#18 — Implement Promise.all, race, any & allSettled](/articles/js-interview-promise-combinators)
-- [#20 — Implement promiseTimeout()](/articles/js-interview-promise-timeout)
-- [#21 — Implement mapAsync() and mapAsyncLimit()](/articles/js-interview-map-async)
+- [Implement Promise.all, race, any & allSettled](/articles/js-interview-promise-combinators)
+- [Implement promiseTimeout()](/articles/js-interview-promise-timeout)
+- [Implement mapAsync() and mapAsyncLimit()](/articles/js-interview-map-async)

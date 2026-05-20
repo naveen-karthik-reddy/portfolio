@@ -1,4 +1,4 @@
-`deepClone` from Interview #13 breaks on circular references — it recurses infinitely. Solve it with a `WeakMap` that tracks already-cloned objects and returns the clone instead of recursing. Then extend to handle `Date`, `RegExp`, `Map`, and `Set`.
+﻿`deepClone` from Interview #13 breaks on circular references — it recurses infinitely. Solve it with a `WeakMap` that tracks already-cloned objects and returns the clone instead of recursing. Then extend to handle `Date`, `RegExp`, `Map`, and `Set`.
 
 **Related deep-dive:** [Data #1 — Deep Clone & Deep Compare](/articles/js-deep-clone-compare)
 
@@ -291,6 +291,6 @@ function deepClone(value, visited = new WeakMap()) {
 
 ## Related Questions
 
-- [#13 — Implement deepClone() (base version)](/articles/js-interview-deep-clone)
-- [#14 — Implement deepEqual()](/articles/js-interview-deep-equal)
-- [#17 — Implement a Simplified JSON.stringify()](/articles/js-interview-json-stringify)
+- [Implement deepClone() (base version)](/articles/js-interview-deep-clone)
+- [Implement deepEqual()](/articles/js-interview-deep-equal)
+- [Implement a Simplified JSON.stringify()](/articles/js-interview-json-stringify)

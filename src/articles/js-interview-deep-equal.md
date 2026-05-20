@@ -1,4 +1,4 @@
-`deepEqual(a, b)` checks structural equality — same shape, same values, not the same reference. The interviewer tests whether you handle `NaN`, `+0`/`-0`, `null` vs `{}`, and arrays vs objects correctly.
+﻿`deepEqual(a, b)` checks structural equality — same shape, same values, not the same reference. The interviewer tests whether you handle `NaN`, `+0`/`-0`, `null` vs `{}`, and arrays vs objects correctly.
 
 **Related deep-dive:** [Data #1 — Deep Clone & Deep Compare](/articles/js-deep-clone-compare)
 
@@ -204,6 +204,6 @@ function deepEqual(a, b) {
 
 ## Related Questions
 
-- [#13 — Implement deepClone()](/articles/js-interview-deep-clone)
-- [#15 — Implement deepOmit()](/articles/js-interview-deep-omit)
-- [#28 — Deep Clone with Circular References](/articles/js-interview-deep-clone-circular)
+- [Implement deepClone()](/articles/js-interview-deep-clone)
+- [Implement deepOmit()](/articles/js-interview-deep-omit)
+- [Deep Clone with Circular References](/articles/js-interview-deep-clone-circular)

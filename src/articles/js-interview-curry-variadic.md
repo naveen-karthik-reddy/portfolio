@@ -1,4 +1,4 @@
-The hardest curry variant: transform `f(a, b, c, d)` so it accepts any number of arguments at each call — `f(a)(b, c)(d)` — and invokes the original when enough args have been collected. It's curry without the one-arg-at-a-time restriction.
+﻿The hardest curry variant: transform `f(a, b, c, d)` so it accepts any number of arguments at each call — `f(a)(b, c)(d)` — and invokes the original when enough args have been collected. It's curry without the one-arg-at-a-time restriction.
 
 **Related deep-dive:** [Functions #2 — Currying & Partial Application](/articles/js-currying-partial-application)
 
@@ -226,6 +226,6 @@ function curry(fn, arity = fn.length) {
 
 ## Related Questions
 
-- [#11 — Implement curry() — Fixed Arity](/articles/js-interview-curry)
-- [#4 — Implement once()](/articles/js-interview-once)
-- [#10 — Implement memoize()](/articles/js-interview-memoize)
+- [Implement curry() — Fixed Arity](/articles/js-interview-curry)
+- [Implement once()](/articles/js-interview-once)
+- [Implement memoize()](/articles/js-interview-memoize)

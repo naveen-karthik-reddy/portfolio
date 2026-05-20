@@ -1,6 +1,4 @@
-Memoize caches a function's return values keyed by its arguments. The base version is straightforward — wrap the function, check a cache before calling. But the interview gets interesting when you add a custom key resolver for multi-arg and object-argument functions.
-
-**Related deep-dive:** [Functions #4 — memoize() & once()](/articles/js-memoize-once)
+﻿Memoize caches a function's return values keyed by its arguments. The base version is straightforward — wrap the function, check a cache before calling. But the interview gets interesting when you add a custom key resolver for multi-arg and object-argument functions.
 
 ---
 
@@ -183,9 +181,72 @@ console.log(withResolver({ value: 1 }));  // 1 (cached — same serialized key)
 
 ---
 
+## Step 6 — In-Flight Deduplication (Production Pattern)
+
+The interviewer asks: "What if two callers request the same key before the first async call resolves? You'd fire the function twice."
+
+Standard memoize caches **results** — but if `fn` is async and takes 500ms, a second call during that window misses the cache and fires a duplicate request. The fix: cache the **promise itself** while it's in-flight.
+
+```js-exec
+function memoizeAsync(fn, resolver) {
+  const cache = new Map();
+  const inFlight = new Map();
+
+  return function (...args) {
+    const key = resolver ? resolver(...args) : args[0];
+
+    if (cache.has(key)) return cache.get(key);
+    if (inFlight.has(key)) return inFlight.get(key); // same promise, no duplicate call
+
+    const promise = Promise.resolve(fn.apply(this, args)).then(
+      (value) => {
+        cache.set(key, value);
+        inFlight.delete(key);
+        return value;
+      },
+      (err) => {
+        inFlight.delete(key); // don't cache failures
+        throw err;
+      }
+    );
+
+    inFlight.set(key, promise);
+    return promise;
+  };
+}
+
+// Simulate slow API
+let callCount = 0;
+const fetchUser = async (id) => {
+  callCount++;
+  await new Promise(r => setTimeout(r, 50));
+  return { id, name: "Naveen" };
+};
+
+const memoFetch = memoizeAsync(fetchUser);
+
+async function main() {
+  // Two simultaneous calls for same id — only ONE fetch fires
+  const [a, b] = await Promise.all([memoFetch(1), memoFetch(1)]);
+  console.log("calls made:", callCount); // 1 — not 2
+  console.log("same result:", a === b);  // true — same resolved value
+
+  // Third call after resolution — served from cache
+  const c = await memoFetch(1);
+  console.log("calls made:", callCount); // still 1
+}
+
+main();
+```
+
+This is the pattern used in data-fetching libraries (React Query, SWR) to prevent duplicate network requests.
+
+---
+
 ## Full Solution
 
 ```js-exec
+// Sync memoize
 function memoize(fn, resolver) {
   const cache = new Map();
 
@@ -201,6 +262,26 @@ function memoize(fn, resolver) {
     return result;
   };
 }
+
+// Async memoize with in-flight deduplication
+function memoizeAsync(fn, resolver) {
+  const cache = new Map();
+  const inFlight = new Map();
+
+  return function (...args) {
+    const key = resolver ? resolver(...args) : args[0];
+    if (cache.has(key)) return cache.get(key);
+    if (inFlight.has(key)) return inFlight.get(key);
+
+    const promise = Promise.resolve(fn.apply(this, args)).then(
+      (value) => { cache.set(key, value); inFlight.delete(key); return value; },
+      (err)   => { inFlight.delete(key); throw err; }
+    );
+
+    inFlight.set(key, promise);
+    return promise;
+  };
+}
 ```
 
 ---
@@ -212,6 +293,7 @@ function memoize(fn, resolver) {
 - **Resolver pattern** — the ability to inject a custom key function for flexible caching strategies
 - **`has()` vs `get()`** — using `has()` to distinguish cache miss from cached `undefined`
 - **Memory awareness** — acknowledging unbounded cache growth and mentioning LRU as the fix
+- **In-flight deduplication** — caching the promise itself, not just the result, to prevent duplicate concurrent requests
 
 ---
 
@@ -235,6 +317,6 @@ function memoize(fn, resolver) {
 
 ## Related Questions
 
-- [#4 — Implement once()](/articles/js-interview-once)
-- [#11 — Implement curry()](/articles/js-interview-curry)
-- [#8 — Implement debounce()](/articles/js-interview-debounce)
+- [Implement once()](/articles/js-interview-once)
+- [Implement curry()](/articles/js-interview-curry)
+- [Implement debounce()](/articles/js-interview-debounce)

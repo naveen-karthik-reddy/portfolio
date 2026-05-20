@@ -1,4 +1,4 @@
-`deepOmit(obj, keys)` removes the specified keys from an object at every level of nesting — including inside arrays. It's a recursive traversal problem that tests whether you remember arrays are objects too.
+﻿`deepOmit(obj, keys)` removes the specified keys from an object at every level of nesting — including inside arrays. It's a recursive traversal problem that tests whether you remember arrays are objects too.
 
 ---
 
@@ -190,6 +190,6 @@ function deepOmit(obj, keys) {
 
 ## Related Questions
 
-- [#13 — Implement deepClone()](/articles/js-interview-deep-clone)
-- [#16 — Implement squash()](/articles/js-interview-squash-object)
-- [#14 — Implement deepEqual()](/articles/js-interview-deep-equal)
+- [Implement deepClone()](/articles/js-interview-deep-clone)
+- [Implement squash()](/articles/js-interview-squash-object)
+- [Implement deepEqual()](/articles/js-interview-deep-equal)

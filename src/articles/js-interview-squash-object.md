@@ -1,4 +1,4 @@
-`squash(obj)` flattens a nested object into a single-level object with dot-path keys: `{ a: { b: { c: 1 } } }` becomes `{ 'a.b.c': 1 }`. The interviewer will then ask you to reverse it with `unsquash()`.
+﻿`squash(obj)` flattens a nested object into a single-level object with dot-path keys: `{ a: { b: { c: 1 } } }` becomes `{ 'a.b.c': 1 }`. The interviewer will then ask you to reverse it with `unsquash()`.
 
 **Related deep-dive:** [Data #2 — Flatten & Unflatten Nested Objects](/articles/js-flatten-unflatten-object)
 
@@ -247,6 +247,6 @@ function unsquash(obj, sep = '.') {
 
 ## Related Questions
 
-- [#6 — Implement _.get()](/articles/js-interview-get)
-- [#13 — Implement deepClone()](/articles/js-interview-deep-clone)
-- [#12 — Implement flatten()](/articles/js-interview-flatten)
+- [Implement _.get()](/articles/js-interview-get)
+- [Implement deepClone()](/articles/js-interview-deep-clone)
+- [Implement flatten()](/articles/js-interview-flatten)

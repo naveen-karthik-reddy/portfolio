@@ -1,6 +1,4 @@
-`once(fn)` returns a function that runs `fn` at most one time — the first call executes it, and every subsequent call returns the cached result. It's a single-closure problem that tests whether you understand function wrapping and state encapsulation.
-
-**Related deep-dive:** [Functions #4 — memoize() & once()](/articles/js-memoize-once)
+﻿`once(fn)` returns a function that runs `fn` at most one time — the first call executes it, and every subsequent call returns the cached result. It's a single-closure problem that tests whether you understand function wrapping and state encapsulation.
 
 ---
 
@@ -205,6 +203,6 @@ function limit(fn, n) {
 
 ## Related Questions
 
-- [#10 — Implement memoize()](/articles/js-interview-memoize)
-- [#3 — Make Counter](/articles/js-interview-make-counter)
-- [#8 — Implement debounce()](/articles/js-interview-debounce)
+- [Implement memoize()](/articles/js-interview-memoize)
+- [Make Counter](/articles/js-interview-make-counter)
+- [Implement debounce()](/articles/js-interview-debounce)

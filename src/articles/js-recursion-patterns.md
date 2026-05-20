@@ -1,7 +1,5 @@
 Recursion is a function that calls itself. It's the natural way to process trees, generate combinations, and traverse nested structures. This article covers core recursive patterns, the stack overflow problem, tail-call optimization, and iterative alternatives.
 
-**Prerequisites:** [Arrays #1 — map, filter, reduce](/articles/javascript-series/js-array-methods-polyfills-1)
-
 ---
 
 ## 1. The Anatomy of a Recursive Function

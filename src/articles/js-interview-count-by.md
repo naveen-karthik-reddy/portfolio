@@ -1,4 +1,4 @@
-`countBy(array, fn)` groups array elements by the result of a key function and returns a count of how many fall into each group. It's a single `reduce` call — the challenge is getting the accumulator shape and key resolution right.
+﻿`countBy(array, fn)` groups array elements by the result of a key function and returns a count of how many fall into each group. It's a single `reduce` call — the challenge is getting the accumulator shape and key resolution right.
 
 ---
 
@@ -178,6 +178,6 @@ function groupBy(array, fn) {
 
 ## Related Questions
 
-- [#25 — Implement Data Merging](/articles/js-interview-data-merging)
-- [#2 — Implement map(), filter() & reduce()](/articles/js-interview-map-filter-reduce)
-- [#30 — Implement a Data Selection / Filter Engine](/articles/js-interview-data-selection)
+- [Implement Data Merging](/articles/js-interview-data-merging)
+- [Implement map(), filter() & reduce()](/articles/js-interview-map-filter-reduce)
+- [Implement a Data Selection / Filter Engine](/articles/js-interview-data-selection)

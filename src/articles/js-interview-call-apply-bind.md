@@ -1,6 +1,4 @@
-Implementing `call`, `apply`, and `bind` from scratch is one of the most common frontend interview questions. It tests whether you truly understand how `this` works — not just the rules, but the mechanics.
-
-**Related deep-dive:** [Functions #1 — call(), apply() & bind() Polyfills](/articles/js-call-apply-bind)
+﻿Implementing `call`, `apply`, and `bind` from scratch is one of the most common frontend interview questions. It tests whether you truly understand how `this` works — not just the rules, but the mechanics.
 
 ---
 
@@ -278,6 +276,6 @@ Function.prototype.myBind = function (context, ...boundArgs) {
 
 ## Related Questions
 
-- [#2 — Implement map(), filter() & reduce()](/articles/js-interview-map-filter-reduce)
-- [#3 — Make Counter](/articles/js-interview-make-counter)
-- [#4 — Implement once()](/articles/js-interview-once)
+- [Implement map(), filter() & reduce()](/articles/js-interview-map-filter-reduce)
+- [Make Counter](/articles/js-interview-make-counter)
+- [Implement once()](/articles/js-interview-once)

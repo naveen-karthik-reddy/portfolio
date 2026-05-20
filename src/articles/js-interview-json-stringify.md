@@ -1,4 +1,4 @@
-`myJSONStringify(value)` converts a JavaScript value into a JSON string. The interviewer wants to see you handle all JSON types, escape strings properly, skip non-JSON values, and detect circular references — essentially a recursive tree serializer.
+﻿`myJSONStringify(value)` converts a JavaScript value into a JSON string. The interviewer wants to see you handle all JSON types, escape strings properly, skip non-JSON values, and detect circular references — essentially a recursive tree serializer.
 
 **Related deep-dive:** [Parsing #1 — Building a Simple JSON.stringify()](/articles/js-json-stringify-parser)
 
@@ -272,6 +272,6 @@ function myJSONStringify(value, visited = new WeakSet()) {
 
 ## Related Questions
 
-- [#13 — Implement deepClone()](/articles/js-interview-deep-clone)
-- [#14 — Implement deepEqual()](/articles/js-interview-deep-equal)
-- [#12 — Implement flatten()](/articles/js-interview-flatten)
+- [Implement deepClone()](/articles/js-interview-deep-clone)
+- [Implement deepEqual()](/articles/js-interview-deep-equal)
+- [Implement flatten()](/articles/js-interview-flatten)

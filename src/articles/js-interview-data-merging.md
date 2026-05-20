@@ -1,4 +1,4 @@
-`mergeData(rows)` combines an array of user activity rows where one user appears multiple times into one row per user. It's a reduce-into-a-Map problem with a field merging strategy: concatenate arrays, sum numbers, take the first value for scalars.
+﻿`mergeData(rows)` combines an array of user activity rows where one user appears multiple times into one row per user. It's a reduce-into-a-Map problem with a field merging strategy: concatenate arrays, sum numbers, take the first value for scalars.
 
 ---
 
@@ -203,6 +203,6 @@ function mergeData(rows, { mergeArrays = true, sumNumbers = true, scalarStrategy
 
 ## Related Questions
 
-- [#26 — Implement countBy()](/articles/js-interview-count-by)
-- [#30 — Implement a Data Selection / Filter Engine](/articles/js-interview-data-selection)
-- [#2 — Implement map(), filter() & reduce()](/articles/js-interview-map-filter-reduce)
+- [Implement countBy()](/articles/js-interview-count-by)
+- [Implement a Data Selection / Filter Engine](/articles/js-interview-data-selection)
+- [Implement map(), filter() & reduce()](/articles/js-interview-map-filter-reduce)

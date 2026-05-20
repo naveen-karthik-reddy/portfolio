@@ -1,7 +1,5 @@
 Building on `map`, `filter`, and `reduce`, this article implements `flat`, `flatMap`, `find`, `findIndex`, `every`, and `some` — the remaining essential array methods — from scratch.
 
-**Prerequisites:** [Arrays #1 — `map`, `filter`, `reduce`](/articles/javascript-series/js-array-methods-polyfills-1)
-
 ---
 
 ## 1. Implementing `Array.prototype.flat(depth)`
@@ -236,4 +234,4 @@ console.log("some > 4:", arr.mySome((x) => x > 4));        // true
 
 ---
 
-**Next:** [Functions #4 — `memoize()` & `once()` ](/articles/javascript-series/js-memoize-once) — cache function results and ensure a function runs only once.
+**Next:** [Arrays #3 — Array Methods Usage Reference](/articles/js-array-methods-reference) — every array method organized by purpose with runnable examples for all 30+ methods.

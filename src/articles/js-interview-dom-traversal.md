@@ -1,4 +1,4 @@
-DOM traversal questions are the same recursive tree walk applied three different ways. The interviewer gives you a root element and asks you to find descendants by className, tagName, or computed style. Master the DFS pattern once, apply it three times.
+﻿DOM traversal questions are the same recursive tree walk applied three different ways. The interviewer gives you a root element and asks you to find descendants by className, tagName, or computed style. Master the DFS pattern once, apply it three times.
 
 ---
 
@@ -240,6 +240,6 @@ function getElementsByStyle(root, property, value) {
 
 ## Related Questions
 
-- [#6 — Implement _.get()](/articles/js-interview-get)
-- [#12 — Implement flatten()](/articles/js-interview-flatten)
-- [#22 — Implement an EventEmitter](/articles/js-interview-event-emitter)
+- [Implement _.get()](/articles/js-interview-get)
+- [Implement flatten()](/articles/js-interview-flatten)
+- [Implement an EventEmitter](/articles/js-interview-event-emitter)

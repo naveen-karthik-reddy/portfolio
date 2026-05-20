@@ -282,4 +282,3 @@ console.log(path); // C:\Users\Naveen\Desktop — backslashes preserved
 
 ---
 
-**Next:** [Functions #1 — `call()`, `apply()` & `bind()` Polyfills](/articles/javascript-series/js-call-apply-bind) — implement each method from scratch and understand how they control `this`.

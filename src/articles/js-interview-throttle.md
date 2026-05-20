@@ -1,6 +1,4 @@
-Throttle guarantees a function runs at most once per interval, no matter how many times it's called. It's the other half of the debounce/throttle pair — and the trailing-edge variant reveals whether you truly understand the timing model.
-
-**Related deep-dive:** [Functions #3 — Debounce & Throttle](/articles/js-debounce-throttle)
+﻿Throttle guarantees a function runs at most once per interval, no matter how many times it's called. It's the other half of the debounce/throttle pair — and the trailing-edge variant reveals whether you truly understand the timing model.
 
 ---
 
@@ -298,6 +296,6 @@ function throttle(fn, interval, options = {}) {
 
 ## Related Questions
 
-- [#8 — Implement debounce()](/articles/js-interview-debounce)
-- [#10 — Implement memoize()](/articles/js-interview-memoize)
-- [#4 — Implement once()](/articles/js-interview-once)
+- [Implement debounce()](/articles/js-interview-debounce)
+- [Implement memoize()](/articles/js-interview-memoize)
+- [Implement once()](/articles/js-interview-once)

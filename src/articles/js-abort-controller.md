@@ -1,6 +1,6 @@
 `AbortController` is the standard way to cancel ongoing async operations in JavaScript — fetch requests, event listeners, streams, and custom async work. It replaces patterns like manual cancellation tokens and timeout hacks.
 
-**Prerequisites:** [Async #3 — Promises](/articles/javascript-series/js-promise-from-scratch), [Async #4 — Promise Combinators](/articles/javascript-series/js-promise-combinators)
+**Prerequisites:** [Async #3 — Promises](/articles/javascript-series/js-promise-from-scratch)
 
 ---
 

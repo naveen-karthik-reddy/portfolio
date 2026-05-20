@@ -1,4 +1,4 @@
-`flatten(arr)` takes a nested array and returns a single-level array. The interviewer starts with "flatten completely," then tightens it to "flatten to depth N" — then asks you to do it without recursion. Three approaches, same core idea.
+﻿`flatten(arr)` takes a nested array and returns a single-level array. The interviewer starts with "flatten completely," then tightens it to "flatten to depth N" — then asks you to do it without recursion. Three approaches, same core idea.
 
 **Related deep-dive:** [Arrays #2 — flat, flatMap, find, every, some Polyfills](/articles/js-array-methods-polyfills-2)
 
@@ -190,6 +190,6 @@ function flatten(arr, depth = Infinity) {
 
 ## Related Questions
 
-- [#13 — Implement deepClone()](/articles/js-interview-deep-clone)
-- [#16 — Implement squash()](/articles/js-interview-squash-object)
-- [#2 — Implement map(), filter() & reduce()](/articles/js-interview-map-filter-reduce)
+- [Implement deepClone()](/articles/js-interview-deep-clone)
+- [Implement squash()](/articles/js-interview-squash-object)
+- [Implement map(), filter() & reduce()](/articles/js-interview-map-filter-reduce)

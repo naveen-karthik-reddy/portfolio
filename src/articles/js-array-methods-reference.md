@@ -286,7 +286,6 @@ console.log(Array.of(3));        // [3]  — unlike new Array(3) which creates [
 
 ## Related Articles
 
-- [Arrays #1 — map, filter, reduce Polyfills](/articles/js-array-methods-polyfills-1)
 - [Arrays #2 — flat, flatMap, find, every, some Polyfills](/articles/js-array-methods-polyfills-2)
 - [#2 — Implement map(), filter() & reduce()](/articles/js-interview-map-filter-reduce)
 - [#12 — Implement flatten()](/articles/js-interview-flatten)
