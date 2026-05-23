@@ -998,8 +998,6 @@ export default function ArticleView({ article, content: initialContent = "" }) {
         <PrevNextNav article={article} grad={grad} sx={{ mt: 0, pt: 0, mb: 3, pb: 3, borderTop: "none", borderBottom: "1px solid" }} />
       </div>
 
-      <Divider sx={{ mb: 3 }} />
-
       <ArticleAudioPlayer ref={audioPlayerRef} markdownContent={content} onBlockChange={handleBlockChange} />
 
       <Box className="no-print" sx={{ display: { xs: "block", lg: "none" } }}>
