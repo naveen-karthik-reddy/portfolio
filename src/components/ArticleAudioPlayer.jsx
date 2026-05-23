@@ -184,6 +184,18 @@ const ArticleAudioPlayer = forwardRef(function ArticleAudioPlayer({ markdownCont
         onBlockChange?.(blockIdx, blocks[blockIdx]?.text);
       }
 
+      // Advance progress to this chunk's start (fallback when onboundary is unreliable).
+      // onboundary will overwrite with finer word-level values when it does fire.
+      if (idx > 0) {
+        const chunkAbsStart = charOffset + chunkOffsets[idx];
+        charIndexRef.current = chunkAbsStart;
+        setProgress(total > 0 ? Math.min((chunkAbsStart / total) * 100, 100) : 0);
+        const charsLeft = Math.max(0, total - chunkAbsStart);
+        const wordsLeft = Math.ceil(charsLeft / AVG_CHARS_PER_WORD);
+        const secsLeft = Math.ceil((wordsLeft / AVG_WPM) * 60 / rateRef.current);
+        setTimeLeft(secsLeft < 60 ? `${secsLeft}s left` : `${Math.ceil(secsLeft / 60)} min left`);
+      }
+
       const utterance = new SpeechSynthesisUtterance(chunks[idx]);
       utterance.rate = rateRef.current;
       if (voiceRef.current) utterance.voice = voiceRef.current;
