@@ -4,7 +4,8 @@ import { Box, Button, IconButton, Typography, Paper } from "@mui/material";
 import { Close, Terminal } from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
 import CodeMirror from "@uiw/react-codemirror";
-import { javascript } from "@codemirror/lang-javascript";
+import { javascript, javascriptLanguage, scopeCompletionSource, snippets } from "@codemirror/lang-javascript";
+import { autocompletion } from "@codemirror/autocomplete";
 
 export default function CodeEditorPanel({ code, lang, onClose }) {
   const theme = useTheme();
@@ -229,7 +230,12 @@ export default function CodeEditorPanel({ code, lang, onClose }) {
         <CodeMirror
           value={editedCode}
           onChange={setEditedCode}
-          extensions={[javascript()]}
+          extensions={[
+            javascript({ typescript: false, jsx: false }),
+            javascriptLanguage.data.of({ autocomplete: scopeCompletionSource(globalThis) }),
+            autocompletion({ override: null, defaultKeymap: true }),
+            javascriptLanguage.data.of({ autocomplete: snippets }),
+          ]}
           theme={isDark ? "dark" : "light"}
           basicSetup={{
             lineNumbers: true,
@@ -238,7 +244,7 @@ export default function CodeEditorPanel({ code, lang, onClose }) {
             allowMultipleSelections: false,
             indentOnInput: true,
             syntaxHighlighting: true,
-            autocompletion: true,
+            autocompletion: false,
             closeBrackets: true,
           }}
           height="100%"
