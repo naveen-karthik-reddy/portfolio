@@ -16,6 +16,7 @@ import {
   GlobalStyles,
   Dialog,
   Fade,
+  Fab,
 } from "@mui/material";
 import {
   ArrowBack,
@@ -25,6 +26,7 @@ import {
   ExpandMore,
   Download,
   Close,
+  Code,
 } from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
 import ReactMarkdown from "react-markdown";
@@ -39,6 +41,7 @@ const CodeBlock = dynamic(() => import("./CodeBlock"), { ssr: false });
 
 /* Lazy-load RunableCodeBlock — CodeMirror is heavy, only load when an article uses js-exec blocks */
 const RunableCodeBlock = lazy(() => import("./RunableCodeBlock"));
+const CodeEditorPanel = lazy(() => import("./CodeEditorPanel"));
 
 /* Content is passed as a prop from the server component (read via fs at build time) */
 
@@ -469,8 +472,57 @@ export default function ArticleView({ article, content: initialContent = "" }) {
   const [copied, setCopied] = useState(false);
   const [lightbox, setLightbox] = useState(null); // null | { src, alt }
   const [content, setContent] = useState(initialContent);
+  const [splitMode, setSplitMode] = useState(false);
+  const [editorCode, setEditorCode] = useState("// Start coding here...\n");
+  const [editorLang, setEditorLang] = useState("javascript");
+  const [leftWidthPct, setLeftWidthPct] = useState(50);
   const audioPlayerRef = useRef(null);
   const articleBodyRef = useRef(null);
+  const splitContainerRef = useRef(null);
+  const leftPaneRef = useRef(null);
+  const savedScrollY = useRef(0);
+
+  const enterSplitMode = useCallback((code, lang) => {
+    savedScrollY.current = window.scrollY;
+    if (code) setEditorCode(code);
+    if (lang) setEditorLang(lang);
+    setSplitMode(true);
+  }, []);
+
+  const exitSplitMode = useCallback(() => {
+    const scrollY = leftPaneRef.current?.scrollTop ?? savedScrollY.current;
+    savedScrollY.current = scrollY;
+    setSplitMode(false);
+    requestAnimationFrame(() => window.scrollTo({ top: scrollY, behavior: "instant" }));
+  }, []);
+
+  const handleVDividerMouseDown = useCallback((e) => {
+    e.preventDefault();
+    document.body.style.userSelect = "none";
+    const container = splitContainerRef.current;
+    const onMove = (ev) => {
+      if (!container) return;
+      const rect = container.getBoundingClientRect();
+      const pct = ((ev.clientX - rect.left) / rect.width) * 100;
+      setLeftWidthPct(Math.max(25, Math.min(75, pct)));
+    };
+    const onUp = () => {
+      document.body.style.userSelect = "";
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    };
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+  }, []);
+
+  useEffect(() => {
+    if (!splitMode) return;
+    document.body.style.overflow = "hidden";
+    requestAnimationFrame(() => {
+      if (leftPaneRef.current) leftPaneRef.current.scrollTop = savedScrollY.current;
+    });
+    return () => { document.body.style.overflow = ""; };
+  }, [splitMode]);
 
   const handleBlockChange = useCallback((blockIdx, blockText) => {
     const body = articleBodyRef.current;
@@ -663,21 +715,47 @@ export default function ArticleView({ article, content: initialContent = "" }) {
           );
         }
         if (lang && raw) {
+          const codeStr = raw.replace(/\n$/, "");
           return (
-            <CodeBlock
-              language={lang}
-              isDark={isDark}
-              customStyle={{
-                borderRadius: 8,
-                marginTop: 24,
-                marginBottom: 24,
-                fontSize: "0.875rem",
-                lineHeight: 1.7,
-                border: `1px solid ${theme.palette.divider}`,
-              }}
-            >
-              {raw.replace(/\n$/, "")}
-            </CodeBlock>
+            <Box sx={{ position: "relative", my: 3 }}>
+              <Tooltip title="Open in editor" arrow placement="top">
+                <IconButton
+                  size="small"
+                  onClick={() => enterSplitMode(codeStr, lang)}
+                  sx={{
+                    position: "absolute",
+                    top: 8,
+                    right: 8,
+                    zIndex: 2,
+                    display: { xs: "none", lg: "inline-flex" },
+                    bgcolor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
+                    border: "1px solid",
+                    borderColor: "divider",
+                    borderRadius: 1,
+                    color: "text.secondary",
+                    padding: "4px",
+                    "&:hover": { bgcolor: "primary.main", color: "primary.contrastText", borderColor: "primary.main" },
+                  }}
+                  aria-label="Open in editor"
+                >
+                  <Code sx={{ fontSize: 15 }} />
+                </IconButton>
+              </Tooltip>
+              <CodeBlock
+                language={lang}
+                isDark={isDark}
+                customStyle={{
+                  borderRadius: 8,
+                  marginTop: 0,
+                  marginBottom: 0,
+                  fontSize: "0.875rem",
+                  lineHeight: 1.7,
+                  border: `1px solid ${theme.palette.divider}`,
+                }}
+              >
+                {codeStr}
+              </CodeBlock>
+            </Box>
           );
         }
       }
@@ -853,7 +931,118 @@ export default function ArticleView({ article, content: initialContent = "" }) {
     img({ src, alt }) {
       return <ArticleImage src={src} alt={alt} />;
     },
-  }), [isDark, grad, theme.palette.divider, theme.palette.primary.main]);
+  }), [isDark, grad, theme.palette.divider, theme.palette.primary.main, enterSplitMode]);
+
+  const articleMainContent = (
+    <Box sx={{
+      "@keyframes fadeInUp": { from: { opacity: 0, transform: "translateY(16px)" }, to: { opacity: 1, transform: "translateY(0)" } },
+      animation: "fadeInUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both",
+      "@media (prefers-reduced-motion: reduce)": { animation: "none" },
+    }}>
+      <Box
+        className="no-print"
+        sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 4 }}
+      >
+        <Button
+          component={Link}
+          href="/articles"
+          startIcon={<ArrowBack />}
+          sx={{ color: "text.secondary", "&:hover": { color: "primary.main" } }}
+        >
+          All Articles
+        </Button>
+
+        <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+          <Tooltip title="Download PDF" arrow>
+            <IconButton
+              onClick={() => window.print()}
+              size="small"
+              sx={{ border: "1px solid", borderColor: "divider", borderRadius: 1.5, color: "text.secondary", transition: "all 0.3s", "&:hover": { borderColor: "primary.main", color: "primary.main" } }}
+            >
+              <Download fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title={copied ? "Copied!" : "Copy link"} arrow>
+            <IconButton
+              onClick={handleCopy}
+              size="small"
+              sx={{ border: "1px solid", borderColor: copied ? "success.main" : "divider", borderRadius: 1.5, color: copied ? "success.main" : "text.secondary", transition: "all 0.3s", "&:hover": { borderColor: "primary.main", color: "primary.main" } }}
+            >
+              {copied ? <Check fontSize="small" /> : <ContentCopy fontSize="small" />}
+            </IconButton>
+          </Tooltip>
+        </Box>
+      </Box>
+
+      <Typography variant="h1" sx={{ fontWeight: 900, mb: 2, background: grad, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", lineHeight: 1.2 }}>
+        {article.title}
+      </Typography>
+
+      <Typography variant="body1" color="text.secondary" sx={{ mb: 2.5, lineHeight: 1.7, fontSize: "1.05rem" }}>
+        {article.excerpt}
+      </Typography>
+
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2.5, flexWrap: "wrap" }}>
+        <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.85rem" }}>
+          {article.readTime}
+        </Typography>
+      </Box>
+
+      <Box display="flex" gap={1} flexWrap="wrap" mb={4}>
+        {article.tags.map((tag) => (
+          <Chip key={tag} label={tag} size="small" sx={{ color: "primary.main", border: "1px solid", borderColor: "primary.main", bgcolor: "transparent", fontWeight: 600 }} />
+        ))}
+      </Box>
+
+      <div className="no-print">
+        <PrevNextNav article={article} grad={grad} sx={{ mt: 0, pt: 0, mb: 3, pb: 3, borderTop: "none", borderBottom: "1px solid" }} />
+      </div>
+
+      <Divider sx={{ mb: 3 }} />
+
+      <ArticleAudioPlayer ref={audioPlayerRef} markdownContent={content} onBlockChange={handleBlockChange} />
+
+      <Box className="no-print" sx={{ display: { xs: "block", lg: "none" } }}>
+        <TableOfContents headings={headings} grad={grad} />
+      </Box>
+
+      {article.image && (
+        <Box
+          sx={{ mb: 4, borderRadius: 2, overflow: "hidden", cursor: "pointer" }}
+          onClick={() => setLightbox({ src: `/articles/images/${article.image}`, alt: article.title })}
+        >
+          <Box
+            component="img"
+            src={`/articles/images/${article.image.replace(/\.webp$/, "-800w.webp")}`}
+            srcSet={[320, 640, 800, 1200, 1536, 1920].map((w) => `/articles/images/${article.image.replace(/\.webp$/, `-${w}w.webp`)} ${w}w`).join(", ")}
+            sizes="(max-width: 600px) 100vw, (max-width: 1280px) 100vw, 800px"
+            alt={article.title}
+            width={800}
+            height={450}
+            fetchPriority="high"
+            sx={{ width: "100%", height: "auto", display: "block", transition: "transform 0.2s", "&:hover": { transform: "scale(1.01)" } }}
+          />
+        </Box>
+      )}
+
+      <Dialog open={Boolean(lightbox)} onClose={() => setLightbox(null)} maxWidth={false} fullScreen TransitionComponent={Fade} PaperProps={{ sx: { m: 0, bgcolor: "rgba(0,0,0,0.9)", cursor: "zoom-out", display: "flex", alignItems: "center", justifyContent: "center" }, onClick: () => setLightbox(null) }}>
+        <IconButton onClick={() => setLightbox(null)} sx={{ position: "fixed", top: 16, right: 16, zIndex: 1900, bgcolor: "rgba(0,0,0,0.5)", color: "#fff", "&:hover": { bgcolor: "rgba(0,0,0,0.7)" } }}>
+          <Close />
+        </IconButton>
+        {lightbox && (
+          <Box component="img" src={lightbox.src} alt={lightbox.alt} onClick={(e) => e.stopPropagation()} sx={{ maxWidth: "100vw", maxHeight: "100vh", objectFit: "contain", display: "block", cursor: "default" }} />
+        )}
+      </Dialog>
+
+      <Box ref={articleBodyRef} component="article" sx={{ "& > *:first-of-type": { mt: 0 } }}>
+        <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} components={components}>{content}</ReactMarkdown>
+      </Box>
+
+      <div className="no-print">
+        <PrevNextNav article={article} grad={grad} />
+      </div>
+    </Box>
+  );
 
   return (
     <>
@@ -928,213 +1117,77 @@ export default function ArticleView({ article, content: initialContent = "" }) {
         }}
       />
 
-      <Container maxWidth="lg" sx={{ py: { xs: 5, sm: 8 }, px: { xs: 2, sm: 3 } }}>
-      <div className="no-print">
-        <ReadingProgress grad={grad} />
-      </div>
+      {/* FAB: toggle split editor — desktop only */}
+      <Tooltip title={splitMode ? "Exit split view" : "Open split editor"} arrow placement="left">
+        <Fab
+          size="medium"
+          color="primary"
+          className="no-print"
+          onClick={() => splitMode ? exitSplitMode() : enterSplitMode()}
+          sx={{ position: "fixed", bottom: 24, right: 24, zIndex: 1200, display: { xs: "none", lg: "flex" }, boxShadow: 4 }}
+        >
+          {splitMode ? <Close /> : <Code />}
+        </Fab>
+      </Tooltip>
 
-      <Box sx={{ display: "flex", gap: { xs: 0, lg: 5 }, alignItems: "flex-start" }}>
-        <Box component="main" sx={{ flex: 1, minWidth: 0 }}>
-          <Box sx={{
-            "@keyframes fadeInUp": { from: { opacity: 0, transform: "translateY(16px)" }, to: { opacity: 1, transform: "translateY(0)" } },
-            animation: "fadeInUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both",
-            "@media (prefers-reduced-motion: reduce)": { animation: "none" },
-          }}>
-            <Box
-              className="no-print"
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                mb: 4,
-              }}
-            >
-              <Button
-                component={Link}
-                href="/articles"
-                startIcon={<ArrowBack />}
-                sx={{ color: "text.secondary", "&:hover": { color: "primary.main" } }}
-              >
-                All Articles
-              </Button>
+      {splitMode ? (
+        /* ── SPLIT MODE: fixed full-height two-pane layout ── */
+        <Box
+          ref={splitContainerRef}
+          sx={{ position: "fixed", top: 64, left: 0, right: 0, bottom: 0, zIndex: 1100, display: "flex", bgcolor: "background.default" }}
+        >
+          {/* Left pane: article */}
+          <Box ref={leftPaneRef} sx={{ width: `${leftWidthPct}%`, height: "100%", overflowY: "auto", flexShrink: 0 }}>
+            <Box sx={{ px: { xs: 2, sm: 3, md: 4 }, py: 4, maxWidth: 860, mx: "auto" }}>
+              {articleMainContent}
+            </Box>
+          </Box>
 
-              <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-                <Tooltip title="Download PDF" arrow>
-                  <IconButton
-                    onClick={() => window.print()}
-                    size="small"
-                    sx={{
-                      border: "1px solid",
-                      borderColor: "divider",
-                      borderRadius: 1.5,
-                      color: "text.secondary",
-                      transition: "all 0.3s",
-                      "&:hover": { borderColor: "primary.main", color: "primary.main" },
-                    }}
-                  >
-                    <Download fontSize="small" />
-                  </IconButton>
-                </Tooltip>
+          {/* Vertical drag divider */}
+          <Box
+            onMouseDown={handleVDividerMouseDown}
+            sx={{
+              width: 5,
+              height: "100%",
+              flexShrink: 0,
+              cursor: "col-resize",
+              bgcolor: "divider",
+              transition: "background-color 0.15s",
+              "&:hover": { bgcolor: "primary.main" },
+            }}
+          />
 
-                <Tooltip title={copied ? "Copied!" : "Copy link"} arrow>
-                  <IconButton
-                    onClick={handleCopy}
-                    size="small"
-                    sx={{
-                      border: "1px solid",
-                      borderColor: copied ? "success.main" : "divider",
-                      borderRadius: 1.5,
-                      color: copied ? "success.main" : "text.secondary",
-                      transition: "all 0.3s",
-                      "&:hover": { borderColor: "primary.main", color: "primary.main" },
-                    }}
-                  >
-                    {copied ? (
-                      <Check fontSize="small" />
-                    ) : (
-                      <ContentCopy fontSize="small" />
-                    )}
-                  </IconButton>
-                </Tooltip>
+          {/* Right pane: code editor */}
+          <Box sx={{ flex: 1, height: "100%", minWidth: 0, display: "flex", flexDirection: "column" }}>
+            <Suspense fallback={
+              <Box sx={{ p: 3, textAlign: "center" }}>
+                <Typography variant="body2" color="text.secondary">Loading editor...</Typography>
               </Box>
-            </Box>
-
-            <Typography
-              variant="h1"
-              sx={{
-                fontWeight: 900,
-                mb: 2,
-                background: grad,
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                lineHeight: 1.2,
-              }}
-            >
-              {article.title}
-            </Typography>
-
-            <Typography
-              variant="body1"
-              color="text.secondary"
-              sx={{ mb: 2.5, lineHeight: 1.7, fontSize: "1.05rem" }}
-            >
-              {article.excerpt}
-            </Typography>
-
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 1.5,
-                mb: 2.5,
-                flexWrap: "wrap",
-              }}
-            >
-              <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.85rem" }}>
-                {article.readTime}
-              </Typography>
-            </Box>
-
-            <Box display="flex" gap={1} flexWrap="wrap" mb={4}>
-              {article.tags.map((tag) => (
-                <Chip
-                  key={tag}
-                  label={tag}
-                  size="small"
-                  sx={{
-                    color: "primary.main",
-                    border: "1px solid",
-                    borderColor: "primary.main",
-                    bgcolor: "transparent",
-                    fontWeight: 600,
-                  }}
-                />
-              ))}
-            </Box>
-
-            <div className="no-print">
-              <PrevNextNav
-                article={article}
-                grad={grad}
-                sx={{ mt: 0, pt: 0, mb: 3, pb: 3, borderTop: "none", borderBottom: "1px solid" }}
-              />
-            </div>
-
-            <Divider sx={{ mb: 3 }} />
-
-            <ArticleAudioPlayer ref={audioPlayerRef} markdownContent={content} onBlockChange={handleBlockChange} />
-
-            <Box className="no-print" sx={{ display: { xs: "block", lg: "none" } }}>
-              <TableOfContents headings={headings} grad={grad} />
-            </Box>
-
-            {article.image && (
-              <Box
-                sx={{ mb: 4, borderRadius: 2, overflow: "hidden", cursor: "pointer" }}
-                onClick={() => setLightbox({ src: `/articles/images/${article.image}`, alt: article.title })}
-              >
-                <Box
-                  component="img"
-                  src={`/articles/images/${article.image.replace(/\.webp$/, "-800w.webp")}`}
-                  srcSet={[320, 640, 800, 1200, 1536, 1920]
-                    .map((w) => `/articles/images/${article.image.replace(/\.webp$/, `-${w}w.webp`)} ${w}w`)
-                    .join(", ")}
-                  sizes="(max-width: 600px) 100vw, (max-width: 1280px) 100vw, 800px"
-                  alt={article.title}
-                  width={800}
-                  height={450}
-                  fetchPriority="high"
-                  sx={{ width: "100%", height: "auto", display: "block", transition: "transform 0.2s", "&:hover": { transform: "scale(1.01)" } }}
-                />
-              </Box>
-            )}
-
-            <Dialog open={Boolean(lightbox)} onClose={() => setLightbox(null)} maxWidth={false} fullScreen TransitionComponent={Fade} PaperProps={{ sx: { m: 0, bgcolor: "rgba(0,0,0,0.9)", cursor: "zoom-out", display: "flex", alignItems: "center", justifyContent: "center" }, onClick: () => setLightbox(null) }}>
-              <IconButton
-                onClick={() => setLightbox(null)}
-                sx={{ position: "fixed", top: 16, right: 16, zIndex: 1900, bgcolor: "rgba(0,0,0,0.5)", color: "#fff", "&:hover": { bgcolor: "rgba(0,0,0,0.7)" } }}
-              >
-                <Close />
-              </IconButton>
-              {lightbox && (
-                <Box
-                  component="img"
-                  src={lightbox.src}
-                  alt={lightbox.alt}
-                  onClick={(e) => e.stopPropagation()}
-                  sx={{ maxWidth: "100vw", maxHeight: "100vh", objectFit: "contain", display: "block", cursor: "default" }}
-                />
-              )}
-            </Dialog>
-
-            <Box ref={articleBodyRef} component="article" sx={{ "& > *:first-of-type": { mt: 0 } }}>
-              <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} components={components}>{content}</ReactMarkdown>
-            </Box>
-
-            <div className="no-print">
-              <PrevNextNav article={article} grad={grad} />
-            </div>
+            }>
+              <CodeEditorPanel code={editorCode} lang={editorLang} onClose={exitSplitMode} />
+            </Suspense>
           </Box>
         </Box>
-
-        <Box
-          component="aside"
-          className="no-print"
-          sx={{
-            width: 260,
-            flexShrink: 0,
-            position: "sticky",
-            top: 88,
-            maxHeight: "calc(100vh - 104px)",
-            overflowY: "auto",
-            display: { xs: "none", lg: "block" },
-            mt: 0,
-          }}
-        >
-          <TableOfContents headings={headings} grad={grad} sidebar />
-        </Box>
-      </Box>
-      </Container>
+      ) : (
+        /* ── NORMAL MODE: standard article layout ── */
+        <Container maxWidth="lg" sx={{ py: { xs: 5, sm: 8 }, px: { xs: 2, sm: 3 } }}>
+          <div className="no-print">
+            <ReadingProgress grad={grad} />
+          </div>
+          <Box sx={{ display: "flex", gap: { xs: 0, lg: 5 }, alignItems: "flex-start" }}>
+            <Box component="main" sx={{ flex: 1, minWidth: 0 }}>
+              {articleMainContent}
+            </Box>
+            <Box
+              component="aside"
+              className="no-print"
+              sx={{ width: 260, flexShrink: 0, position: "sticky", top: 88, maxHeight: "calc(100vh - 104px)", overflowY: "auto", display: { xs: "none", lg: "block" }, mt: 0 }}
+            >
+              <TableOfContents headings={headings} grad={grad} sidebar />
+            </Box>
+          </Box>
+        </Container>
+      )}
     </>
   );
 }
